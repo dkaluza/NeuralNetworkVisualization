@@ -13,17 +13,26 @@ These instructions will get you a copy of the project up and running on your loc
 
 In order to install and run angular and other web-dev goodies you need to have node.js package installed.
 
+For Linux:
 ```
-Visit https://nodejs.org/en/ and download latest LTS node.js (8.9.3). Then follow install instructions. 
-```
-
-After that type: (IMPORTANT: sudo only required on Linux and maxOS machines)
-
-```
-(sudo) npm install -g @angular/cli
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
 
-Once you have this install dependecies for our project. Got to angular-app folder.
+For Windows: (not tested)
+```
+Visit https://nodejs.org/en/download/package-manager/#windows
+and download latest LTS node.js (8.9.3). Then follow install instructions. 
+```
+
+After that type: (IMPORTANT: sudo only required on Linux and macOS machines)
+This may take a while
+```
+# this may or may not be helpful https://github.com/angular/angular-cli/issues/8367
+[sudo] npm install -g @angular/cli
+```
+
+Once you got here, install dependecies for our project. Got to angular-app folder.
 
 ```
 cd frontend/NNVisualization
@@ -36,8 +45,10 @@ You are ready to test angular app. Run it with:
 ng serve
 ```
 
+Bravo! You get your app running
 
-### random stuff here
+
+### Random stuff here
 
 Work in progress
 
