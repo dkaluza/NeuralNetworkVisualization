@@ -22,7 +22,7 @@ sudo apt-get install -y nodejs
 For Windows: (not tested)
 ```
 Visit https://nodejs.org/en/download/package-manager/#windows
-and download latest LTS node.js (8.9.3). Then follow install instructions. 
+and download latest LTS node.js (8.9.3). Then follow install instructions.
 ```
 
 After that type: (IMPORTANT: sudo only required on Linux and macOS machines)
@@ -42,7 +42,7 @@ npm install
 You are ready to test angular app. Run it with:
 
 ```
-ng serve
+npm start
 ```
 
 Bravo! You get your app running
