@@ -13,7 +13,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 In order to install and run angular and other web-dev goodies you need to have node.js package installed.
 
-For Linux:
+For Debian:
 ```
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
