@@ -2,6 +2,13 @@
 
 ROOTDIR=$(git rev-parse --show-toplevel)
 
+usage()
+{
+    echo 'Usage:'
+    echo "$0 start - build and run container"
+    echo "$0 connect - connect to running container"
+}
+
 do-build()
 {
     docker build -t nnvis "$ROOTDIR/environment"
@@ -15,20 +22,34 @@ do-run()
                --rm=true \
                --name nnvis-container \
                -it \
+               -p 4200:4200 \
                -p 80:80 \
                nnvis
     fi
 }
 
+do-start()
+{
+    do-build
+    do-run
+}
+
+do-connect()
+{
+    docker exec -it nnvis-container /bin/bash
+}
+
 main()
 {
-    if [ "$#" -ne 0 ]; then
-        echo "No args pls"
+    if [ "$#" -ne 1 ]; then
+        usage
         exit 1
     fi
 
-    do-build
-    do-run
+    case $1 in
+        start|connect) do-$1 ;;
+        *) usage ;;
+    esac
 }
 
 main "$@"
