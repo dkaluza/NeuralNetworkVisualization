@@ -30,7 +30,6 @@ RUN    npm install --unsafe -g @angular/cli \
 USER root
 WORKDIR /shared
 
-EXPOSE 80
 EXPOSE 4200
 
 CMD ["/bin/bash"]
