@@ -23,7 +23,6 @@ do-run()
                --name nnvis-container \
                -it \
                -p 4200:4200 \
-               -p 80:80 \
                nnvis
     fi
 }
