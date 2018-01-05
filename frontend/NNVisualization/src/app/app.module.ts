@@ -15,7 +15,8 @@ import {FormsModule} from '@angular/forms';
 
 const appRoutes: Routes = [
   { path: '', component: ManageComponent},
-  { path: 'build', component: BuildComponent },
+  { path: 'manage', component: ManageComponent},
+  { path: 'build', component: BuildComponent},
   { path: 'train', component: TrainComponent},
   { path: 'visualize', component: VisualizeComponent},
 ];
