@@ -6,47 +6,16 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-* node.js 8.9.3
-* angular 5
+* docker
 
-### Installing
+### Running the container
 
-In order to install and run angular and other web-dev goodies you need to have node.js package installed.
-
-For Debian:
+In order to start the development environment, run the env.sh script from anywhere inside the repo:
 ```
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt-get install -y nodejs
+./environment/env.sh start
 ```
 
-For Windows: (not tested)
-```
-Visit https://nodejs.org/en/download/package-manager/#windows
-and download latest LTS node.js (8.9.3). Then follow install instructions.
-```
-
-After that type: (IMPORTANT: sudo only required on Linux and macOS machines)
-This may take a while
-```
-# this may or may not be helpful https://github.com/angular/angular-cli/issues/8367
-[sudo] npm install -g @angular/cli
-```
-
-Once you got here, install dependecies for our project. Got to angular-app folder.
-
-```
-cd frontend/NNVisualization
-npm install
-```
-
-You are ready to test angular app. Run it with:
-
-```
-npm start
-```
-
-Bravo! You get your app running
-
+From inside the container, start the frontend or backend with their respective start.sh scripts or run both with utils/run.sh
 
 ### Random stuff here
 

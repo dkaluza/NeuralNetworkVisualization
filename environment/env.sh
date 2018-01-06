@@ -7,6 +7,7 @@ usage()
     echo 'Usage:'
     echo "$0 start - build and run container"
     echo "$0 connect - connect to running container"
+    echo "$0 clean - remove the built image"
 }
 
 do-build()
@@ -24,6 +25,8 @@ do-run()
                -it \
                -p 4200:4200 \
                nnvis
+    else
+        echo "Already running!"
     fi
 }
 
@@ -38,6 +41,11 @@ do-connect()
     docker exec -it nnvis-container /bin/bash
 }
 
+do-clean()
+{
+    docker rmi nnvis
+}
+
 main()
 {
     if [ "$#" -ne 1 ]; then
@@ -46,7 +54,7 @@ main()
     fi
 
     case $1 in
-        start|connect) do-$1 ;;
+        start|connect|clean) do-$1 ;;
         *) usage ;;
     esac
 }
