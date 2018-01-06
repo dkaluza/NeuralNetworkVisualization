@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service'
+import { Restangular } from 'ngx-restangular';
 
 @Component({
     selector: 'app-manage',
@@ -8,7 +9,15 @@ import { SelectedArchitectureService } from '../selected-architecture/selected-a
 })
 export class ManageComponent implements OnInit {
 
-    constructor(private selectedArchitectureService: SelectedArchitectureService) { }
+    archNames: String[] = [];
+    archIds: Number[] = [];
+
+    modelNames: String[] = [];
+    modelIds: Number[] = [];
+
+    constructor(private selectedArchitectureService: SelectedArchitectureService,
+                private restangular: Restangular) {
+    }
 
     ngOnInit() {
     }

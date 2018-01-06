@@ -13,6 +13,7 @@ import { SelectedArchitectureService } from './selected-architecture/selected-ar
 import { VisualizeComponent } from './visualize/visualize.component';
 import {RouterModule, Routes} from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import { RestangularModule, Restangular } from 'ngx-restangular';
 
 
 const appRoutes: Routes = [
@@ -22,6 +23,12 @@ const appRoutes: Routes = [
     { path: 'train', component: TrainComponent},
     { path: 'visualize', component: VisualizeComponent},
 ];
+
+// Function for setting the default restangular configuration
+export function RestangularConfigFactory (RestangularProvider) {
+    RestangularProvider.setBaseUrl('/api');
+    RestangularProvider.setDefaultHeaders({});
+}
 
 @NgModule({
     declarations: [
@@ -38,6 +45,7 @@ const appRoutes: Routes = [
         BrowserModule,
         FormsModule,
         RouterModule.forRoot(appRoutes)
+        RestangularModule.forRoot(RestangularConfigFactory)
     ],
     providers: [SelectedArchitectureService],
     bootstrap: [AppComponent]
