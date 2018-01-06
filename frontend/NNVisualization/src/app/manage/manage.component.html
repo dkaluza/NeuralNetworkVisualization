@@ -1,11 +1,36 @@
 <div class="row">
     <div class="col-md-3 col-md-offset-3" align="center">
-        <p>Your architecture</p>
+        <table>
+            <thead>
+                <th>Your Architectures</th>
+            </thead>
+            <tbody *ngIf="architectures.length == 0">
+                <tr><p>You have no architectures.</p></tr>
+            </tbody>
+            <tbody *ngIf="architectures.length > 0">
+                <tr *ngFor="let arch of architectures; let i = index">
+                    <p class="btn" (click)="selectArchitecture(arch.id)">{{ i+1 }}. {{ arch.name }}</p>
+                </tr>
+            </tbody>
+        </table>
     </div>
     <div class="col-md-3" align="center">
-        <p>Your model</p>
+        <table>
+            <thead>
+                <th>Your Models</th>
+            </thead>
+            <tbody *ngIf="models.length == 0">
+                <tr><p>You have to select architecture.</p></tr>
+            </tbody>
+            <tbody *ngIf="models.length > 0">
+                <tr *ngFor="let model of models; let i = index">
+                    <p class="btn" (click)="selectModel(model.id)">{{ i+1 }}. {{ model.name }}</p>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
+<hr>
 <div class="row">
     <div class="col-md-3 col-md-offset-3" align="center">
         <p>Current Architecture</p>

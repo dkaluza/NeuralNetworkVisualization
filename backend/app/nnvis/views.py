@@ -2,6 +2,8 @@ from flask import Blueprint, make_response
 from flask_restful import Api, Resource
 from app.nnvis.models import Architecture
 
+import json
+
 nnvis = Blueprint('nnvis', __name__)
 api = Api(nnvis)
 
@@ -25,6 +27,30 @@ class AddArchitecture(Resource):
         arch.add(arch)
         return 'udało się <3'
 
+class ListAllArchitectures(Resource):
+    def get(self):
+        # TODO: REST /listarchs
+        mockup = [
+                {"name": "arch1", "id": 1},
+                {"name": "arch2", "id": 2},
+                {"name": "arch3", "id": 3}
+                ]
+
+        return mockup
+
+class ListAllModels(Resource):
+    def get(self, arch_id):
+        # TODO: REST /listmodels
+        mockup = [
+                {"name": "model1", "id": 1},
+                {"name": "model2", "id": 2},
+                {"name": "model3", "id": 3},
+                {"name": "model4", "id": 4},
+                {"name": "model5", "id": 5}
+                ]
+        return mockup
 
 api.add_resource(Init, '')
 api.add_resource(AddArchitecture, 'add')
+api.add_resource(ListAllArchitectures, 'listarchs')
+api.add_resource(ListAllModels, 'listmodels/<string:arch_id>')
