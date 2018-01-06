@@ -1,15 +1,23 @@
 import { Component, OnInit } from '@angular/core';
+import { Restangular } from 'ngx-restangular';
 
 @Component({
-  selector: 'app-manage',
-  templateUrl: './manage.component.html',
-  styleUrls: ['./manage.component.css']
+    selector: 'app-manage',
+    templateUrl: './manage.component.html',
+    styleUrls: ['./manage.component.css']
 })
 export class ManageComponent implements OnInit {
 
-  constructor() { }
+    archNames: String[] = [];
+    archIds: Number[] = [];
 
-  ngOnInit() {
-  }
+    modelNames: String[] = [];
+    modelIds: Number[] = [];
+
+    constructor(private restangular: Restangular) {
+    }
+
+    ngOnInit() {
+    }
 
 }

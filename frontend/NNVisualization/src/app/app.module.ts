@@ -11,6 +11,7 @@ import { TrainComponent } from './train/train.component';
 import { VisualizeComponent } from './visualize/visualize.component';
 import {RouterModule, Routes} from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import { RestangularModule, Restangular } from 'ngx-restangular';
 
 
 const appRoutes: Routes = [
@@ -20,6 +21,12 @@ const appRoutes: Routes = [
   { path: 'train', component: TrainComponent},
   { path: 'visualize', component: VisualizeComponent},
 ];
+
+// Function for setting the default restangular configuration
+export function RestangularConfigFactory (RestangularProvider) {
+    RestangularProvider.setBaseUrl('/api');
+    RestangularProvider.setDefaultHeaders({});
+}
 
 @NgModule({
   declarations: [
@@ -34,7 +41,8 @@ const appRoutes: Routes = [
   imports: [
     BrowserModule,
     FormsModule,
-    RouterModule.forRoot(appRoutes)
+      RouterModule.forRoot(appRoutes),
+      RestangularModule.forRoot(RestangularConfigFactory)
   ],
   providers: [],
   bootstrap: [AppComponent]
