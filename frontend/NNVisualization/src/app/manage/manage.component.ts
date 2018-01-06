@@ -8,16 +8,29 @@ import { Restangular } from 'ngx-restangular';
 })
 export class ManageComponent implements OnInit {
 
-    archNames: String[] = [];
-    archIds: Number[] = [];
-
-    modelNames: String[] = [];
-    modelIds: Number[] = [];
+    architectures: String[] = [];
+    models: String[] = [];
 
     constructor(private restangular: Restangular) {
     }
 
     ngOnInit() {
+        this.restangular.all('listarchs')
+            .getList().subscribe(_architectures => {
+                this.architectures = _architectures;
+            });
     }
 
+    selectArchitecture(id) {
+        console.log("You have selected architecture: " + id);
+        this.restangular.one('listmodels', id)
+            .getList().subscribe(_models => {
+                this.models = _models;
+            });
+    }
+
+    selectModel(id) {
+        // TODO: selecting model
+        console.log("You have selected model: " + id);
+    }
 }

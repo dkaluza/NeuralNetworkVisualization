@@ -41,8 +41,8 @@ export function RestangularConfigFactory (RestangularProvider) {
   imports: [
     BrowserModule,
     FormsModule,
-      RouterModule.forRoot(appRoutes),
-      RestangularModule.forRoot(RestangularConfigFactory)
+    RouterModule.forRoot(appRoutes),
+    RestangularModule.forRoot(RestangularConfigFactory)
   ],
   providers: [],
   bootstrap: [AppComponent]
