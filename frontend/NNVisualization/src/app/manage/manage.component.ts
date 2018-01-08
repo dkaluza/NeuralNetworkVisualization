@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { Restangular } from 'ngx-restangular';
 
 @Component({
@@ -8,8 +8,9 @@ import { Restangular } from 'ngx-restangular';
 })
 export class ManageComponent implements OnInit {
 
-    architectures: String[] = [];
-    models: String[] = [];
+    architectures: string[] = [];
+    models: string[] = [];
+    popup: boolean = false
 
     constructor(private restangular: Restangular) {
     }
@@ -19,6 +20,19 @@ export class ManageComponent implements OnInit {
             .getList().subscribe(_architectures => {
                 this.architectures = _architectures;
             });
+    }
+
+    addNewArchitecture() {
+        this.popup = true
+    }
+
+    saveNewArchitecture(n, d) {
+        if (n == "" || d == "") {
+            return;
+        }
+        console.log("Name: " + n +
+            " , Description: " + d);
+        this.popup = false;
     }
 
     selectArchitecture(id) {

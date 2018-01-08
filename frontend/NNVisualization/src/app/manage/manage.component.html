@@ -1,4 +1,17 @@
 <div class="row">
+    <div class="col-md-12" align="center">
+        <button (click)="addNewArchitecture()">
+            <h4>Create New Architecture</h4>
+        </button>
+    </div>
+</div>
+<hr>
+<div class="row" align="center" *ngIf="popup == true">
+    Name: <input #n><br>
+    Description: <input #d><br>
+    <button (click)="saveNewArchitecture(n.value, d.value)">Save</button>
+</div>
+<div class="row">
     <div class="col-md-3 col-md-offset-3" align="center">
         <table>
             <thead>
