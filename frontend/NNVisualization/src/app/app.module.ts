@@ -36,7 +36,7 @@ const appRoutes: Routes = [
     FormsModule,
     RouterModule.forRoot(appRoutes)
   ],
-  providers: [],
+  providers: [SelectedArchitectureService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
