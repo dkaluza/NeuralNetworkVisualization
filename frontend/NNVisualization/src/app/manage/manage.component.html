@@ -1,54 +1,70 @@
 <div class="row">
-    <div class="col-md-12" align="center">
-        <button (click)="addNewArchitecture()">
-            <h4>Create New Architecture</h4>
-        </button>
+    <div class="col-md-3" align="center">
+        <button mat-button (click)="addNewArchitecture()">Add new architecture</button>
+    </div>
+    <div class="col-md-3" align="center">
+        <h2>Select architecture</h2>
+        <div class="filter-header">
+            <mat-form-field [floatLabel]="auto">
+                <input matInput (keyup)="applyFilter(archDataSource, $event.target.value)" placeholder="Filter">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-table #archs [dataSource]="archDataSource">
+                <ng-container matColumnDef="position">
+                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                    <mat-cell *matCellDef="let elem">
+                        <button mat-button (click)="selectArchitecture(elem.id)">{{elem.name}}</button>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+        </div>
+    </div>
+    <div class="col-md-3" align="center">
+        <h2>Select model</h2>
+        <div class="filter-header">
+            <mat-form-field>
+                <input matInput (keyup)="applyFilter(modelDataSource, $event.target.value)" placeholder="Filter">
+            </mat-form-field>
+        </div>
+        <mat-table #models [dataSource]="modelDataSource">
+            <ng-container matColumnDef="position">
+                <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+            </ng-container>
+            <ng-container matColumnDef="name">
+                <mat-cell *matCellDef="let elem">
+                    <button mat-button (click)="selectModel(elem.id)">{{elem.name}}</button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </mat-table>
     </div>
 </div>
 <hr>
-<div class="row" align="center" *ngIf="popup == true">
-    Name: <input #n><br>
-    Description: <input #d><br>
-    <button (click)="saveNewArchitecture(n.value, d.value)">Save</button>
-</div>
 <div class="row">
     <div class="col-md-3 col-md-offset-3" align="center">
-        <table>
-            <thead>
-                <th>Your Architectures</th>
-            </thead>
-            <tbody *ngIf="architectures.length == 0">
-                <tr><p>You have no architectures.</p></tr>
-            </tbody>
-            <tbody *ngIf="architectures.length > 0">
-                <tr *ngFor="let arch of architectures; let i = index">
-                    <p class="btn" (click)="selectArchitecture(arch.id)">{{ i+1 }}. {{ arch.name }}</p>
-                </tr>
-            </tbody>
-        </table>
+        <div *ngIf="add_new_arch_mode == false">
+            <h2>Current architecture</h2>
+        </div>
+        <div *ngIf="add_new_arch_mode == true">
+            <h2>Create new architecture</h2>
+            <div class="flex">
+                <mat-form-field>
+                    <input matInput placeholder="Name">
+                </mat-form-field>
+                <mat-form-field>
+                    <input matInput placeholder="Description">
+                </mat-form-field>
+            </div>
+            <button mat-button (click)="saveNewArchitecture()">Save</button>
+        </div>
     </div>
     <div class="col-md-3" align="center">
-        <table>
-            <thead>
-                <th>Your Models</th>
-            </thead>
-            <tbody *ngIf="models.length == 0">
-                <tr><p>You have to select architecture.</p></tr>
-            </tbody>
-            <tbody *ngIf="models.length > 0">
-                <tr *ngFor="let model of models; let i = index">
-                    <p class="btn" (click)="selectModel(model.id)">{{ i+1 }}. {{ model.name }}</p>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-<hr>
-<div class="row">
-    <div class="col-md-3 col-md-offset-3" align="center">
-        <p>Current Architecture</p>
-    </div>
-    <div class="col-md-3" align="center">
-        <p>Current Model</p>
+        <h2>Current model</h2>
     </div>
 </div>
