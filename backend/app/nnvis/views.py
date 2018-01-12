@@ -27,16 +27,18 @@ class AddArchitecture(Resource):
         arch.add(arch)
         return 'udało się <3'
 
+
 class ListAllArchitectures(Resource):
     def get(self):
         # TODO: REST /listarchs
         mockup = [
-                {"name": "arch1", "id": 1},
-                {"name": "arch2", "id": 2},
-                {"name": "arch3", "id": 3}
+                {"name": "simple convolutions", "id": 1},
+                {"name": "basic resnet", "id": 2},
+                {"name": "fancy resnet", "id": 3},
                 ]
 
         return mockup
+
 
 class ListAllModels(Resource):
     def get(self, arch_id):
@@ -49,6 +51,7 @@ class ListAllModels(Resource):
                 {"name": "model5", "id": 5}
                 ]
         return mockup
+
 
 api.add_resource(Init, '')
 api.add_resource(AddArchitecture, 'add')
