@@ -1,10 +1,10 @@
 // TODO: Implement
 
 export class Model {
-  constructor() {
-  }
+    constructor() {
+    }
 
-  get name(): string {
-    return "Example name";
-  }
+    get name(): string {
+        return "Example name";
+    }
 }
