@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service'
 
 @Component({
     selector: 'app-manage',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ManageComponent implements OnInit {
 
-    constructor() { }
+    constructor(private selectedArchitectureService: SelectedArchitectureService) { }
 
     ngOnInit() {
     }

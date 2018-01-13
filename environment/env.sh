@@ -17,6 +17,10 @@ do-build()
 
 do-run()
 {
+    if [[ "$OSTYPE" == "msys" ]]; then
+      ROOTDIR="$(echo "//$ROOTDIR" | tr -d : | sed -e 's|[A-Z]|\l&|')"
+    fi
+    echo $ROOTDIR
     if [[ "$(docker ps | grep nnvis-container)" -eq 0 ]]; then
         docker run \
                -v $ROOTDIR:/shared \
@@ -60,4 +64,3 @@ main()
 }
 
 main "$@"
-
