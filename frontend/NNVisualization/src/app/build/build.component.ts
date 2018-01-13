@@ -3,15 +3,15 @@ import { SelectedArchitectureService } from '../selected-architecture/selected-a
 
 
 @Component({
-  selector: 'app-build',
-  templateUrl: './build.component.html',
-  styleUrls: ['./build.component.css']
+    selector: 'app-build',
+    templateUrl: './build.component.html',
+    styleUrls: ['./build.component.css']
 })
 export class BuildComponent implements OnInit {
 
-  constructor(private selectedArchitectureService: SelectedArchitectureService) { }
+    constructor(private selectedArchitectureService: SelectedArchitectureService) { }
 
-  ngOnInit() {
-  }
+    ngOnInit() {
+    }
 
 }
