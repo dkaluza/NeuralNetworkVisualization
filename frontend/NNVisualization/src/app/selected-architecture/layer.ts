@@ -16,7 +16,7 @@ export abstract class Layer {
   }
 
   removeLayer(index: number): Layer {
-    removedLayer: Layer = this._outputLayers[index];
+    let removedLayer: Layer = this._outputLayers[index];
     this._outputLayers[index] = this._outputLayers[this._outputLayers.length - 1];
     this._outputLayers.pop();
     return removedLayer;

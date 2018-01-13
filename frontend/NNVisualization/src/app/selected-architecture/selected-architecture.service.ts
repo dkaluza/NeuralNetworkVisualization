@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Architecture } from 'architecture';
-import { Model } from 'model';
+import { Architecture } from './architecture';
+import { Model } from './model';
 
 
 @Injectable()
@@ -16,23 +16,23 @@ export class SelectedArchitectureService {
       return this._architecture;
   }
 
-  set architecture(newArchitecture: Architecture): void {
+  set architecture(newArchitecture: Architecture) {
     this._architecture =  newArchitecture;
-    updateHeader();
+    this.updateHeader();
   }
 
   get model(): Model {
     return this._model;
   }
 
-  set model(newModel: Model): void {
+  set model(newModel: Model) {
     this._model = newModel;
-    updateHeader();
+    this.updateHeader();
   }
 
-  private updateHeader(): string {
-      header =  "Architecture " + this._architecture.name() +
-      ", Model " + this._model.name();
+  private updateHeader(): void {
+      this.header =  "Architecture " + this._architecture.name +
+        ", Model " + this._model.name;
   }
 
 }

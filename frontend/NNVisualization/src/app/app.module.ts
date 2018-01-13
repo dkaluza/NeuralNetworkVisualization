@@ -8,6 +8,8 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { ManageComponent } from './manage/manage.component';
 import { BuildComponent } from './build/build.component';
 import { TrainComponent } from './train/train.component';
+import { SelectedBarComponent } from './selected-bar/selected-bar.component';
+import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
 import {RouterModule, Routes} from '@angular/router';
 import {FormsModule} from '@angular/forms';
@@ -29,6 +31,7 @@ const appRoutes: Routes = [
     ManageComponent,
     BuildComponent,
     TrainComponent,
+    SelectedBarComponent,
     VisualizeComponent
   ],
   imports: [
