@@ -8,7 +8,7 @@ export class SelectedArchitectureService {
 
     private _architecture: Architecture;
     private _model: Model;
-    header: string  = "Select model and architecture";
+    header: string = "Select model and architecture";
 
     constructor() { }
 
@@ -17,7 +17,7 @@ export class SelectedArchitectureService {
     }
 
     set architecture(newArchitecture: Architecture) {
-        this._architecture =  newArchitecture;
+        this._architecture = newArchitecture;
         this.updateHeader();
     }
 
@@ -31,8 +31,11 @@ export class SelectedArchitectureService {
     }
 
     private updateHeader(): void {
-        this.header =  "Architecture " + this._architecture.name +
-        ", Model " + this._model.name;
+        if (this._architecture && this._model) {
+            this.header = "Architecture " + this._architecture.name +
+                ", Model " + this._model.name;
+        }
+
     }
 
 }
