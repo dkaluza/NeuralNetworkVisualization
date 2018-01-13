@@ -14,29 +14,29 @@ import {FormsModule} from '@angular/forms';
 
 
 const appRoutes: Routes = [
-  { path: '', redirectTo: 'manage', pathMatch: 'full'},
-  { path: 'manage', component: ManageComponent},
-  { path: 'build', component: BuildComponent},
-  { path: 'train', component: TrainComponent},
-  { path: 'visualize', component: VisualizeComponent},
+    { path: '', redirectTo: 'manage', pathMatch: 'full'},
+    { path: 'manage', component: ManageComponent},
+    { path: 'build', component: BuildComponent},
+    { path: 'train', component: TrainComponent},
+    { path: 'visualize', component: VisualizeComponent},
 ];
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    NavbarComponent,
-    ManageComponent,
-    BuildComponent,
-    TrainComponent,
-    VisualizeComponent
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    RouterModule.forRoot(appRoutes)
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        HeaderComponent,
+        NavbarComponent,
+        ManageComponent,
+        BuildComponent,
+        TrainComponent,
+        VisualizeComponent
+    ],
+    imports: [
+        BrowserModule,
+        FormsModule,
+        RouterModule.forRoot(appRoutes)
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
