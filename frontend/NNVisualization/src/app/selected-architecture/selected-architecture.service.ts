@@ -31,8 +31,10 @@ export class SelectedArchitectureService {
     }
 
     private updateHeader(): void {
-        this.header =  "Architecture " + this._architecture.name +
-        ", Model " + this._model.name;
+        if (this._architecture && this._model) {
+            this.header =  "Architecture " + this._architecture.name +
+            ", Model " + this._model.name;
+        }
     }
 
 }

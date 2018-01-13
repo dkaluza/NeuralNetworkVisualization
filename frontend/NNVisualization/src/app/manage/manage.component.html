@@ -5,7 +5,7 @@
     <div class="col-md-3" align="center">
         <h2>Select architecture</h2>
         <div class="filter-header">
-            <mat-form-field [floatLabel]="auto">
+            <mat-form-field>
                 <input matInput (keyup)="applyFilter(archDataSource, $event.target.value)" placeholder="Filter">
             </mat-form-field>
         </div>
@@ -16,10 +16,11 @@
                 </ng-container>
                 <ng-container matColumnDef="name">
                     <mat-cell *matCellDef="let elem">
-                        <button mat-button (click)="selectArchitecture(elem.id)">{{elem.name}}</button>
+                        <button mat-button (click)="selectArchitecture(elem.position)">{{elem.name}}</button>
                     </mat-cell>
                 </ng-container>
 
+                <mat-header-row *matHeaderRowDef=""></mat-header-row>
                 <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
             </mat-table>
         </div>
@@ -31,18 +32,21 @@
                 <input matInput (keyup)="applyFilter(modelDataSource, $event.target.value)" placeholder="Filter">
             </mat-form-field>
         </div>
-        <mat-table #models [dataSource]="modelDataSource">
-            <ng-container matColumnDef="position">
-                <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
-            </ng-container>
-            <ng-container matColumnDef="name">
-                <mat-cell *matCellDef="let elem">
-                    <button mat-button (click)="selectModel(elem.id)">{{elem.name}}</button>
-                </mat-cell>
-            </ng-container>
+        <div>
+            <mat-table #models [dataSource]="modelDataSource">
+                <ng-container matColumnDef="position">
+                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                    <mat-cell *matCellDef="let elem">
+                        <button mat-button (click)="selectModel(elem.position)">{{elem.name}}</button>
+                    </mat-cell>
+                </ng-container>
 
-            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-        </mat-table>
+                <mat-header-row *matHeaderRowDef=""></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+        </div>
     </div>
 </div>
 <hr>
@@ -50,21 +54,20 @@
     <div class="col-md-3 col-md-offset-3" align="center">
         <div *ngIf="add_new_arch_mode == false">
             <h2>Current architecture</h2>
+            <h4>TODO: current arch info</h4>
         </div>
         <div *ngIf="add_new_arch_mode == true">
             <h2>Create new architecture</h2>
             <div class="flex">
                 <mat-form-field>
-                    <input matInput placeholder="Name">
-                </mat-form-field>
-                <mat-form-field>
-                    <input matInput placeholder="Description">
+                    <input matInput placeholder="Name" #name>
                 </mat-form-field>
             </div>
-            <button mat-button (click)="saveNewArchitecture()">Save</button>
+            <button mat-button (click)="saveNewArchitecture(name.value)">Save</button>
         </div>
     </div>
     <div class="col-md-3" align="center">
         <h2>Current model</h2>
+        <h4>TODO: current model info</h4>
     </div>
 </div>

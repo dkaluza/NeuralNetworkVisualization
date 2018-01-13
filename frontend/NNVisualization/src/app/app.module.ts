@@ -48,7 +48,7 @@ import {
     MatTooltipModule,
     MatStepperModule,
 } from '@angular/material';
-import {CdkTableModule} from '@angular/cdk/table';
+import { CdkTableModule } from '@angular/cdk/table';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full'},
