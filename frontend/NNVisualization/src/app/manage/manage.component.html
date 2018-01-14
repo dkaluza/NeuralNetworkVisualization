@@ -1,75 +1,85 @@
 <div class="row">
-    <div class="col-md-3 centered">
-        <button mat-button (click)="addNewArchitecture()">Add new architecture</button>
-    </div>
-    <div class="col-md-3 centered">
-        <h2>Select architecture</h2>
-        <div class="filter-header">
-            <mat-form-field>
-                <input matInput (keyup)="applyFilter(archDataSource, $event.target.value)" placeholder="Filter">
-            </mat-form-field>
-        </div>
-        <div>
-            <mat-table #archs [dataSource]="archDataSource">
-                <ng-container matColumnDef="position">
-                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
-                </ng-container>
-                <ng-container matColumnDef="name">
-                    <mat-cell *matCellDef="let elem">
-                        <button mat-button (click)="selectArchitecture(elem.position)">{{elem.name}}</button>
-                    </mat-cell>
-                </ng-container>
-
-                <mat-header-row *matHeaderRowDef=""></mat-header-row>
-                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-            </mat-table>
+    <div class="col-md-3">
+        <div class="centered">
+            <button mat-button (click)="addNewArchitecture()">Add new architecture</button>
         </div>
     </div>
-    <div class="col-md-3 centered">
-        <h2>Select model</h2>
-        <div class="filter-header">
-            <mat-form-field>
-                <input matInput (keyup)="applyFilter(modelDataSource, $event.target.value)" placeholder="Filter">
-            </mat-form-field>
-        </div>
-        <div>
-            <mat-table #models [dataSource]="modelDataSource">
-                <ng-container matColumnDef="position">
-                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
-                </ng-container>
-                <ng-container matColumnDef="name">
-                    <mat-cell *matCellDef="let elem">
-                        <button mat-button (click)="selectModel(elem.position)">{{elem.name}}</button>
-                    </mat-cell>
-                </ng-container>
+    <div class="col-md-3">
+        <div class="centered">
+            <h2>Select architecture</h2>
+            <div class="filter-header">
+                <mat-form-field>
+                    <input matInput (keyup)="applyFilter(archDataSource, $event.target.value)" placeholder="Filter">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-table #archs [dataSource]="archDataSource">
+                    <ng-container matColumnDef="position">
+                        <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="name">
+                        <mat-cell *matCellDef="let elem">
+                            <button mat-button (click)="selectArchitecture(elem.position)">{{elem.name}}</button>
+                        </mat-cell>
+                    </ng-container>
 
-                <mat-header-row *matHeaderRowDef=""></mat-header-row>
-                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-            </mat-table>
+                    <mat-header-row *matHeaderRowDef=""></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                </mat-table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="centered">
+            <h2>Select model</h2>
+            <div class="filter-header">
+                <mat-form-field>
+                    <input matInput (keyup)="applyFilter(modelDataSource, $event.target.value)" placeholder="Filter">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-table #models [dataSource]="modelDataSource">
+                    <ng-container matColumnDef="position">
+                        <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="name">
+                        <mat-cell *matCellDef="let elem">
+                            <button mat-button (click)="selectModel(elem.position)">{{elem.name}}</button>
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef=""></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                </mat-table>
+            </div>
         </div>
     </div>
 </div>
 <hr>
 <div class="row">
-    <div class="col-md-3 col-md-offset-3 centered">
-        <div *ngIf="add_new_arch_mode == false">
-            <h2>Current architecture</h2>
-            <h4>ID: {{ selectedArchitectureService.architecture.id }}</h4>
-            <h4>Name: {{ selectedArchitectureService.architecture.name }}</h4>
-        </div>
-        <div *ngIf="add_new_arch_mode == true">
-            <h2>Create new architecture</h2>
-            <div class="flex">
-                <mat-form-field>
-                    <input matInput placeholder="Name" #name>
-                </mat-form-field>
+    <div class="col-md-3 col-md-offset-3">
+        <div class="centered">
+            <div *ngIf="add_new_arch_mode == false">
+                <h2>Current architecture</h2>
+                <h4>ID: {{ selectedArchitectureService.architecture.id }}</h4>
+                <h4>Name: {{ selectedArchitectureService.architecture.name }}</h4>
             </div>
-            <button mat-button (click)="saveNewArchitecture(name.value)">Save</button>
+            <div *ngIf="add_new_arch_mode == true">
+                <h2>Create new architecture</h2>
+                <div class="flex">
+                    <mat-form-field>
+                        <input matInput placeholder="Name" #name>
+                    </mat-form-field>
+                </div>
+                <button mat-button (click)="saveNewArchitecture(name.value)">Save</button>
+            </div>
         </div>
     </div>
-    <div class="col-md-3 centered">
-        <h2>Current model</h2>
-        <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
-        <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
+    <div class="col-md-3">
+        <div class="centered">
+            <h2>Current model</h2>
+            <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
+            <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
+        </div>
     </div>
 </div>
