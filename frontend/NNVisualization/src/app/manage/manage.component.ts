@@ -18,8 +18,8 @@ interface Element {
     styleUrls: ['./manage.component.css']
 })
 export class ManageComponent implements OnInit {
-    _architectures: Element[];
-    _models: Element[];
+    private _architectures: Element[];
+    private _models: Element[];
     add_new_arch_mode: boolean;
 
     displayedColumns = ['position', 'name'];

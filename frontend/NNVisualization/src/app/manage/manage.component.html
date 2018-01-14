@@ -1,8 +1,8 @@
 <div class="row">
-    <div class="col-md-3" align="center">
+    <div class="col-md-3 centered">
         <button mat-button (click)="addNewArchitecture()">Add new architecture</button>
     </div>
-    <div class="col-md-3" align="center">
+    <div class="col-md-3 centered">
         <h2>Select architecture</h2>
         <div class="filter-header">
             <mat-form-field>
@@ -25,7 +25,7 @@
             </mat-table>
         </div>
     </div>
-    <div class="col-md-3" align="center">
+    <div class="col-md-3 centered">
         <h2>Select model</h2>
         <div class="filter-header">
             <mat-form-field>
@@ -51,7 +51,7 @@
 </div>
 <hr>
 <div class="row">
-    <div class="col-md-3 col-md-offset-3" align="center">
+    <div class="col-md-3 col-md-offset-3 centered">
         <div *ngIf="add_new_arch_mode == false">
             <h2>Current architecture</h2>
             <h4>ID: {{ selectedArchitectureService.architecture.id }}</h4>
@@ -67,7 +67,7 @@
             <button mat-button (click)="saveNewArchitecture(name.value)">Save</button>
         </div>
     </div>
-    <div class="col-md-3" align="center">
+    <div class="col-md-3 centered">
         <h2>Current model</h2>
         <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
         <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
