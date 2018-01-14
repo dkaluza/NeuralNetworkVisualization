@@ -1,3 +1,14 @@
 <h3>
-  {{ selectedArchitectureService.header }}
+    <ng-container *ngIf="selectedArchitectureService.architecture">
+        Architecture: {{ selectedArchitectureService.architecture.name }},
+        <ng-container *ngIf="selectedArchitectureService.model">
+            Model: {{ selectedArchitectureService.model.name }}
+        </ng-container>
+        <ng-container *ngIf="!selectedArchitectureService.model">
+            Please select a model
+        </ng-container>
+    </ng-container>
+    <ng-container *ngIf="!selectedArchitectureService.architecture">
+        Please select an architecture and a model
+    </ng-container>
 </h3>
