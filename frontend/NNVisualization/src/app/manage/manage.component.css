@@ -1,0 +1,23 @@
+.mat-table {
+    overflow: auto;
+    max-height: 200px;
+}
+
+.flex {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-header {
+    min-height: 64px;
+    padding: 8px 24px 0;
+}
+
+.mat-form-field {
+    font-size: 14px;
+    width: 100%;
+}
+
+.centered {
+    text-align: center;
+}

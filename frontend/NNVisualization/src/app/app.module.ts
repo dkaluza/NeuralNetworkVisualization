@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
-
 
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
@@ -11,9 +12,43 @@ import { TrainComponent } from './train/train.component';
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
-import {RouterModule, Routes} from '@angular/router';
-import {FormsModule} from '@angular/forms';
-
+import { RouterModule, Routes } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RestangularModule, Restangular } from 'ngx-restangular';
+import {
+    MatAutocompleteModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatChipsModule,
+    MatDatepickerModule,
+    MatDialogModule,
+    MatExpansionModule,
+    MatGridListModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatMenuModule,
+    MatNativeDateModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatRadioModule,
+    MatRippleModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatSliderModule,
+    MatSlideToggleModule,
+    MatSnackBarModule,
+    MatSortModule,
+    MatTableModule,
+    MatTabsModule,
+    MatToolbarModule,
+    MatTooltipModule,
+    MatStepperModule,
+} from '@angular/material';
+import { CdkTableModule } from '@angular/cdk/table';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full'},
@@ -22,6 +57,51 @@ const appRoutes: Routes = [
     { path: 'train', component: TrainComponent},
     { path: 'visualize', component: VisualizeComponent},
 ];
+
+// Function for setting the default restangular configuration
+export function RestangularConfigFactory (RestangularProvider) {
+    RestangularProvider.setBaseUrl('/api');
+    RestangularProvider.setDefaultHeaders({});
+}
+
+@NgModule({
+    exports: [
+        CdkTableModule,
+        MatAutocompleteModule,
+        MatButtonModule,
+        MatButtonToggleModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatChipsModule,
+        MatStepperModule,
+        MatDatepickerModule,
+        MatDialogModule,
+        MatExpansionModule,
+        MatGridListModule,
+        MatIconModule,
+        MatInputModule,
+        MatListModule,
+        MatMenuModule,
+        MatNativeDateModule,
+        MatPaginatorModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+        MatRadioModule,
+        MatRippleModule,
+        MatSelectModule,
+        MatSidenavModule,
+        MatSliderModule,
+        MatSlideToggleModule,
+        MatSnackBarModule,
+        MatSortModule,
+        MatTableModule,
+        MatTabsModule,
+        MatToolbarModule,
+        MatTooltipModule,
+    ]
+})
+export class MaterialImportsModule {}
+
 
 @NgModule({
     declarations: [
@@ -32,14 +112,20 @@ const appRoutes: Routes = [
         BuildComponent,
         TrainComponent,
         SelectedBarComponent,
-        VisualizeComponent
+        VisualizeComponent,
     ],
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         FormsModule,
-        RouterModule.forRoot(appRoutes)
+        ReactiveFormsModule,
+        RouterModule.forRoot(appRoutes),
+        RestangularModule.forRoot(RestangularConfigFactory),
+        MaterialImportsModule,
     ],
     providers: [SelectedArchitectureService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+platformBrowserDynamic().bootstrapModule(AppModule);
