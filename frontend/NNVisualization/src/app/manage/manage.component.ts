@@ -29,7 +29,7 @@ export class ManageComponent implements OnInit {
     constructor(private selectedArchitectureService: SelectedArchitectureService,
                 private restangular: Restangular) {
         this._architectures = [];
-        this._models = []
+        this._models = [];
         this.add_new_arch_mode = false;
         this.archDataSource = new MatTableDataSource<Element>([]);
         this.modelDataSource = new MatTableDataSource<Element>([]);
@@ -69,7 +69,7 @@ export class ManageComponent implements OnInit {
 
     selectArchitecture(pos: number) {
         pos -= 1;
-        let newArchitecture = new Architecture(
+        const newArchitecture = new Architecture(
             this._architectures[pos].id,
             this._architectures[pos].name,
             []
@@ -94,7 +94,7 @@ export class ManageComponent implements OnInit {
 
     selectModel(pos: number) {
         pos -= 1;
-        let newModel = new Model(
+        const newModel = new Model(
             this._models[pos].id,
             this._models[pos].name
         );
