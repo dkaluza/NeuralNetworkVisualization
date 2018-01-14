@@ -52,12 +52,17 @@
 <hr>
 <div class="row">
     <div class="col-md-3 col-md-offset-3 centered">
-        <div *ngIf="add_new_arch_mode == false">
-            <h2>Current architecture</h2>
-            <h4>ID: {{ selectedArchitectureService.architecture.id }}</h4>
-            <h4>Name: {{ selectedArchitectureService.architecture.name }}</h4>
-        </div>
-        <div *ngIf="add_new_arch_mode == true">
+        <ng-container *ngIf="!add_new_arch_mode; else addArch">
+            <ng-container *ngIf="selectedArchitectureService.architecture; else noArch">
+                <h2>Current architecture</h2>
+                <h4>ID: {{ selectedArchitectureService.architecture.id }}</h4>
+                <h4>Name: {{ selectedArchitectureService.architecture.name }}</h4>
+            </ng-container>
+            <ng-template #noArch>
+                No architecture selected
+            </ng-template>
+        </ng-container>
+        <ng-template #addArch>
             <h2>Create new architecture</h2>
             <div class="flex">
                 <mat-form-field>
@@ -65,11 +70,16 @@
                 </mat-form-field>
             </div>
             <button mat-button (click)="saveNewArchitecture(name.value)">Save</button>
-        </div>
+        </ng-template>
     </div>
     <div class="col-md-3 centered">
-        <h2>Current model</h2>
-        <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
-        <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
+        <ng-container *ngIf="selectedArchitectureService.model; else noModel">
+            <h2>Current model</h2>
+            <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
+            <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
+        </ng-container>
+        <ng-template #noModel>
+            No model selected
+        </ng-template>
     </div>
 </div>
