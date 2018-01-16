@@ -5,10 +5,15 @@ export class Architecture {
     private _name: string;
     private _layers: Layer[];
 
-    constructor(id: number, name: string, layers: Layer[]) {
+    private _nodes: any[];
+    private _links: any[];
+
+    constructor(id: number, name: string, nodes: any[], links: any[]) {
         this._id = id;
         this._name = name;
-        this._layers = layers; // maybe should be a deep copy?
+        // this._layers = layers; // maybe should be a deep copy?
+        this._nodes = nodes;
+        this._links = links;
     }
 
     get name(): string {
@@ -17,6 +22,14 @@ export class Architecture {
 
     get id(): number {
         return this._id;
+    }
+
+    get nodes() {
+        return this._nodes;
+    }
+
+    get links() {
+        return this._links;
     }
 
     // any more functions?

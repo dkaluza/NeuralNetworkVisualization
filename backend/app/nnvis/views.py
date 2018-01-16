@@ -32,9 +32,71 @@ class ListAllArchitectures(Resource):
     def get(self):
         # TODO: REST /listarchs
         mockup = [
-                {"name": "simple convolutions", "id": 1},
-                {"name": "basic resnet", "id": 2},
-                {"name": "fancy resnet", "id": 3},
+                {
+                    "name": "simple convolutions",
+                    "id": 1,
+                    'architecture': {
+                        'nodes': [
+                                {
+                                    'id': '1',
+                                    'label': 'input'
+                                }, {
+                                    'id': '2',
+                                    'label': 'conv1'
+                                }, {
+                                    'id': '3',
+                                    'label': 'conv2'
+                                }, {
+                                    'id': '4',
+                                    'label': 'fc1'
+                                }, {
+                                    'id': '5',
+                                    'label': 'fc2'
+                                }
+                            ],
+                        'links': [
+                                {
+                                    'source': '1',
+                                    'target': '2'
+                                }, {
+                                    'source': '2',
+                                    'target': '3'
+                                }, {
+                                    'source': '3',
+                                    'target': '4'
+                                }, {
+                                    'source': '4',
+                                    'target': '5'
+                                },
+                            ],
+                        }
+                }, {
+                    'name': 'stupid',
+                    'id': 2,
+                    'architecture': {
+                        'nodes': [
+                            {
+                                'id': '1',
+                                'label': 'input1'
+                            }, {
+                                'id': '3',
+                                'label': 'input2'
+                            }, {
+                                'id': '2',
+                                'label': 'output'
+                            }
+                            ],
+                        'links': [
+                                {
+                                'source': '1',
+                                'target': '2',
+                            }, {
+                                'source': '3',
+                                'target': '2',
+                            }
+                            ]
+                        }
+                }
                 ]
 
         return mockup

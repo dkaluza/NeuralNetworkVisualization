@@ -18,8 +18,8 @@ interface Element {
     styleUrls: ['./manage.component.css']
 })
 export class ManageComponent implements OnInit {
-    private _architectures: Element[];
-    private _models: Element[];
+    private _architectures: any[];
+    private _models: any[];
     add_new_arch_mode: boolean;
 
     displayedColumns = ['position', 'name'];
@@ -72,7 +72,8 @@ export class ManageComponent implements OnInit {
         const newArchitecture = new Architecture(
             this._architectures[pos].id,
             this._architectures[pos].name,
-            []
+            this._architectures[pos].architecture.nodes,
+            this._architectures[pos].architecture.links
         );
         this.selectedArchitectureService.architecture = newArchitecture;
 
