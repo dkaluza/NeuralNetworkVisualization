@@ -1,58 +1,58 @@
-<main [class]="theme">
-<div class="">
-    <div style="">
-        <ngx-graph
-         class=""
-         [view]="view"
-         [autoZoom]="autoZoom"
-         [legend]="showLegend"
-         [links]="links"
-         (legendLabelClick)="onLegendLabelClick($event)"
-         [nodes]="nodes"
-         [scheme]="colorScheme"
-         [orientation]="orientation"
-         [curve]="curve"
-         (select)="select($event)">
-
-            <ng-template #defsTemplate>
-                <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
-                    <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
-                </svg:marker>
-            </ng-template>
-
-            <ng-template #nodeTemplate let-node>
-                <svg:g class="node"
-                       ngx-tooltip
-                       [tooltipPlacement]="'top'"
-                       [tooltipType]="'tooltip'"
-                       [tooltipTitle]="node.label">
-                    <svg:rect [attr.width]="node.width" [attr.height]="node.height" [attr.fill]="node.options.color" />
-                        <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">
-                            {{node.label}}
-                        </svg:text>
-                    </svg:g>
-            </ng-template>
-
-            <ng-template #linkTemplate let-link>
-                <svg:g class="edge">
-                    <svg:path
-                       class="line"
-                       stroke-width="2"
-                       marker-end="url(#arrow)" >
-                    </svg:path>
-                        <svg:text class="edge-label" text-anchor="middle">
-                            <textPath
-                                                     class="text-path"
-                                                     [attr.href]="'#' + link.id"
-                                                     [style.dominant-baseline]="link.dominantBaseline"
-                                                     startOffset="50%">
-                            {{link.label}}
-                            </textPath>
-                        </svg:text>
-                </svg:g>
-            </ng-template>
-
-        </ngx-graph>
-    </div>
+<div>
+    <mat-checkbox class="setting" [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
+    <mat-checkbox class="setting" [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
+    <button class="setting" mat-button (click)="addNewNode()">Add</button>
 </div>
-</main>
+<div style="border-style: solid; border-width: 1px; width: 100%; height: 100%"
+        >
+    <ngx-graph
+     [view]="view"
+     [autoZoom]="true"
+     [legend]="false"
+     [links]="links"
+     (legendLabelClick)="onLegendLabelClick($event)"
+     [nodes]="nodes"
+     [orientation]="orientation"
+     [curve]="curve"
+     (select)="select($event)">
+
+        <ng-template #defsTemplate>
+            <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+                <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+            </svg:marker>
+        </ng-template>
+
+        <ng-template #nodeTemplate let-node>
+            <svg:g class="node"
+                   ngx-tooltip
+                   [tooltipPlacement]="'top'"
+                   [tooltipType]="'tooltip'"
+                   [tooltipTitle]="node.label">
+                <defs>
+                    <filter id="f4" x="0" y="0" width="300%" height="300%">
+                        <feOffset result="offOut" in="SourceGraphic" dx="20" dy="20" />
+                          <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+                              values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0" />
+                          <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="10" />
+                          <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+                    </filter>
+                </defs>
+                <svg:rect [attr.width]="node.width" [attr.height]="node.height" [attr.fill]="node.options.color" filter="url(#f4)"/>
+                    <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">
+                        {{node.label}}
+                    </svg:text>
+                </svg:g>
+        </ng-template>
+
+        <ng-template #linkTemplate let-link>
+            <svg:g class="edge">
+                <svg:path
+                   class="line"
+                   stroke-width="2"
+                   marker-end="url(#arrow)" >
+                </svg:path>
+            </svg:g>
+        </ng-template>
+
+    </ngx-graph>
+</div>

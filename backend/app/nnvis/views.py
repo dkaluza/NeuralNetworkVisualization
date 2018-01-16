@@ -84,10 +84,13 @@ class ListAllArchitectures(Resource):
                             }, {
                                 'id': '2',
                                 'label': 'output'
+                            }, {
+                                'id': '4',
+                                'label': 'alone'
                             }
                             ],
                         'links': [
-                                {
+                            {
                                 'source': '1',
                                 'target': '2',
                             }, {

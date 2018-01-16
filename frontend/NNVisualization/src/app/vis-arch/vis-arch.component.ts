@@ -28,7 +28,7 @@ export class VisArchComponent implements OnInit {
 
     view: any[];
     width: number = 700;
-    height: number = 300;
+    height: number = 700;
     fitContainer: boolean = true;
     autoZoom: boolean = false;
 
@@ -36,24 +36,8 @@ export class VisArchComponent implements OnInit {
     showLegend = false;
     orientation: string = 'LR'; // LR, RL, TB, BT
 
-    orientations: any[] = [
-        {
-            label: 'Left to Right',
-            value: 'LR'
-        }, {
-            label: 'Right to Left',
-            value: 'RL'
-        }, {
-            label: 'Top to Bottom',
-            value: 'TB'
-        }, {
-            label: 'Bottom to Top',
-            value: 'BT'
-        }
-    ];
-
     // line interpolation
-    curveType: string = 'Linear';
+    curveType: string = 'Bundle';
     curve: any = shape.curveLinear;
     interpolationTypes = [
         'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
@@ -72,22 +56,16 @@ export class VisArchComponent implements OnInit {
     schemeType: string = 'ordinal';
     selectedColorScheme: string;
 
-    nodes = [
-        {
-            id: 'start',
-            label: 'start'
-        }, {
-            id: '1',
-            label: 'node numero uno'
-        }
-    ];
-    links = [
-        {
-            source: 'start',
-            target: '1',
-            label: ''
-        }
-    ];
+    nodes = [];
+    links = [];
+
+    connectingMode = false;
+    selectedSource = undefined;
+    selectedTarget = undefined;
+
+    deletingMode = false;
+
+    idCounter = 10;
 
     constructor(private selArchService: SelectedArchitectureService) {
         if (selArchService.architecture) {
@@ -96,33 +74,57 @@ export class VisArchComponent implements OnInit {
         } else {
             this.nodes = [];
             this.links = [];
-
         }
+        this.view = undefined;
     }
 
     ngOnInit() {
-        if (!this.fitContainer) {
-            this.applyDimensions();
-        }
+        // if (!this.fitContainer) {
+        //     this.applyDimensions();
+        // }
     }
 
-    applyDimensions() {
-        this.view = [this.width, this.height];
-    }
+    // applyDimensions() {
+    //     this.view = [this.width, this.height];
+    // }
 
-    toggleFitContainer(fitContainer: boolean, autoZoom: boolean): void {
-        this.fitContainer = fitContainer;
-        this.autoZoom = autoZoom;
+    // toggleFitContainer(fitContainer: boolean, autoZoom: boolean): void {
+    //     this.fitContainer = fitContainer;
+    //     this.autoZoom = autoZoom;
 
-        if (this.fitContainer) {
-            this.view = undefined;
-        } else {
-            this.applyDimensions();
-        }
-    }
+    //     if (this.fitContainer) {
+    //         this.view = undefined;
+    //     } else {
+    //         this.applyDimensions();
+    //     }
+    // }
 
     select(data) {
         console.log('Item clicked', data);
+
+        if (this.connectingMode) {
+            if (!this.selectedSource) {
+                this.selectedSource = data.id;
+            } else {
+                this.selectedTarget = data.id;
+                this.links.push({
+                    source: this.selectedSource,
+                    target: this.selectedTarget
+                });
+                this.updateView();
+                this.selectedSource = undefined;
+                this.selectedTarget = undefined;
+            }
+        } else if (this.deletingMode) {
+            this.links = this.links.filter(link =>
+                link.source !== data.id &&
+                link.target !== data.id
+            );
+            this.nodes = this.nodes.filter(node =>
+                node.id !== data.id
+            );
+            this.updateView();
+        }
     }
 
     onLegendLabelClick(entry) {
@@ -133,4 +135,27 @@ export class VisArchComponent implements OnInit {
         console.log('toggle expand', node);
     }
 
+    private updateView(): void {
+        // HACK!
+        // makes changes visible on screen
+        this.nodes = [...this.nodes];
+        this.links = [...this.links];
+    }
+
+    addNewNode(): void {
+        this.nodes.push({
+            id: String(this.idCounter),
+            label: String(this.idCounter)
+        });
+        this.idCounter += 1;
+        this.updateView();
+    }
+
+    toggleLinking(): void {
+        this.deletingMode = false;
+    }
+
+    toggleDeleting(): void {
+        this.connectingMode = false;
+    }
 }
