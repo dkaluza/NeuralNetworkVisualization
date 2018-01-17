@@ -40,7 +40,7 @@
         </ng-template>
 
         <ng-template #linkTemplate let-link>
-            <svg:g class="edge">
+            <svg:g class="edge" (click)="onLinkSelect(link)">
                 <svg:path
                    class="line"
                    stroke-width="2"

@@ -191,4 +191,16 @@ export class VisArchComponent implements OnInit {
             return node;
         });
     }
+
+    onLinkSelect(data): void {
+        console.log('Link selected: ', data);
+
+        if (this.deletingMode) {
+            this.links = this.links.filter(link =>
+                link.source !== data.source ||
+                link.target !== data.target
+            );
+            this.updateView();
+        }
+    }
 }
