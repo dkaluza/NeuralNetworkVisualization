@@ -71,6 +71,10 @@ export class VisArchComponent implements OnInit {
         if (selArchService.architecture) {
             this.nodes = selArchService.architecture.nodes;
             this.links = selArchService.architecture.links;
+            this.nodes = this.nodes.map(node => {
+                node.selected = false;
+                return node;
+            });
         } else {
             this.nodes = [];
             this.links = [];
@@ -103,28 +107,52 @@ export class VisArchComponent implements OnInit {
         console.log('Item clicked', data);
 
         if (this.connectingMode) {
-            if (!this.selectedSource) {
-                this.selectedSource = data.id;
-            } else {
-                this.selectedTarget = data.id;
-                this.links.push({
-                    source: this.selectedSource,
-                    target: this.selectedTarget
-                });
-                this.updateView();
-                this.selectedSource = undefined;
-                this.selectedTarget = undefined;
-            }
+            this.handleSelectInConnectingMode(data);
         } else if (this.deletingMode) {
-            this.links = this.links.filter(link =>
-                link.source !== data.id &&
-                link.target !== data.id
-            );
-            this.nodes = this.nodes.filter(node =>
-                node.id !== data.id
-            );
+            this.handleSelectInDeletingMode(data);
+        }
+    }
+
+    private handleSelectInConnectingMode(data): void {
+        if (!this.selectedSource) {
+            // select staring node
+            this.selectedSource = data;
+            this.selectedSource.selected = true;
+        } else if (data.id === this.selectedSource.id) {
+            // if you select the same node second time
+            //  just unselect it
+            this.selectedSource.selected = false;
+            this.selectedSource = undefined;
+        } else {
+            // connect two selected nodes with link
+            //  but check if they weren't already connected
+            this.selectedTarget = data;
+            this.selectedSource.selected = false;
+
+            if (!this.links.some(link =>
+                    link.source === this.selectedSource.id &&
+                    link.target === this.selectedTarget.id)) {
+                this.links.push({
+                    source: this.selectedSource.id,
+                    target: this.selectedTarget.id
+                });
+            }
+
+            this.selectedSource = undefined;
+            this.selectedTarget = undefined;
             this.updateView();
         }
+    }
+
+    private handleSelectInDeletingMode(data): void {
+        this.links = this.links.filter(link =>
+            link.source !== data.id &&
+            link.target !== data.id
+        );
+        this.nodes = this.nodes.filter(node =>
+            node.id !== data.id
+        );
+        this.updateView();
     }
 
     onLegendLabelClick(entry) {
@@ -145,7 +173,8 @@ export class VisArchComponent implements OnInit {
     addNewNode(): void {
         this.nodes.push({
             id: String(this.idCounter),
-            label: String(this.idCounter)
+            label: String(this.idCounter),
+            selected: false
         });
         this.idCounter += 1;
         this.updateView();
@@ -157,5 +186,9 @@ export class VisArchComponent implements OnInit {
 
     toggleDeleting(): void {
         this.connectingMode = false;
+        this.nodes = this.nodes.map(node => {
+            node.selected = false;
+            return node;
+        });
     }
 }
