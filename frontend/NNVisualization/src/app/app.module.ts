@@ -9,11 +9,11 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { ManageComponent } from './manage/manage.component';
 import { BuildComponent } from './build/build.component';
 import { TrainComponent } from './train/train.component';
-import { AlgorithmsComponent } from './visualize/algorithms/algorithms.component';
 import { ImagesPanelComponent } from './visualize/images-panel/images-panel.component';
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
+import { VisualizationAlgorithmsComponent } from './visualize/visualization-algorithms/visualization-algorithms.component';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RestangularModule, Restangular } from 'ngx-restangular';
@@ -101,7 +101,7 @@ export function RestangularConfigFactory (RestangularProvider) {
         MatToolbarModule,
         MatTooltipModule,
     ],
-    declarations: [AlgorithmsComponent, ImagesPanelComponent]
+    declarations: [VisualizationAlgorithmsComponent]
 })
 export class MaterialImportsModule {}
 
@@ -116,6 +116,7 @@ export class MaterialImportsModule {}
         TrainComponent,
         SelectedBarComponent,
         VisualizeComponent,
+        ImagesPanelComponent,
     ],
     imports: [
         BrowserModule,
