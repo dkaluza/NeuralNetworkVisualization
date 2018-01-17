@@ -101,7 +101,7 @@ export function RestangularConfigFactory (RestangularProvider) {
         MatToolbarModule,
         MatTooltipModule,
     ],
-    declarations: [VisualizationAlgorithmsComponent]
+    declarations: []
 })
 export class MaterialImportsModule {}
 
@@ -117,6 +117,7 @@ export class MaterialImportsModule {}
         SelectedBarComponent,
         VisualizeComponent,
         ImagesPanelComponent,
+        VisualizationAlgorithmsComponent,
     ],
     imports: [
         BrowserModule,
