@@ -24,7 +24,7 @@ ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 
 USER node
 
-RUN    npm install --unsafe -g @angular/cli
+RUN npm install --unsafe -g @angular/cli
 
 USER root
 WORKDIR /shared
