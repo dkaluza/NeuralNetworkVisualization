@@ -51,6 +51,8 @@ import {
     MatStepperModule,
 } from '@angular/material';
 import { CdkTableModule } from '@angular/cdk/table';
+import { InputImageComponent } from './visualize/images-panel/input-image/input-image.component';
+import { OutputImageComponent } from './visualize/images-panel/output-image/output-image.component';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full'},
@@ -101,7 +103,7 @@ export function RestangularConfigFactory (RestangularProvider) {
         MatToolbarModule,
         MatTooltipModule,
     ],
-    declarations: []
+    declarations: [InputImageComponent, OutputImageComponent]
 })
 export class MaterialImportsModule {}
 
