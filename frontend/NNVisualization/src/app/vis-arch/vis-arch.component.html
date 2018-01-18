@@ -14,11 +14,12 @@
      [nodes]="nodes"
      [orientation]="orientation"
      [curve]="curve"
-     (select)="select($event)">
+     [draggingEnabled]="!connectingMode && !deletingMode"
+     (select)="onNodeSelect($event)">
 
         <ng-template #defsTemplate>
             <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
-                <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+                <svg:path d="M0,-5 L 8,0 L 0,5" class="arrow-head" />
             </svg:marker>
         </ng-template>
 
@@ -32,7 +33,7 @@
                     [class.node-selected]="node.selected"
                     [attr.width]="node.width"
                     [attr.height]="node.height"
-                    [attr.fill]="node.options.color"/>
+                    [attr.fill]="node.color"/>
                     <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">
                         {{node.label}}
                     </svg:text>
@@ -43,7 +44,6 @@
             <svg:g class="edge" (click)="onLinkSelect(link)">
                 <svg:path
                    class="line"
-                   stroke-width="2"
                    marker-end="url(#arrow)" >
                 </svg:path>
             </svg:g>

@@ -2,10 +2,6 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import * as shape from 'd3-shape';
 
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
-// import { colorSets } from '../src/utils/color-sets';
-// import { countries, generateHierarchialGraph, getTurbineData } from './data';
-// import chartGroups from './chartTypes';
-// import { id } from '../src/utils/id';
 
 @Component({
     selector: 'app-vis-arch',
@@ -15,56 +11,26 @@ import { SelectedArchitectureService } from '../selected-architecture/selected-a
 })
 export class VisArchComponent implements OnInit {
 
-    // version = APP_VERSION;
-
-    theme = 'dark';
-    chartType = 'directed-graph';
-    chartGroups: any;
-    chart: any;
-    realTimeData: boolean = false;
-    countries: any[];
-    graph: { links: any[], nodes: any[] };
-    hierarchialGraph: { links: any[], nodes: any[] };
-
-    view: any[];
-    width: number = 700;
-    height: number = 700;
-    fitContainer: boolean = true;
-    autoZoom: boolean = false;
-
     // options
-    showLegend = false;
-    orientation: string = 'LR'; // LR, RL, TB, BT
+    orientation = 'LR'; // LR, RL, TB, BT
 
     // line interpolation
-    curveType: string = 'Bundle';
-    curve: any = shape.curveLinear;
+    curve: any = shape.curveCardinal;
     interpolationTypes = [
         'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
         'Monotone Y', 'Natural', 'Step', 'Step After', 'Step Before'
     ];
 
-    colorSets: any;
-    colorScheme = {
-        name: 'vivid',
-        selectable: true,
-        group: 'Ordinal',
-        domain: [
-           '#647c8a', '#3f51b5', '#2196f3', '#00b862', '#afdf0a', '#a7b61a', '#f3e562', '#ff9800', '#ff5722', '#ff4514'
-        ]
-    };
-    schemeType: string = 'ordinal';
-    selectedColorScheme: string;
-
-    nodes = [];
-    links = [];
+    // graph data
+    nodes: any[] = [];
+    links: any[] = [];
 
     connectingMode = false;
+    deletingMode = false;
     selectedSource = undefined;
     selectedTarget = undefined;
 
-    deletingMode = false;
-
+    // dummy counter for new nodes
     idCounter = 10;
 
     constructor(private selArchService: SelectedArchitectureService) {
@@ -73,37 +39,16 @@ export class VisArchComponent implements OnInit {
             this.links = selArchService.architecture.links;
             this.nodes = this.nodes.map(node => {
                 node.selected = false;
+                node.color = '#ff5722';
                 return node;
             });
-        } else {
-            this.nodes = [];
-            this.links = [];
         }
-        this.view = undefined;
     }
 
     ngOnInit() {
-        // if (!this.fitContainer) {
-        //     this.applyDimensions();
-        // }
     }
 
-    // applyDimensions() {
-    //     this.view = [this.width, this.height];
-    // }
-
-    // toggleFitContainer(fitContainer: boolean, autoZoom: boolean): void {
-    //     this.fitContainer = fitContainer;
-    //     this.autoZoom = autoZoom;
-
-    //     if (this.fitContainer) {
-    //         this.view = undefined;
-    //     } else {
-    //         this.applyDimensions();
-    //     }
-    // }
-
-    select(data) {
+    onNodeSelect(data) {
         console.log('Item clicked', data);
 
         if (this.connectingMode) {
@@ -174,7 +119,8 @@ export class VisArchComponent implements OnInit {
         this.nodes.push({
             id: String(this.idCounter),
             label: String(this.idCounter),
-            selected: false
+            selected: false,
+            color: '#ff5722'
         });
         this.idCounter += 1;
         this.updateView();
