@@ -3,6 +3,18 @@ import * as shape from 'd3-shape';
 
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 
+interface NodeInterface {
+    id: string;
+    label: string;
+    selected: boolean;
+    color: string;
+}
+
+interface LinkInterface {
+    source: string;
+    target: string;
+}
+
 @Component({
     selector: 'app-vis-arch',
     encapsulation: ViewEncapsulation.None,
@@ -15,23 +27,24 @@ export class VisArchComponent implements OnInit {
     orientation = 'LR'; // LR, RL, TB, BT
 
     // line interpolation
+    // possible curves:
+    //    'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
+    //    'Monotone Y', 'Natural', 'Step', 'Step After', 'Step Before'
     curve: any = shape.curveCardinal;
-    interpolationTypes = [
-        'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
-        'Monotone Y', 'Natural', 'Step', 'Step After', 'Step Before'
-    ];
 
     // graph data
-    nodes: any[] = [];
-    links: any[] = [];
+    nodes: NodeInterface[] = [];
+    links: LinkInterface[] = [];
 
     connectingMode = false;
     deletingMode = false;
-    selectedSource = undefined;
-    selectedTarget = undefined;
+    private _selectedSource = undefined;
+    private _selectedTarget = undefined;
 
     // dummy counter for new nodes
-    idCounter = 10;
+    private _idCounter = 10;
+
+    private _nodeColor = '#6666aa';
 
     constructor(private selArchService: SelectedArchitectureService) {
         if (selArchService.architecture) {
@@ -39,7 +52,7 @@ export class VisArchComponent implements OnInit {
             this.links = selArchService.architecture.links;
             this.nodes = this.nodes.map(node => {
                 node.selected = false;
-                node.color = '#ff5722';
+                node.color = this._nodeColor;
                 return node;
             });
         }
@@ -49,8 +62,6 @@ export class VisArchComponent implements OnInit {
     }
 
     onNodeSelect(data) {
-        console.log('Item clicked', data);
-
         if (this.connectingMode) {
             this.handleSelectInConnectingMode(data);
         } else if (this.deletingMode) {
@@ -59,32 +70,32 @@ export class VisArchComponent implements OnInit {
     }
 
     private handleSelectInConnectingMode(data): void {
-        if (!this.selectedSource) {
+        if (!this._selectedSource) {
             // select staring node
-            this.selectedSource = data;
-            this.selectedSource.selected = true;
-        } else if (data.id === this.selectedSource.id) {
+            this._selectedSource = data;
+            this._selectedSource.selected = true;
+        } else if (data.id === this._selectedSource.id) {
             // if you select the same node second time
             //  just unselect it
-            this.selectedSource.selected = false;
-            this.selectedSource = undefined;
+            this._selectedSource.selected = false;
+            this._selectedSource = undefined;
         } else {
             // connect two selected nodes with link
             //  but check if they weren't already connected
-            this.selectedTarget = data;
-            this.selectedSource.selected = false;
+            this._selectedTarget = data;
+            this._selectedSource.selected = false;
 
             if (!this.links.some(link =>
-                    link.source === this.selectedSource.id &&
-                    link.target === this.selectedTarget.id)) {
+                    link.source === this._selectedSource.id &&
+                    link.target === this._selectedTarget.id)) {
                 this.links.push({
-                    source: this.selectedSource.id,
-                    target: this.selectedTarget.id
+                    source: this._selectedSource.id,
+                    target: this._selectedTarget.id
                 });
             }
 
-            this.selectedSource = undefined;
-            this.selectedTarget = undefined;
+            this._selectedSource = undefined;
+            this._selectedTarget = undefined;
             this.updateView();
         }
     }
@@ -100,14 +111,6 @@ export class VisArchComponent implements OnInit {
         this.updateView();
     }
 
-    onLegendLabelClick(entry) {
-        console.log('Legend clicked', entry);
-    }
-
-    toggleExpand(node) {
-        console.log('toggle expand', node);
-    }
-
     private updateView(): void {
         // HACK!
         // makes changes visible on screen
@@ -117,12 +120,12 @@ export class VisArchComponent implements OnInit {
 
     addNewNode(): void {
         this.nodes.push({
-            id: String(this.idCounter),
-            label: String(this.idCounter),
+            id: String(this._idCounter),
+            label: String(this._idCounter),
             selected: false,
-            color: '#ff5722'
+            color: this._nodeColor
         });
-        this.idCounter += 1;
+        this._idCounter += 1;
         this.updateView();
     }
 
@@ -139,8 +142,6 @@ export class VisArchComponent implements OnInit {
     }
 
     onLinkSelect(data): void {
-        console.log('Link selected: ', data);
-
         if (this.deletingMode) {
             this.links = this.links.filter(link =>
                 link.source !== data.source ||

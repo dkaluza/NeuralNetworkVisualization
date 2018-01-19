@@ -18,8 +18,8 @@ interface Element {
     styleUrls: ['./manage.component.css']
 })
 export class ManageComponent implements OnInit {
-    private _architectures: any[];
-    private _models: any[];
+    private _architectures: Element[];
+    private _models: Element[];
     add_new_arch_mode: boolean;
 
     displayedColumns = ['position', 'name'];
@@ -69,13 +69,17 @@ export class ManageComponent implements OnInit {
 
     selectArchitecture(pos: number) {
         pos -= 1;
-        const newArchitecture = new Architecture(
-            this._architectures[pos].id,
-            this._architectures[pos].name,
-            this._architectures[pos].architecture.nodes,
-            this._architectures[pos].architecture.links
-        );
-        this.selectedArchitectureService.architecture = newArchitecture;
+
+        this.restangular.one('getarch', this._architectures[pos].id)
+            .get().subscribe(arch => {
+                console.log(arch);
+                const newArch = new Architecture(
+                    arch.id, arch.name,
+                    arch.architecture.nodes,
+                    arch.architecture.links
+                );
+                this.selectedArchitectureService.architecture = newArch;
+            });
 
         this.restangular.one('listmodels', this._architectures[pos].id)
             .getList().subscribe(_models => {
