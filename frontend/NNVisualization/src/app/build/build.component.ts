@@ -21,15 +21,15 @@ export class BuildComponent implements OnInit {
             let currName = this.selectedArchitectureService.architecture.name
             let currDesc = this.selectedArchitectureService.architecture.description
             this.saveArch(currName, currDesc, currId)
-        } else {
+        } else
             alert('No architecture to save!')
-        }
     }
 
     saveAsNewArch(name: string) {
-        // ask for new description
+        let desc = prompt('Enter a short description:')
 
-        this.saveArch
+        if (desc != null)
+            this.saveArch(name, desc, undefined)
     }
 
     private saveArch(name: string, description: string, id?: number) {
