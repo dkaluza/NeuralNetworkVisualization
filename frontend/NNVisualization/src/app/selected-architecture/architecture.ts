@@ -3,6 +3,7 @@ import { Layer } from './layer'
 export class Architecture {
     private _id: number;
     private _name: string;
+    private _desc: string;
     private _layers: Layer[];
 
     constructor(id: number, name: string, layers: Layer[]) {
@@ -20,4 +21,9 @@ export class Architecture {
     }
 
     // any more functions?
+    // yeah
+
+    get description(): string {
+        return this._desc
+    }
 }
