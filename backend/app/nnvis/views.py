@@ -1,4 +1,4 @@
-from flask import Blueprint, make_response
+from flask import Blueprint, make_response, send_from_directory
 from flask_restful import Api, Resource
 from app.nnvis.models import Architecture
 
@@ -53,7 +53,23 @@ class ListAllModels(Resource):
         return mockup
 
 
+# /mockup_files/<0,1,2>
+class Images(Resource):
+    def get(self, img_id):
+        EXAMPLE_LIST = [['mockup_files/img1.jpg', 56],
+                        ['mockup_files/img2.png', 243],
+                        ['mockup_files/img3.png', 72]]
+
+
+        img_file = EXAMPLE_LIST[img_id]
+        img_proccessed, ext = img_file.split('.')
+        img_proccessed += '_GBP.jpg'
+
+        return send_from_directory('mockup_files', path)
+
+
 api.add_resource(Init, '')
 api.add_resource(AddArchitecture, 'add')
 api.add_resource(ListAllArchitectures, 'listarchs')
 api.add_resource(ListAllModels, 'listmodels/<string:arch_id>')
+api.add_resource(Images, '/mockup_files/<string:img_id>')
