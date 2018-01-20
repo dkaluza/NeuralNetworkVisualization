@@ -13,7 +13,7 @@ import { ImagesPanelComponent } from './visualize/images-panel/images-panel.comp
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
-import { VisualizationAlgorithmsComponent } from './visualize/visualization-algorithms/visualization-algorithms.component';
+import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RestangularModule, Restangular } from 'ngx-restangular';
@@ -60,6 +60,8 @@ const appRoutes: Routes = [
     { path: 'build', component: BuildComponent},
     { path: 'train', component: TrainComponent},
     { path: 'visualize', component: VisualizeComponent},
+    // { path: 'visualize/:algorithm', component: ImagesPanelComponent},
+    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent},
 ];
 
 // Function for setting the default restangular configuration
@@ -103,7 +105,7 @@ export function RestangularConfigFactory (RestangularProvider) {
         MatToolbarModule,
         MatTooltipModule,
     ],
-    declarations: [InputImageComponent, OutputImageComponent]
+    declarations: []
 })
 export class MaterialImportsModule {}
 
@@ -119,7 +121,9 @@ export class MaterialImportsModule {}
         SelectedBarComponent,
         VisualizeComponent,
         ImagesPanelComponent,
-        VisualizationAlgorithmsComponent,
+        NavAlgorithmsComponent,
+        InputImageComponent,
+        OutputImageComponent,
     ],
     imports: [
         BrowserModule,
