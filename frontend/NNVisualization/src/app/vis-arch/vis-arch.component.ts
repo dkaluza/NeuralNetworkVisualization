@@ -3,14 +3,14 @@ import * as shape from 'd3-shape';
 
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 
-interface NodeInterface {
+interface GraphNode {
     id: string;
     label: string;
     selected: boolean;
     color: string;
 }
 
-interface LinkInterface {
+interface GraphLink {
     source: string;
     target: string;
 }
@@ -33,8 +33,8 @@ export class VisArchComponent implements OnInit {
     curve: any = shape.curveCardinal;
 
     // graph data
-    nodes: NodeInterface[] = [];
-    links: LinkInterface[] = [];
+    nodes: GraphNode[] = [];
+    links: GraphLink[] = [];
 
     connectingMode = false;
     deletingMode = false;
@@ -48,13 +48,16 @@ export class VisArchComponent implements OnInit {
 
     constructor(private selArchService: SelectedArchitectureService) {
         if (selArchService.architecture) {
-            this.nodes = selArchService.architecture.nodes;
+            this.nodes = [];
+            for (let node of selArchService.architecture.nodes) {
+                this.nodes.push({
+                    id: node.id,
+                    label: node.label,
+                    selected: false,
+                    color: this._nodeColor
+                });
+            }
             this.links = selArchService.architecture.links;
-            this.nodes = this.nodes.map(node => {
-                node.selected = false;
-                node.color = this._nodeColor;
-                return node;
-            });
         }
     }
 

@@ -1,14 +1,24 @@
 import { Layer } from './layer'
 
+export interface ArchNode {
+    id: string;
+    label: string;
+}
+
+export interface ArchLink {
+    source: string;
+    target: string;
+}
+
 export class Architecture {
     private _id: number;
     private _name: string;
     private _layers: Layer[];
 
-    private _nodes: any[];
-    private _links: any[];
+    private _nodes: ArchNode[];
+    private _links: ArchLink[];
 
-    constructor(id: number, name: string, nodes: any[], links: any[]) {
+    constructor(id: number, name: string, nodes: ArchNode[], links: ArchLink[]) {
         this._id = id;
         this._name = name;
         // this._layers = layers; // maybe should be a deep copy?
