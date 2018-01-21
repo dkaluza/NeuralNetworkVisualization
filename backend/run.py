@@ -1,8 +1,10 @@
 from flask import Flask
 from app.nnvis.models import db
 from app.nnvis.views import nnvis
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object('config')
 
 db.init_app(app)

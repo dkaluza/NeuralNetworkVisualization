@@ -1,8 +1,8 @@
-from flask import Blueprint, make_response, send_from_directory
+from flask import Blueprint, make_response
 from flask_restful import Api, Resource
 from app.nnvis.models import Architecture
 
-import json
+from app.nnvis.models import Image
 
 nnvis = Blueprint('nnvis', __name__)
 api = Api(nnvis)
@@ -53,23 +53,35 @@ class ListAllModels(Resource):
         return mockup
 
 
-# /mockup_files/<0,1,2>
+# /visualize/<string:algorithm>/<string:image_id>
 class Images(Resource):
-    def get(self, img_id):
-        EXAMPLE_LIST = [['mockup_files/img1.jpg', 56],
-                        ['mockup_files/img2.png', 243],
-                        ['mockup_files/img3.png', 72]]
+    def get(self, algorithm, image_id):
+        if algorithm == 'GBP':
+            EXAMPLE_LIST = [['img1.jpg', 56],
+                            ['img2.jpg', 243],
+                            ['img3.jpg', 72]]
 
+            img_name, class_number = EXAMPLE_LIST[int(image_id)]
+            img_proc_name, ext = img_name.rsplit('.')
+            img_proc_name += '_GBP.jpg'
 
-        img_file = EXAMPLE_LIST[img_id]
-        img_proccessed, ext = img_file.split('.')
-        img_proccessed += '_GBP.jpg'
+            # compute here
 
-        return send_from_directory('mockup_files', path)
+            prefix = 'http://localhost:5000/static/'
+            img_path = prefix + 'original/' + img_name
+            img_proc_path = prefix + 'GBP/' + img_proc_name
+
+            image1 = Image(img_name, img_path)
+            image2 = Image(img_proc_name, img_proc_path)
+            return {'images': [image1.json(),
+                               image2.json()]}
+
+        return {'error message': algorithm + ' alogrithm is not handled yet'}, 202
+
 
 
 api.add_resource(Init, '')
 api.add_resource(AddArchitecture, 'add')
 api.add_resource(ListAllArchitectures, 'listarchs')
 api.add_resource(ListAllModels, 'listmodels/<string:arch_id>')
-api.add_resource(Images, '/mockup_files/<string:img_id>')
+api.add_resource(Images, 'visualize/<string:algorithm>/<string:image_id>')
