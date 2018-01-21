@@ -14,6 +14,9 @@ import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
 import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
+import { VisArchComponent } from './vis-arch/vis-arch.component';
+
+
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from "@angular/common/http";
@@ -54,6 +57,9 @@ import {
 import { CdkTableModule } from '@angular/cdk/table';
 import { InputImageComponent } from './visualize/images-panel/input-image/input-image.component';
 import { OutputImageComponent } from './visualize/images-panel/output-image/output-image.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
+
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full'},
@@ -124,6 +130,8 @@ export class MaterialImportsModule {}
         NavAlgorithmsComponent,
         InputImageComponent,
         OutputImageComponent,
+        VisArchComponent
+
     ],
     imports: [
         BrowserModule,
@@ -134,6 +142,8 @@ export class MaterialImportsModule {}
         RouterModule.forRoot(appRoutes),
         RestangularModule.forRoot(RestangularConfigFactory),
         MaterialImportsModule,
+        NgxChartsModule,
+        NgxGraphModule
     ],
     providers: [SelectedArchitectureService],
     bootstrap: [AppComponent]
