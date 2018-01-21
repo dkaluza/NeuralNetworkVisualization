@@ -13,7 +13,6 @@ export class VisualizeComponent implements OnInit {
     constructor() { }
 
     ngOnInit() {
-      console.log('init in VisualizeComponent');
     }
 
 }

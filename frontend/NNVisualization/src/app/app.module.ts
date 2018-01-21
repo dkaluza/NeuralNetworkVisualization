@@ -16,6 +16,7 @@ import { VisualizeComponent } from './visualize/visualize.component';
 import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from "@angular/common/http";
 import { RestangularModule, Restangular } from 'ngx-restangular';
 import {
     MatAutocompleteModule,
@@ -60,7 +61,6 @@ const appRoutes: Routes = [
     { path: 'build', component: BuildComponent},
     { path: 'train', component: TrainComponent},
     { path: 'visualize', component: VisualizeComponent},
-    // { path: 'visualize/:algorithm', component: ImagesPanelComponent},
     { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent},
 ];
 
@@ -130,6 +130,7 @@ export class MaterialImportsModule {}
         BrowserAnimationsModule,
         FormsModule,
         ReactiveFormsModule,
+        HttpClientModule,
         RouterModule.forRoot(appRoutes),
         RestangularModule.forRoot(RestangularConfigFactory),
         MaterialImportsModule,

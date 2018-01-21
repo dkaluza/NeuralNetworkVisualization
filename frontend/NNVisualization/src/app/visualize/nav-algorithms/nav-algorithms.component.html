@@ -2,17 +2,17 @@
     <div class="container-fluid">
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li role="presentation" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-                    <a routerLink="/visualize/CAM/1">CAM</a>
+                <li role="presentation" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}">
+                    <a [routerLink]="['/visualize', 'CAM', 0]">CAM</a>
                 </li>
                 <li role="presentation" routerLinkActive="active">
-                    <a routerLink="/visualize/GBP/1">Guided Backprop</a>
+                    <a [routerLink]="['/visualize', 'GBP', 0]">Guided Backprop</a>
                 </li>
                 <li role="presentation" routerLinkActive="active">
-                    <a routerLink="/visualize/Occlusion/1">Occlusion Experiment</a>
+                    <a [routerLink]="['/visualize', 'Occlusion', 0]">Occlusion Experiment</a>
                 </li>
                 <li role="presentation" routerLinkActive="active">
-                    <a routerLink="/visualize/GradCAM/1">GradCAM</a>
+                    <a [routerLink]="['/visualize', 'GradCAM', 0]">GradCAM</a>
                 </li>
             </ul>
         </div>
