@@ -15,6 +15,11 @@ interface GraphLink {
     target: string;
 }
 
+interface ToolboxLayer {
+    label: string;
+    color: string;
+}
+
 @Component({
     selector: 'app-vis-arch',
     encapsulation: ViewEncapsulation.None,
@@ -35,6 +40,16 @@ export class VisArchComponent implements OnInit {
     // graph data
     nodes: GraphNode[] = [];
     links: GraphLink[] = [];
+
+    // toolbox data
+    layers: ToolboxLayer[] = [{
+        label: "Convolution",
+        color: "#6666aa"
+    },
+    {
+        label: "Fully Connected",
+        color: "#00FF00"
+    }]
 
     connectingMode = false;
     deletingMode = false;
@@ -89,8 +104,8 @@ export class VisArchComponent implements OnInit {
             this._selectedSource.selected = false;
 
             if (!this.links.some(link =>
-                    link.source === this._selectedSource.id &&
-                    link.target === this._selectedTarget.id)) {
+                link.source === this._selectedSource.id &&
+                link.target === this._selectedTarget.id)) {
                 this.links.push({
                     source: this._selectedSource.id,
                     target: this._selectedTarget.id
@@ -121,12 +136,12 @@ export class VisArchComponent implements OnInit {
         this.links = [...this.links];
     }
 
-    addNewNode(): void {
+    addNewNode(layer: ToolboxLayer): void {
         this.nodes.push({
             id: String(this._idCounter),
             label: String(this._idCounter),
             selected: false,
-            color: this._nodeColor
+            color: layer.color
         });
         this._idCounter += 1;
         this.updateView();
@@ -142,6 +157,12 @@ export class VisArchComponent implements OnInit {
             node.selected = false;
             return node;
         });
+    }
+
+    onLayerDrop(event: { value: ToolboxLayer}): void {
+        console.log(event);
+        let layer: ToolboxLayer = event.value;
+        this.addNewNode(layer);
     }
 
     onLinkSelect(data): void {
