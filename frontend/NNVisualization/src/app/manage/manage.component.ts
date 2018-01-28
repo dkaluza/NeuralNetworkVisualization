@@ -65,7 +65,8 @@ export class ManageComponent implements OnInit {
                 const newArch = new Architecture(
                     arch.id, arch.name,
                     arch.architecture.nodes,
-                    arch.architecture.links
+                    arch.architecture.links,
+                    'Placeholder description' // TODO add desc in backend
                 );
                 this.selectedArchitectureService.architecture = newArch;
             });
