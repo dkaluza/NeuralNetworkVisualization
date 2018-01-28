@@ -58,12 +58,17 @@ export class ManageComponent implements OnInit {
 
     selectArchitecture(pos: number) {
         pos -= 1;
-        const newArchitecture = new Architecture(
-            this._architectures[pos].id,
-            this._architectures[pos].name,
-            []
-        );
-        this.selectedArchitectureService.architecture = newArchitecture;
+
+        this.restangular.one('getarch', this._architectures[pos].id)
+            .get().subscribe(arch => {
+                console.log(arch);
+                const newArch = new Architecture(
+                    arch.id, arch.name,
+                    arch.architecture.nodes,
+                    arch.architecture.links
+                );
+                this.selectedArchitectureService.architecture = newArch;
+            });
 
         this.restangular.one('listmodels', this._architectures[pos].id)
             .getList().subscribe(_models => {

@@ -1,0 +1,17 @@
+.setting {
+    margin: 5px 10px;
+}
+
+.graph {
+    width: 100%;
+    height: 100%;
+}
+
+.node-selected {
+    stroke: red;
+    stroke-width: 2px;
+}
+
+.edge > path {
+    stroke-width: 5px;
+}

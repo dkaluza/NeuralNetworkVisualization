@@ -1,0 +1,52 @@
+<div>
+    <mat-checkbox class="setting" [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
+    <mat-checkbox class="setting" [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
+    <button class="setting" mat-button (click)="addNewNode()">Add</button>
+</div>
+<div class="graph">
+    <ngx-graph
+     [view]="view"
+     [autoZoom]="true"
+     [legend]="false"
+     [links]="links"
+     (legendLabelClick)="onLegendLabelClick($event)"
+     [nodes]="nodes"
+     [orientation]="orientation"
+     [curve]="curve"
+     [draggingEnabled]="!connectingMode && !deletingMode"
+     (select)="onNodeSelect($event)">
+
+        <ng-template #defsTemplate>
+            <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+                <svg:path d="M0,-5 L 8,0 L 0,5" class="arrow-head" />
+            </svg:marker>
+        </ng-template>
+
+        <ng-template #nodeTemplate let-node>
+            <svg:g class="node"
+                   ngx-tooltip
+                   [tooltipPlacement]="'top'"
+                   [tooltipType]="'tooltip'"
+                   [tooltipTitle]="node.label">
+                <svg:rect
+                    [class.node-selected]="node.selected"
+                    [attr.width]="node.width"
+                    [attr.height]="node.height"
+                    [attr.fill]="node.color"/>
+                    <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">
+                        {{node.label}}
+                    </svg:text>
+                </svg:g>
+        </ng-template>
+
+        <ng-template #linkTemplate let-link>
+            <svg:g class="edge" (click)="onLinkSelect(link)">
+                <svg:path
+                   class="line"
+                   marker-end="url(#arrow)" >
+                </svg:path>
+            </svg:g>
+        </ng-template>
+
+    </ngx-graph>
+</div>
