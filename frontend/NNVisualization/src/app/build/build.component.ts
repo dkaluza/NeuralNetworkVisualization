@@ -41,18 +41,24 @@ export class BuildComponent implements OnInit {
     }
 
     saveAsNewArch(name: string) {
-        let dialogRef = this.dialog.open(DescDialog)
+        // TODO use MatDialog
+        // let dialogRef = this.dialog.open(DescDialog)
 
-        dialogRef
-            .afterClosed()
-            .filter(result => result)
-            .subscribe(result => {
-                this.saveArch(name, result, undefined)
-                this._saveNewMessage = 'Saved successfully!'
-                setTimeout(() => {
-                    this._saveNewMessage = 'Save as new'
-                }, this._msgTimeout)
-            })
+        // dialogRef
+        //     .afterClosed()
+        //     .filter(result => result)
+        //     .subscribe(result => {
+        //         this.saveArch(name, result, undefined)
+        //         this._saveNewMessage = 'Saved successfully!'
+        //         setTimeout(() => {
+        //             this._saveNewMessage = 'Save as new'
+        //         }, this._msgTimeout)
+        //     })
+
+        let desc = prompt("Enter a short description:")
+
+        if (desc != null)
+            this.saveArch(name, desc, undefined)
     }
 
     private saveArch(name: string, description: string, id?: number) {
