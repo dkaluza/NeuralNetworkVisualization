@@ -2,6 +2,7 @@
     margin: 5px 10px;
 }
 
+/* drag and drop hack do not touch or be careful */
 .graph {
     width: 100%;
     height: 100%;
@@ -14,4 +15,30 @@
 
 .edge > path {
     stroke-width: 5px;
+}
+
+.toolbox {
+    position: fixed;
+    top: 87%;
+    height: 10%;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.layer {
+    margin: auto;
+    padding: 10px;
+    display: inline-block;
+}
+
+/* drag and drop hack do not touch */
+.gu-mirror {
+    position: fixed;
+    z-index: -1;
+}
+
+/* drag and drop hack do not touch */
+.gu-transit {
+    display: none;
 }

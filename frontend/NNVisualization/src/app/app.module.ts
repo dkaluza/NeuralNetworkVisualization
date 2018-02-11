@@ -53,6 +53,7 @@ import {
 import { CdkTableModule } from '@angular/cdk/table';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
+import { NgxDnDModule } from '@swimlane/ngx-dnd';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full'},
@@ -128,7 +129,8 @@ export class MaterialImportsModule {}
         RestangularModule.forRoot(RestangularConfigFactory),
         MaterialImportsModule,
         NgxChartsModule,
-        NgxGraphModule
+        NgxGraphModule,
+        NgxDnDModule
     ],
     providers: [SelectedArchitectureService],
     bootstrap: [AppComponent]
