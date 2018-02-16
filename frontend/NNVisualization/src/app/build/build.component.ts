@@ -12,14 +12,12 @@ export class BuildComponent implements OnInit {
 
     private _saveCurrentMessage: string
     private _saveNewMessage: string
-    private _msgTimeout: number
 
     constructor(private selectedArchitectureService: SelectedArchitectureService,
                 private restangular: Restangular,
                 public dialog: MatDialog) {
         this._saveCurrentMessage = 'Save'
         this._saveNewMessage = 'Save as new'
-        this._msgTimeout = 3000
     }
 
     ngOnInit() {
@@ -31,16 +29,10 @@ export class BuildComponent implements OnInit {
             let currName = this.selectedArchitectureService.architecture.name
             let currDesc = this.selectedArchitectureService.architecture.description
             this.saveArch(currName, currDesc, currId)
-        } else {
-            // TODO: grey out button if can't save by binding disabled
-            this._saveCurrentMessage = 'No architecture to save!'
-            setTimeout(() => {
-                this._saveCurrentMessage = 'Save'
-            }, this._msgTimeout)
         }
     }
 
-    saveAsNewArch(name: string) {
+    saveAsNewArch() {
         // TODO use MatDialog
         // let dialogRef = this.dialog.open(DescDialog)
 
@@ -55,9 +47,10 @@ export class BuildComponent implements OnInit {
         //         }, this._msgTimeout)
         //     })
 
+        let name = prompt("Enter a name:")
         let desc = prompt("Enter a short description:")
 
-        if (desc != null)
+        if (desc != null && name != null)
             this.saveArch(name, desc, undefined)
     }
 
