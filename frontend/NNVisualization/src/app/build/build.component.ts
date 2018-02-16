@@ -10,14 +10,14 @@ import { MatDialog, MatDialogRef } from  '@angular/material';
 })
 export class BuildComponent implements OnInit {
 
-    private _saveCurrentMessage: string
-    private _saveNewMessage: string
+    private _saveCurrentMessage: string;
+    private _saveNewMessage: string;
 
     constructor(private selectedArchitectureService: SelectedArchitectureService,
                 private restangular: Restangular,
                 public dialog: MatDialog) {
-        this._saveCurrentMessage = 'Save'
-        this._saveNewMessage = 'Save as new'
+        this._saveCurrentMessage = 'Save';
+        this._saveNewMessage = 'Save as new';
     }
 
     ngOnInit() {
@@ -25,16 +25,16 @@ export class BuildComponent implements OnInit {
 
     saveCurrentArch() {
         if (this.selectedArchitectureService.architecture) {
-            let currId = this.selectedArchitectureService.architecture.id
-            let currName = this.selectedArchitectureService.architecture.name
-            let currDesc = this.selectedArchitectureService.architecture.description
-            this.saveArch(currName, currDesc, currId)
+            let currId = this.selectedArchitectureService.architecture.id;
+            let currName = this.selectedArchitectureService.architecture.name;
+            let currDesc = this.selectedArchitectureService.architecture.description;
+            this.saveArch(currName, currDesc, currId);
         }
     }
 
     saveAsNewArch() {
         // TODO use MatDialog
-        // let dialogRef = this.dialog.open(DescDialog)
+        // let dialogRef = this.dialog.open(DescDialog);
 
         // dialogRef
         //     .afterClosed()
@@ -45,13 +45,13 @@ export class BuildComponent implements OnInit {
         //         setTimeout(() => {
         //             this._saveNewMessage = 'Save as new'
         //         }, this._msgTimeout)
-        //     })
+        //     });
 
-        let name = prompt("Enter a name:")
-        let desc = prompt("Enter a short description:")
+        let name = prompt("Enter a name:");
+        let desc = prompt("Enter a short description:");
 
         if (desc != null && name != null)
-            this.saveArch(name, desc, undefined)
+            this.saveArch(name, desc, undefined);
     }
 
     private saveArch(name: string, description: string, id?: number) {
@@ -59,9 +59,9 @@ export class BuildComponent implements OnInit {
         let postData = {
             'name': name,
             'description': description
-        }
+        };
 
-        if (id) postData['id'] = id
+        if (id) postData['id'] = id;
 
         this.restangular
             .one('add')
@@ -69,7 +69,7 @@ export class BuildComponent implements OnInit {
             .subscribe(
                 () => { alert('Save successful!') },
                 () => { alert('Something fucked up while saving') }
-            )
+            );
     }
 
     get saveCurrentMsg(): string {
@@ -87,17 +87,17 @@ export class BuildComponent implements OnInit {
 })
 export class DescDialog {
 
-    private _text: string
+    private _text: string;
 
     constructor(
         private dialogRef: MatDialogRef<DescDialog>
     ) {}
 
     save() {
-        this.dialogRef.close(this._text)
+        this.dialogRef.close(this._text);
     }
 
     cancel() {
-        this.dialogRef.close()
+        this.dialogRef.close();
     }
 }
