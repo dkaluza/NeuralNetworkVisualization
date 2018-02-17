@@ -42,14 +42,15 @@ export class VisArchComponent implements OnInit {
     links: GraphLink[] = [];
 
     // toolbox data
-    layers: ToolboxLayer[] = [{
-        label: "Convolution",
-        color: "#6666aa"
-    },
-    {
-        label: "Fully Connected",
-        color: "#00FF00"
-    }]
+    layers: ToolboxLayer[] = [
+        {
+            label: 'Convolution',
+            color: '#6666aa'
+        }, {
+            label: 'Fully Connected',
+            color: '#00FF00'
+        }
+    ];
 
     connectingMode = false;
     deletingMode = false;
@@ -64,7 +65,7 @@ export class VisArchComponent implements OnInit {
     constructor(private selArchService: SelectedArchitectureService) {
         if (selArchService.architecture) {
             this.nodes = [];
-            for (let node of selArchService.architecture.nodes) {
+            for (const node of selArchService.architecture.nodes) {
                 this.nodes.push({
                     id: node.id,
                     label: node.label,
@@ -134,6 +135,9 @@ export class VisArchComponent implements OnInit {
         // makes changes visible on screen
         this.nodes = [...this.nodes];
         this.links = [...this.links];
+
+        this.selArchService.currentNodes = this.nodes;
+        this.selArchService.currentLinks = this.links;
     }
 
     addNewNode(layer: ToolboxLayer): void {
@@ -161,7 +165,7 @@ export class VisArchComponent implements OnInit {
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
         console.log(event);
-        let layer: ToolboxLayer = event.value;
+        const layer: ToolboxLayer = event.value;
         this.addNewNode(layer);
     }
 

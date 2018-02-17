@@ -25,10 +25,19 @@ export class BuildComponent implements OnInit {
 
     saveCurrentArch() {
         if (this.selectedArchitectureService.architecture) {
-            const currId = this.selectedArchitectureService.architecture.id;
-            const currName = this.selectedArchitectureService.architecture.name;
-            const currDesc = this.selectedArchitectureService.architecture.description;
-            this.saveArch(currName, currDesc, currId);
+            const arch = this.selectedArchitectureService.architecture;
+
+            const data = {
+                graph: {
+                    nodes: this.selectedArchitectureService.currentNodes,
+                    links: this.selectedArchitectureService.currentLinks
+                }
+            };
+            this.restangular.all('arch').all(arch.id)
+                .post(data).subscribe(
+                    (nArch) => {},
+                    () => { alert('Error :('); }
+                );
         }
     }
 
@@ -50,26 +59,21 @@ export class BuildComponent implements OnInit {
         const name = prompt('Enter a name:');
         const desc = prompt('Enter a short description:');
 
-        if (desc != null && name != null) {
-            this.saveArch(name, desc, undefined);
-        }
-    }
-
-    private saveArch(name: string, description: string, id?: number) {
-        // TODO: passing the selected arch somehow
-        const postData = {
-            'name': name,
-            'description': description
+        const data = {
+            graph: {
+                nodes: this.selectedArchitectureService.currentNodes,
+                links: this.selectedArchitectureService.currentLinks
+            }
         };
-
-        if (id) {
-            postData['id'] = id;
+        if (name != null) {
+            data['name'] = name;
+        }
+        if (desc != null) {
+            data['description'] = desc;
         }
 
-        this.restangular
-            .all('arch')
-            .post(postData)
-            .subscribe(
+        this.restangular.all('arch')
+            .post(data).subscribe(
                 () => { alert('Save successful!'); },
                 () => { alert('Something fucked up while saving'); }
             );
