@@ -1,8 +1,5 @@
 <div class="row">
-    <div class="col-md-3 centered">
-        <button mat-button (click)="addNewArchitecture()">Add new architecture</button>
-    </div>
-    <div class="col-md-3 centered">
+    <div class="col-md-3 col-md-offset-3 centered">
         <h2>Select architecture</h2>
         <div class="filter-header">
             <mat-form-field>
@@ -68,15 +65,6 @@
                 No architecture selected
             </ng-template>
         </ng-container>
-        <ng-template #addArch>
-            <h2>Create new architecture</h2>
-            <div class="flex">
-                <mat-form-field>
-                    <input matInput placeholder="Name" #name>
-                </mat-form-field>
-            </div>
-            <button mat-button (click)="saveNewArchitecture(name.value)">Save</button>
-        </ng-template>
     </div>
     <div class="col-md-3 centered">
         <ng-container *ngIf="selectedArchitectureService.model; else noModel">

@@ -20,7 +20,6 @@ interface Element {
 export class ManageComponent implements OnInit {
     private _architectures: Element[];
     private _models: Element[];
-    add_new_arch_mode: boolean;
 
     displayedColumns = ['position', 'name'];
     archDataSource;
@@ -30,7 +29,6 @@ export class ManageComponent implements OnInit {
                 private restangular: Restangular) {
         this._architectures = [];
         this._models = [];
-        this.add_new_arch_mode = false;
         this.archDataSource = new MatTableDataSource<Element>([]);
         this.modelDataSource = new MatTableDataSource<Element>([]);
     }
@@ -83,15 +81,6 @@ export class ManageComponent implements OnInit {
         filterValue = filterValue.trim();
         filterValue = filterValue.toLowerCase();
         dataSource.filter = filterValue;
-    }
-
-    addNewArchitecture() {
-        this.add_new_arch_mode = true;
-    }
-
-    saveNewArchitecture(name: string) {
-        console.log(name);
-        this.add_new_arch_mode = false;
     }
 
     selectArchitecture(pos: number) {
