@@ -56,14 +56,10 @@ export class BuildComponent implements OnInit {
         //         }, this._msgTimeout)
         //     });
 
-        let name = '';
-        let desc = '';
-        while (name === '') {
-            name = prompt('Enter a name:');
-        }
-        while (desc === '') {
-            desc = prompt('Enter a short description:');
-        }
+        const name = prompt('Enter a name:');
+        if (name === null || name === '') { return; }
+        const desc = prompt('Enter a short description:');
+        if (desc === null) { return; }
 
         const data = {
             name: name,
