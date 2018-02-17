@@ -56,22 +56,23 @@ export class BuildComponent implements OnInit {
         //         }, this._msgTimeout)
         //     });
 
-        const name = prompt('Enter a name:');
-        const desc = prompt('Enter a short description:');
+        let name = '';
+        let desc = '';
+        while (name === '') {
+            name = prompt('Enter a name:');
+        }
+        while (desc === '') {
+            desc = prompt('Enter a short description:');
+        }
 
         const data = {
+            name: name,
+            description: desc,
             graph: {
                 nodes: this.selectedArchitectureService.currentNodes,
                 links: this.selectedArchitectureService.currentLinks
             }
         };
-        if (name != null) {
-            data['name'] = name;
-        }
-        if (desc != null) {
-            data['description'] = desc;
-        }
-
         this.restangular.all('arch')
             .post(data).subscribe(
                 () => { alert('Save successful!'); },

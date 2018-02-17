@@ -57,9 +57,6 @@ export class VisArchComponent implements OnInit {
     private _selectedSource = undefined;
     private _selectedTarget = undefined;
 
-    // dummy counter for new nodes
-    private _idCounter = 10;
-
     private _nodeColor = '#6666aa';
 
     constructor(private selArchService: SelectedArchitectureService) {
@@ -136,18 +133,32 @@ export class VisArchComponent implements OnInit {
         this.nodes = [...this.nodes];
         this.links = [...this.links];
 
-        this.selArchService.currentNodes = this.nodes;
+        this.selArchService.currentNodes = this.nodes.map(
+            (node) =>  ({id: node.id, label: node.label})
+        );
         this.selArchService.currentLinks = this.links;
     }
 
     addNewNode(layer: ToolboxLayer): void {
+        // select new id and label
+        // temporary solution
+        let label = layer.label;
+        let id = 1;
+        while (!this.nodes.every((node) => node.label !== label)) {
+            label = layer.label + ' ' + id;
+            id += 1;
+        }
+        id = 1;
+        while (!this.nodes.every((node) => node.id !== String(id))) {
+            id += 1;
+        }
+
         this.nodes.push({
-            id: String(this._idCounter),
-            label: String(this._idCounter),
+            id: String(id),
+            label: label,
             selected: false,
             color: layer.color
         });
-        this._idCounter += 1;
         this.updateView();
     }
 
