@@ -155,8 +155,11 @@ export class ManageComponent implements OnInit {
         const arch = this.selectedArchitectureService.architecture;
         this.restangular.one('arch', arch.id)
             .remove().subscribe(
-            () => {},
-            (e) => { alert(e); }
+                () => {
+                    this._updateArchitectureList();
+                    this.selectedArchitectureService.architecture = undefined;
+                },
+                (e) => { alert(e); }
         );
     }
 
@@ -193,7 +196,10 @@ export class ManageComponent implements OnInit {
         const model = this.selectedArchitectureService.model;
         this.restangular.one('model', model.id)
             .remove().subscribe(
-                () => {},
+                () => {
+                    this._updateModelList();
+                    this.selectedArchitectureService.model = undefined;
+                },
                 (e) => { alert(e); }
             );
     }
