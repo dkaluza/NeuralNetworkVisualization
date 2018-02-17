@@ -60,19 +60,20 @@ import { OutputImageComponent } from './visualize/images-panel/output-image/outp
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
+import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
 
 
 const appRoutes: Routes = [
-    { path: '', redirectTo: 'manage', pathMatch: 'full'},
-    { path: 'manage', component: ManageComponent},
-    { path: 'build', component: BuildComponent},
-    { path: 'train', component: TrainComponent},
-    { path: 'visualize', component: VisualizeComponent},
-    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent},
+    { path: '', redirectTo: 'manage', pathMatch: 'full' },
+    { path: 'manage', component: ManageComponent },
+    { path: 'build', component: BuildComponent },
+    { path: 'train', component: TrainComponent },
+    { path: 'visualize', component: VisualizeComponent },
+    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent },
 ];
 
 // Function for setting the default restangular configuration
-export function RestangularConfigFactory (RestangularProvider) {
+export function RestangularConfigFactory(RestangularProvider) {
     RestangularProvider.setBaseUrl('/api');
     RestangularProvider.setDefaultHeaders({});
 
@@ -129,7 +130,7 @@ export function RestangularConfigFactory (RestangularProvider) {
     ],
     declarations: []
 })
-export class MaterialImportsModule {}
+export class MaterialImportsModule { }
 
 
 @NgModule({
@@ -146,8 +147,11 @@ export class MaterialImportsModule {}
         NavAlgorithmsComponent,
         InputImageComponent,
         OutputImageComponent,
-        VisArchComponent
-
+        VisArchComponent,
+        LogInDialogComponent
+    ],
+    entryComponents: [
+        LogInDialogComponent
     ],
     imports: [
         BrowserModule,

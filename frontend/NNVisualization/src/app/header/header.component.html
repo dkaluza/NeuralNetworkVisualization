@@ -1,20 +1,38 @@
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a href="#" class="navbar-brand">Neural Network Visualization ZPP project for the win!</a>
-        </div>
+<div #toolbar>
+    <mat-toolbar class="mat-toolbar mat-primary">
+        <span>
+            <a mat-button routerLink="/">
+                Neural Network Visualization ZPP project for the win!
+            </a>
+        </span>
+        <span class="fill-space"></span>
+        <div *ngIf="logged; then options; else login"></div>
 
-        <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" role="button">| | |<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Dropdown menu option1</a></li>
-                        <li><a href="#">Dropdown menu option2</a></li>
-                        <li><a href="#">Dropdown menu option3</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+        <ng-template #options>
+            <span>
+                <mat-menu #optionsMenu="matMenu" [overlapTrigger]="false">
+                    <button mat-menu-item>
+                        <mat-icon>help_outline</mat-icon>
+                        <span>About</span>
+                    </button>
+                    <button mat-menu-item (click)="logOut()">
+                        <mat-icon>power_settings_new</mat-icon>
+                        <span>Logout</span>
+                    </button>
+                </mat-menu>
+                <button mat-button [matMenuTriggerFor]="optionsMenu">
+                    <mat-icon>more_vert</mat-icon>
+                    <span>Account</span>
+                </button>
+            </span>
+        </ng-template>
+        <ng-template #login>
+            <span>
+                <button mat-button (click)="logIn()">
+                    <mat-icon>exit_to_app</mat-icon>
+                    <span>Log in</span>
+                </button>
+            </span>
+        </ng-template>
+    </mat-toolbar>
+</div>
