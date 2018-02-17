@@ -6,15 +6,15 @@ db = SQLAlchemy()
 
 class CRUD():
 
-    def add(self, resource):
-        db.session.add(resource)
+    def add(self):
+        db.session.add(self)
         return db.session.commit()
 
     def update(self):
         return db.session.commit()
 
-    def delete(self, resource):
-        db.session.delete(resource)
+    def delete(self):
+        db.session.delete(self)
         return db.session.commit()
 
 

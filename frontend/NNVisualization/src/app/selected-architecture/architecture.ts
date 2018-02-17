@@ -1,4 +1,4 @@
-import { Layer } from './layer'
+import { Layer } from './layer';
 
 export interface ArchNode {
     id: string;
@@ -13,17 +13,27 @@ export interface ArchLink {
 export class Architecture {
     private _id: number;
     private _name: string;
+    private _description: string;
     private _layers: Layer[];
 
     private _nodes: ArchNode[];
     private _links: ArchLink[];
 
-    constructor(id: number, name: string, nodes: ArchNode[], links: ArchLink[]) {
+    private _last_used: string;
+    private _last_modified: string;
+
+    constructor(id: number, name: string, desc: string,
+                nodes: ArchNode[], links: ArchLink[],
+                last_used: string, last_modified: string) {
         this._id = id;
         this._name = name;
+        this._description = desc;
         // this._layers = layers; // maybe should be a deep copy?
         this._nodes = nodes;
         this._links = links;
+
+        this._last_used = last_used;
+        this._last_modified = last_modified;
     }
 
     get name(): string {
@@ -34,12 +44,24 @@ export class Architecture {
         return this._id;
     }
 
+    get description(): string {
+        return this._description;
+    }
+
     get nodes() {
         return this._nodes;
     }
 
     get links() {
         return this._links;
+    }
+
+    get last_used(): string {
+        return this._last_used;
+    }
+
+    get last_modified(): string {
+        return this._last_modified;
     }
 
     // any more functions?

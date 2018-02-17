@@ -57,6 +57,12 @@
                 <h2>Current architecture</h2>
                 <h4>ID: {{ selectedArchitectureService.architecture.id }}</h4>
                 <h4>Name: {{ selectedArchitectureService.architecture.name }}</h4>
+                <h4>Description: {{ selectedArchitectureService.architecture.description }}</h4>
+                <h4>Last used: {{ selectedArchitectureService.architecture.last_used }}</h4>
+                <h4>Last modified: {{ selectedArchitectureService.architecture.last_modified }}</h4>
+
+                <button mat-button (click)="editCurrentArchitecture()">Edit</button>
+                <button mat-button (click)="deleteCurrentArchitecture()">Delete</button>
             </ng-container>
             <ng-template #noArch>
                 No architecture selected
@@ -77,6 +83,10 @@
             <h2>Current model</h2>
             <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
             <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
+            <h4>Description: {{ selectedArchitectureService.model.description }}</h4>
+
+            <button mat-button (click)="editCurrentModel()">Edit</button>
+            <button mat-button (click)="deleteCurrentModel()">Delete</button>
         </ng-container>
         <ng-template #noModel>
             No model selected
