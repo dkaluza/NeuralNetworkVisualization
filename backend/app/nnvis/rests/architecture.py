@@ -23,18 +23,18 @@ def arch_to_dict(arch):
 
 
 class ArchitectureTask(Resource):
-    def __abort_if_arch_doesnt_extst(self, arch_id):
+    def __abort_if_arch_doesnt_exist(self, arch_id):
         if Architecture.query.get(arch_id) is None:
             message = 'Architecture {id} doesn\'t exist'.format(id=arch_id)
             abort(404, message=message)
 
     def get(self, arch_id):
-        self.__abort_if_arch_doesnt_extst(arch_id)
+        self.__abort_if_arch_doesnt_exist(arch_id)
         arch = Architecture.query.get(arch_id)
         return arch_to_dict(arch)
 
     def delete(self, arch_id):
-        self.__abort_if_arch_doesnt_extst(arch_id)
+        self.__abort_if_arch_doesnt_exist(arch_id)
         models = Model.query.filter_by(arch_id=arch_id).all()
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
@@ -46,7 +46,7 @@ class ArchitectureTask(Resource):
         return '', 204
 
     def post(self, arch_id):
-        self.__abort_if_arch_doesnt_extst(arch_id)
+        self.__abort_if_arch_doesnt_exist(arch_id)
         models = Model.query.filter_by(arch_id=arch_id).all()
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
