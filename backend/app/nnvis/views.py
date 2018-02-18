@@ -142,6 +142,7 @@ class ListAllModels(Resource):
 # /visualize/<string:algorithm>/<string:image_id>
 class Images(Resource):
     def get(self, algorithm, image_id):
+        print('in get images')
         if algorithm == 'GBP':
             EXAMPLE_LIST = [['img1.jpg', 56],
                             ['img2.jpg', 243],
@@ -153,15 +154,17 @@ class Images(Resource):
 
             # compute here
 
-            prefix = 'http://localhost:5000/static/'
+            prefix = 'api/static/'
             img_path = prefix + 'original/' + img_name
             img_proc_path = prefix + 'GBP/' + img_proc_name
 
             image1 = Image(img_name, img_path)
             image2 = Image(img_proc_name, img_proc_path)
+            print('returning  images')
             return {'images': [image1.json(),
                                image2.json()]}
 
+        print('returning error')
         return {'error message': algorithm + ' alogrithm is not handled yet'}, 202
 
 
