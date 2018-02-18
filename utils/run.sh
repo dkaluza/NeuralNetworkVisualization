@@ -2,8 +2,17 @@
 
 ROOTDIR=$(git rev-parse --show-toplevel)
 
+cleanup()
+{
+    echo ""
+    echo "Cleaning up"
+    kill 0
+}
+
 main()
 {
+    trap "exit" SIGINT SIGTERM ERR
+    trap cleanup EXIT
     if [ "$#" -ne 0 ]; then
         echo "No args pls"
         exit 1
