@@ -10,7 +10,14 @@ main()
     fi
 
     cd "$ROOTDIR"/backend
-    python3 run.py
+
+    # Kinda hack, should be changed in docker
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+    export FLASK_APP="run"
+    export FLASK_DEBUG=1
+    python3 -m flask run
 }
 
 main "$@"
