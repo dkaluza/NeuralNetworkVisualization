@@ -2,6 +2,11 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import * as shape from 'd3-shape';
 
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
+import { ToolboxLayer, layers } from './toolbox-layers';
+import { Graph } from './graph';
+
+import { Layer, Activation } from './layers/layer/layer';
+import { FullyConnectedLayer } from './layers/fully-connected/fully-connected';
 
 interface GraphNode {
     id: string;
@@ -13,11 +18,6 @@ interface GraphNode {
 interface GraphLink {
     source: string;
     target: string;
-}
-
-interface ToolboxLayer {
-    label: string;
-    color: string;
 }
 
 @Component({
@@ -35,46 +35,69 @@ export class VisArchComponent implements OnInit {
     // possible curves:
     //    'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
     //    'Monotone Y', 'Natural', 'Step', 'Step After', 'Step Before'
-    curve: any = shape.curveCardinal;
+    curve: any = shape.curveMonotoneX;
 
     // graph data
     nodes: GraphNode[] = [];
     links: GraphLink[] = [];
 
-    // toolbox data
-    layers: ToolboxLayer[] = [
-        {
-            label: 'Convolution',
-            color: '#6666aa'
-        }, {
-            label: 'Fully Connected',
-            color: '#00FF00'
-        }
-    ];
+    private _graph: Graph;
+    private _layerData: Layer[];
 
     connectingMode = false;
     deletingMode = false;
     private _selectedSource = undefined;
     private _selectedTarget = undefined;
 
-    private _nodeColor = '#6666aa';
+    toolboxLayers = layers;
+
+    selectedLayer: Layer;
 
     constructor(private selArchService: SelectedArchitectureService) {
-        if (selArchService.architecture) {
-            this.nodes = [];
-            for (const node of selArchService.architecture.nodes) {
-                this.nodes.push({
-                    id: node.id,
-                    label: node.label,
-                    selected: false,
-                    color: this._nodeColor
-                });
-            }
-            this.links = selArchService.architecture.links;
-        }
+        this._graph = new Graph();
+        this._layerData = [];
+        this.selectedLayer = undefined;
     }
 
     ngOnInit() {
+        if (this.selArchService.currentNodes) {
+            this._readGraph(this.selArchService.currentNodes,
+                            this.selArchService.currentLinks);
+        } else if (this.selArchService.architecture) {
+            this._readGraph(this.selArchService.architecture.nodes,
+                            this.selArchService.architecture.links);
+        }
+    }
+
+    private _readGraph(nodes, links): void {
+        nodes.forEach(
+            node => { this._graph.addNode(Number(node.id)); }
+        );
+        links.forEach(
+            link => { this._graph.addLink(link.source, link.target); }
+        );
+
+        // this._layerData = nodes.map(this._createLayerFromDict);
+        this._setGraphData();
+    }
+
+    private _setGraphData(): void {
+        this.nodes = this._graph.nodes.map(
+            n => {
+                const layer = this._layerData[n];
+                const color = layers.find(
+                    (l) => (l.id === 'fc')
+                ).color;
+                return {
+                    id: String(layer.id),
+                    label: layer.label,
+                    selected: false,
+                    color: color
+                };
+            }
+        );
+        this.links = this._graph.links;
+        this.updateView();
     }
 
     onNodeSelect(data) {
@@ -82,6 +105,8 @@ export class VisArchComponent implements OnInit {
             this.handleSelectInConnectingMode(data);
         } else if (this.deletingMode) {
             this.handleSelectInDeletingMode(data);
+        } else {
+            this.selectedLayer = this._layerData[Number(data.id)] as FullyConnectedLayer;
         }
     }
 
@@ -139,29 +164,6 @@ export class VisArchComponent implements OnInit {
         this.selArchService.currentLinks = this.links;
     }
 
-    addNewNode(layer: ToolboxLayer): void {
-        // select new id and label
-        // temporary solution
-        let label = layer.label;
-        let id = 1;
-        while (!this.nodes.every((node) => node.label !== label)) {
-            label = layer.label + ' ' + id;
-            id += 1;
-        }
-        id = 1;
-        while (!this.nodes.every((node) => node.id !== String(id))) {
-            id += 1;
-        }
-
-        this.nodes.push({
-            id: String(id),
-            label: label,
-            selected: false,
-            color: layer.color
-        });
-        this.updateView();
-    }
-
     toggleLinking(): void {
         this.deletingMode = false;
     }
@@ -174,10 +176,28 @@ export class VisArchComponent implements OnInit {
         });
     }
 
-    onLayerDrop(event: { value: ToolboxLayer}): void {
+    onLayerDrop(event: {value: ToolboxLayer}): void {
         console.log(event);
         const layer: ToolboxLayer = event.value;
-        this.addNewNode(layer);
+
+        // find smallest free id
+        let id = this._graph.nodes.reduce((p, n) => (n > p ? n : p), 0);
+        id += 1;
+        this._graph.addNode(id);
+
+        switch (layer.id) {
+            case 'fc':
+                this._layerData[id] = new FullyConnectedLayer(id, layer.shortcut, [1], [1]);
+                break;
+        }
+
+        this.nodes.push({
+            id: String(id),
+            label: layer.shortcut,
+            selected: false,
+            color: layer.color
+        });
+        this.updateView();
     }
 
     onLinkSelect(data): void {
@@ -188,5 +208,10 @@ export class VisArchComponent implements OnInit {
             );
             this.updateView();
         }
+    }
+
+    update(id) {
+        console.log('update ' + id);
+        this._setGraphData();
     }
 }

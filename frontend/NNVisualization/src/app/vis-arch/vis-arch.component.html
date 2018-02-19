@@ -1,3 +1,6 @@
+<ng-container *ngIf="selectedLayer">
+    <app-layer-fc [layer]="selectedLayer" (changed)="update($event)"></app-layer-fc>
+</ng-container>
 <div>
     <mat-checkbox class="setting" [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
     <mat-checkbox class="setting" [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
@@ -53,6 +56,6 @@
 
 <mat-divider></mat-divider>
 <div ngxDroppable [copy]="true" class="toolbox">
-    <div *ngFor="let layer of layers" ngxDraggable="graph"
+    <div *ngFor="let layer of toolboxLayers" ngxDraggable="graph"
     [model]="layer" class="layer" [style.background-color]="layer.color">{{layer.label}}</div>
 </div>
