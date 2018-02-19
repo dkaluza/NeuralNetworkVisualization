@@ -15,7 +15,7 @@ export class VisualizeService implements OnInit {
     }
 
     getImages(algorithm: string, id: number) {
-        this.restangular.one('visualize/' + algorithm + '/' + id)
+        this.restangular.all('visualize').one(algorithm, id)
             .get().subscribe(response => {
                 console.log(response['images']);
                 this.image1.imageName = response['images'][0]['imageName'];
