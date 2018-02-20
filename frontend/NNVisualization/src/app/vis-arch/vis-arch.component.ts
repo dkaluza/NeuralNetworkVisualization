@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnChanges,
+         ViewEncapsulation, Input, Output, EventEmitter } from '@angular/core';
 import * as shape from 'd3-shape';
 
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
-import { ArchNode } from '../selected-architecture/architecture';
-import { ToolboxLayer, layers } from './toolbox-layers';
+import { ArchNode, ArchLink } from '../selected-architecture/architecture';
+import { ToolboxLayer, layerTemplates } from './toolbox-layers';
 import { Graph } from './graph';
 
 import { Layer, Activation } from './layers/layer/layer';
@@ -29,7 +30,13 @@ interface GraphLink {
     styleUrls: ['./vis-arch.component.css'],
     templateUrl: './vis-arch.component.html'
 })
-export class VisArchComponent implements OnInit {
+export class VisArchComponent implements OnInit, OnChanges {
+    // @Input() layers: { [id: number]: Layer };
+    @Input() layers: Map<number, Layer>;
+    @Input() connections: ArchLink[];
+
+    @Output() modified = new EventEmitter();
+    @Output() nodeSelected = new EventEmitter();
 
     // options
     orientation = 'LR'; // LR, RL, TB, BT
@@ -48,7 +55,7 @@ export class VisArchComponent implements OnInit {
     private _graph: Graph;
     // stores information abouts layers
     // private _layerData: { [id: number]: Layer };
-    private _layerData: Layer[];
+    // private _layerData: Layer[];
 
     // used for architecture manipulations
     connectingMode = false;
@@ -57,73 +64,27 @@ export class VisArchComponent implements OnInit {
     private _selectedTarget = undefined;
 
     // used for drag 'n' drop
-    toolboxLayers = layers;
-
-    // used for modifing layers
-    selectedLayer: Layer;
+    toolboxLayers = layerTemplates;
 
     constructor(private selArchService: SelectedArchitectureService) {
         this._graph = new Graph();
-        this._layerData = [];
-        this.selectedLayer = undefined;
+        // this._layerData = [];
     }
 
     ngOnInit() {
-        if (this.selArchService.currentNodes) {
-            this.importFromCurrentArch();
-        } else if (this.selArchService.architecture) {
-            const nodes: Layer[] = this.selArchService.architecture.nodes.map(
-                this._archNodeToLayer
-            );
-            this._readGraph(nodes, this.selArchService.architecture.links);
-        }
     }
 
-    private _archNodeToLayer(node: ArchNode): Layer {
-        // Adam: ugly, but what you gonna do ¯\_(ツ)_/¯
-        switch (node.layerType) {
-            case 'fc':
-                return new FullyConnectedLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape,
-                    node.params.outputShape,
-                    node.params.activation
-                );
-            case 'conv':
-                return new ConvLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape, node.params.outputShape,
-                    node.params.filterShape, node.params.strides,
-                    node.params.padding, node.params.activation
-                );
-            case 'input':
-                return new InputLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape, node.params.outputShape
-                );
-            default:
-                console.error('Unknown layerType: ' + node.layerType);
-                return undefined;
-        }
-    }
+    ngOnChanges(changes) {
+        console.log('OnChanges');
 
-    importFromCurrentArch(): void {
-        this._readGraph(this.selArchService.currentNodes,
-                        this.selArchService.currentLinks);
-    }
-
-    private _readGraph(nodes: Layer[], links: GraphLink[]): void {
         this._graph = new Graph();
-        nodes.forEach(
-            node => { this._graph.addNode(node.id); }
+        this.layers.forEach(
+            (node, id) => { this._graph.addNode(id); }
         );
-        links.forEach(
+        this.connections.forEach(
             link => { this._graph.addLink(Number(link.source),
                                           Number(link.target)); }
         );
-
-        this._layerData = [];
-        nodes.forEach(node => { this._layerData[node.id] = node; });
 
         this._setGraphData();
     }
@@ -131,8 +92,8 @@ export class VisArchComponent implements OnInit {
     private _setGraphData(): void {
         this.nodes = this._graph.nodes.map(
             n => {
-                const layer = this._layerData[n];
-                const color = layers.find(
+                const layer = this.layers.get(n);
+                const color = layerTemplates.find(
                     l => (l.id === layer.layerType)
                 ).color;
                 return {
@@ -152,7 +113,8 @@ export class VisArchComponent implements OnInit {
         } else if (this.deletingMode) {
             this._handleSelectInDeletionMode(data);
         } else {
-            this.selectedLayer = this._layerData[Number(data.id)];
+            // this.selectedLayer = this.layers.get(Number(data.id));
+            this.nodeSelected.emit(Number(data.id));
         }
     }
 
@@ -185,7 +147,7 @@ export class VisArchComponent implements OnInit {
         const id = Number(data.id);
 
         this._graph.removeNode(id);
-        delete this._layerData[id];
+        this.layers.delete(id);
 
         this._updateView();
     }
@@ -193,8 +155,7 @@ export class VisArchComponent implements OnInit {
     private _updateView(): void {
         this._setGraphData();
 
-        this.selArchService.currentNodes = this._layerData;
-        this.selArchService.currentLinks = this.links;
+        this.modified.emit({nodes: this.layers, links: this.links});
     }
 
     toggleLinking(): void {
@@ -220,13 +181,13 @@ export class VisArchComponent implements OnInit {
 
         switch (layer.id) {
             case 'fc':
-                this._layerData[id] = new FullyConnectedLayer(id, layer.shortcut);
+                this.layers.set(id, new FullyConnectedLayer(id, layer.shortcut));
                 break;
             case 'conv':
-                this._layerData[id] = new ConvLayer(id, layer.shortcut);
+                this.layers.set(id, new ConvLayer(id, layer.shortcut));
                 break;
             case 'input':
-                this._layerData[id] = new InputLayer(id, layer.shortcut);
+                this.layers.set(id, new InputLayer(id, layer.shortcut));
                 break;
         }
 

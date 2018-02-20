@@ -1,9 +1,16 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
 import { MatDialog, MatDialogRef } from '@angular/material';
 
 import { VisArchComponent } from '../vis-arch/vis-arch.component';
+
+import { ArchNode, ArchLink } from '../selected-architecture/architecture';
+
+import { Layer } from '../vis-arch/layers/layer/layer';
+import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
+import { ConvLayer } from '../vis-arch/layers/conv/conv';
+import { InputLayer } from '../vis-arch/layers/input/input';
 
 @Component({
     selector: 'app-build',
@@ -12,11 +19,14 @@ import { VisArchComponent } from '../vis-arch/vis-arch.component';
 })
 export class BuildComponent implements OnInit {
 
-    @ViewChild(VisArchComponent)
-    private visArch: VisArchComponent;
-
     private _saveCurrentMessage: string;
     private _saveNewMessage: string;
+
+    nodes: Map<number, Layer>;
+    links: ArchLink[];
+
+    selectedLayer: Layer;
+    private selectedID: number;
 
     constructor(private selArchService: SelectedArchitectureService,
                 private restangular: Restangular,
@@ -26,12 +36,82 @@ export class BuildComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (this.selArchService.currentNodes) {
+            this.nodes = this.selArchService.currentNodes;
+            this.links = this.selArchService.currentLinks;
+        } else if (this.selArchService.architecture) {
+            this.nodes = new Map;
+            this.selArchService.architecture.nodes.forEach(
+                node => {
+                    return this.nodes.set(
+                                Number(node.id),
+                                this._archNodeToLayer(node));
+                }
+            );
+            this.links = this.selArchService.architecture.links;
+        } else {
+            this.nodes = new Map;
+            this.links = [];
+        }
+    }
+
+    private _archNodeToLayer(node: ArchNode): Layer {
+        // Adam: ugly, but what you gonna do ¯\_(ツ)_/¯
+        switch (node.layerType) {
+            case 'fc':
+                return new FullyConnectedLayer(
+                    Number(node.id), node.label,
+                    node.params.inputShape,
+                    node.params.outputShape,
+                    node.params.activation
+                );
+            case 'conv':
+                return new ConvLayer(
+                    Number(node.id), node.label,
+                    node.params.inputShape, node.params.outputShape,
+                    node.params.filterShape, node.params.strides,
+                    node.params.padding, node.params.activation
+                );
+            case 'input':
+                return new InputLayer(
+                    Number(node.id), node.label,
+                    node.params.inputShape, node.params.outputShape
+                );
+            default:
+                console.log('Unknown layerType: ' + node.layerType);
+                return undefined;
+        }
+    }
+
+    onGraphModified(data): void {
+        console.log('onGraphModified');
+        console.log(data.nodes);
+        console.log(data.links);
+
+        this.selArchService.currentNodes = data.nodes;
+        this.selArchService.currentLinks = data.links;
+    }
+
+    onNodeSelected(id): void {
+        this.selectedLayer = this.nodes.get(id);
+        this.selectedID = id;
+    }
+
+    onNodeUpdate(): void {
+        // Adam: hack :(
+        // needed so ngOnChanges will run
+        const hack = new Map;
+        this.nodes.forEach(
+            (n, id) => { hack.set(id, n); }
+        );
+        this.nodes = hack;
     }
 
     clearCurrentArch(): void {
-        this.selArchService.currentNodes = [];
+        this.selArchService.currentNodes.clear();
         this.selArchService.currentLinks = [];
-        this.visArch.importFromCurrentArch();
+        this.nodes = this.selArchService.currentNodes;
+        this.links = this.selArchService.currentLinks;
     }
 
     saveCurrentArch() {

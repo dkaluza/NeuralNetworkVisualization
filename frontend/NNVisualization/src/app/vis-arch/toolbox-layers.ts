@@ -5,7 +5,7 @@ export interface ToolboxLayer {
     color: string;
 }
 
-export const layers: ToolboxLayer[] = [
+export const layerTemplates: ToolboxLayer[] = [
     {
         id: 'conv',
         label: 'Convolution',

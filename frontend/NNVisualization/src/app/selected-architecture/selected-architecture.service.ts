@@ -10,7 +10,7 @@ export class SelectedArchitectureService {
     private _architecture: Architecture;
     private _model: Model;
 
-    private _currentNodes: Layer[];
+    private _currentNodes: Map<number, Layer>;
     private _currentLinks: ArchLink[];
 
     constructor() { }
@@ -35,11 +35,11 @@ export class SelectedArchitectureService {
         this._model = newModel;
     }
 
-    get currentNodes(): Layer[] {
+    get currentNodes(): Map<number, Layer> {
         return this._currentNodes;
     }
 
-    set currentNodes(newNodes: Layer[]) {
+    set currentNodes(newNodes: Map<number, Layer>) {
         this._currentNodes = newNodes;
     }
 
@@ -52,8 +52,10 @@ export class SelectedArchitectureService {
     }
 
     currentNodesToDict(): ArchNode[] {
-        return this._currentNodes.map(
-            node => (node.toDict())
+        const ret = [];
+        this._currentNodes.forEach(
+            (node) => { ret.push(node.toDict()); }
         );
+        return ret;
     }
 }

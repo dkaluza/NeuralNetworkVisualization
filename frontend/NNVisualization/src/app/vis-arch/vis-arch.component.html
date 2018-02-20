@@ -1,27 +1,9 @@
-<ng-container *ngIf="selectedLayer">
-    <div [ngSwitch]="selectedLayer.layerType">
-        <ng-template ngSwitchCase="fc">
-            <app-layer-fc [layer]="selectedLayer" (changed)="update()"></app-layer-fc>
-        </ng-template>
-        <ng-template ngSwitchCase="conv">
-            <app-layer-conv [layer]="selectedLayer" (changed)="update()"></app-layer-conv>
-        </ng-template>
-        <ng-template ngSwitchCase="input">
-            <app-layer-input [layer]="selectedLayer" (changed)="update()"></app-layer-input>
-        </ng-template>
-        <ng-template ngSwitchDefault>
-            <h4>Wrong type of layer :( {{ selectedLayer.layerType }}</h4>
-        </ng-template>
-    </div>
-</ng-container>
-
 <div>
     <mat-checkbox class="setting" [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
     <mat-checkbox class="setting" [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
 </div>
 <div class="graph"  ngxDroppable="graph" (drop)="onLayerDrop($event)" [model] = []>
         <ngx-graph
-         [view]="view"
          [autoZoom]="true"
          [legend]="false"
          [links]="links"
