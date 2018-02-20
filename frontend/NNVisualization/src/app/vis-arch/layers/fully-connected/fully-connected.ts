@@ -4,9 +4,9 @@ export class FullyConnectedLayer extends Layer {
     _activation: Activation;
 
     constructor(id: number, label: string,
-                input: number[], output: number[],
+                input = [1], output: number[] = [1],
                 activation = Activation.Relu) {
-        super(id, label, input, output);
+        super(id, label, 'fc', input, output);
 
         this._activation = activation;
     }
@@ -19,7 +19,8 @@ export class FullyConnectedLayer extends Layer {
         this._activation = activation;
     }
 
-    get activationString(): string {
-        return Activation[this._activation];
+    addAttributes(dict) {
+        dict['activation'] = this._activation;
+        return dict;
     }
 }

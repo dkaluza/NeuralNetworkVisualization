@@ -1,0 +1,13 @@
+<div>
+    <span>ID: {{ layer.id }}</span>
+    <mat-form-field>
+        <input matInput placeholder="Label"
+            [value]="layer.label"
+            (input)="onChangeLabel($event.target.value)">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput placeholder="Shape"
+                [value]="layer.outputShape"
+                (input)="onChangeShape(2, $event.target.value)">
+    </mat-form-field>
+</div>

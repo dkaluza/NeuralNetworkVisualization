@@ -1,18 +1,24 @@
 <div>
-    <h4>ID: {{ layer.id }}</h4>
+    <span>ID: {{ layer.id }}</span>
     <mat-form-field>
         <input matInput placeholder="Label"
             [value]="layer.label"
-            (input)="change($event.target.value)">
+            (input)="onChangeLabel($event.target.value)">
     </mat-form-field>
-    <h4>Input: {{ layer.inputShape }}</h4>
-    <h4>Output: {{ layer.outputShape }}</h4>
-    <h4>Activation: {{ layer.activationString }}</h4>
-
+    <mat-form-field>
+        <input matInput placeholder="Input shape"
+                [value]="layer.inputShape"
+                (input)="onChangeShape(1, $event.target.value)">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput placeholder="Output shape"
+                [value]="layer.outputShape"
+                (input)="onChangeShape(2, $event.target.value)">
+    </mat-form-field>
     <mat-form-field>
         <mat-select placeholder="Activation" [(value)]="layer.activation">
-            <mat-option *ngFor="let act of activations" [value]="act.value">
-                {{ act.viewValue }}
+            <mat-option *ngFor="let a of activations" [value]="a.value">
+                {{ a.viewValue }}
             </mat-option>
         </mat-select>
     </mat-form-field>

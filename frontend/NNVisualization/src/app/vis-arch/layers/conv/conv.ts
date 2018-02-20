@@ -11,10 +11,10 @@ export class ConvLayer extends Layer {
     private _padding: Padding;
     private _activation: Activation;
 
-    constructor(id: number, label: string, input: number[],
-                output: number[], filter: number[], strides: number[],
+    constructor(id: number, label: string, input = [1],
+                output = [1], filter = [3, 3], strides = [1],
                 padding = Padding.Same, activation = Activation.Relu) {
-        super(id, label, input, output);
+        super(id, label, 'conv', input, output);
 
         this._filterShape = filter;
         this._strides = strides;
@@ -54,4 +54,11 @@ export class ConvLayer extends Layer {
         this._activation = activation;
     }
 
+    addAttributes(dict) {
+        dict['filterShape'] = this._filterShape;
+        dict['strides'] = this._strides;
+        dict['padding'] = this._padding;
+        dict['activation'] = this._activation;
+        return dict;
+    }
 }

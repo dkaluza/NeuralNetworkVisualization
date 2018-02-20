@@ -1,14 +1,16 @@
-export class Layer {
+export abstract class Layer {
     private _id: number;
     private _label: string;
+    private _layerType: string;
 
     private _inputShape: number[];
     private _outputShape: number[];
 
-    constructor(id: number, label: string,
+    constructor(id: number, label: string, layerType: string,
                 input: number[], output: number[]) {
         this._id = id;
         this._label = label;
+        this._layerType = layerType;
         this._inputShape = input;
         this._outputShape = output;
     }
@@ -18,6 +20,10 @@ export class Layer {
 
     get id(): number {
         return this._id;
+    }
+
+    get layerType(): string {
+        return this._layerType;
     }
 
     get label(): string {
@@ -42,6 +48,22 @@ export class Layer {
 
     set outputShape(output: number[]) {
         this._outputShape = output;
+    }
+
+    abstract addAttributes(dict);
+
+    toDict() {
+        const dict = {
+            id: String(this._id),
+            label: this._label,
+            layerType: this._layerType,
+            params: {
+                inputShape: this._inputShape,
+                outputShape: this._outputShape
+            }
+        };
+        dict.params = this.addAttributes(dict.params);
+        return dict;
     }
 }
 
