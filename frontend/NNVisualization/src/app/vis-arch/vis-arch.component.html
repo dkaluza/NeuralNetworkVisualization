@@ -1,6 +1,20 @@
 <ng-container *ngIf="selectedLayer">
-    <app-layer-fc [layer]="selectedLayer" (changed)="update($event)"></app-layer-fc>
+    <div [ngSwitch]="selectedLayer.layerType">
+        <ng-template ngSwitchCase="fc">
+            <app-layer-fc [layer]="selectedLayer" (changed)="update()"></app-layer-fc>
+        </ng-template>
+        <ng-template ngSwitchCase="conv">
+            <app-layer-conv [layer]="selectedLayer" (changed)="update()"></app-layer-conv>
+        </ng-template>
+        <ng-template ngSwitchCase="input">
+            <app-layer-input [layer]="selectedLayer" (changed)="update()"></app-layer-input>
+        </ng-template>
+        <ng-template ngSwitchDefault>
+            <h4>Wrong type of layer :( {{ selectedLayer.layerType }}</h4>
+        </ng-template>
+    </div>
 </ng-container>
+
 <div>
     <mat-checkbox class="setting" [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
     <mat-checkbox class="setting" [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
@@ -11,7 +25,6 @@
          [autoZoom]="true"
          [legend]="false"
          [links]="links"
-         (legendLabelClick)="onLegendLabelClick($event)"
          [nodes]="nodes"
          [orientation]="orientation"
          [curve]="curve"

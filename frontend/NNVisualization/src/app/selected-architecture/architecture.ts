@@ -3,6 +3,8 @@ import { Layer } from './layer';
 export interface ArchNode {
     id: string;
     label: string;
+    layerType: string;
+    params: any;
 }
 
 export interface ArchLink {

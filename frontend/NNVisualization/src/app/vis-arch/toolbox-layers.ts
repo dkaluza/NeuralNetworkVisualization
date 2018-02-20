@@ -21,10 +21,10 @@ export const layers: ToolboxLayer[] = [
         label: 'Input',
         shortcut: 'input',
         color: '#994499'
-    }, {
-        id: 'concat',
-        label: 'Concatenation',
-        shortcut: 'concat',
-        color: '#528233'
-    }
+    }// , {
+        // id: 'concat',
+        // label: 'Concatenation',
+        // shortcut: 'concat',
+        // color: '#528233'
+    // }
 ];

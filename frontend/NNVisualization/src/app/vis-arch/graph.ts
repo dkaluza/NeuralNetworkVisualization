@@ -27,7 +27,7 @@ export class Graph {
         }
 
         this._nodes = this._nodes.filter(n => (n !== id));
-        this._links.splice(id, 1);
+        delete this._links[id];
         this._links = this._links.map(
             arr => (arr.filter(n => (n !== id)))
         );

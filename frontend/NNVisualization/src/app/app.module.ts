@@ -13,8 +13,11 @@ import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
 import { VisArchComponent } from './vis-arch/vis-arch.component';
+
 import { LayerComponent } from './vis-arch/layers/layer/layer.component';
 import { FullyConnectedComponent } from './vis-arch/layers/fully-connected/fully-connected.component';
+import { ConvComponent } from './vis-arch/layers/conv/conv.component';
+import { InputComponent } from './vis-arch/layers/input/input.component';
 
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -137,7 +140,9 @@ export class MaterialImportsModule {}
         VisualizeComponent,
         VisArchComponent,
         LayerComponent,
-        FullyConnectedComponent
+        FullyConnectedComponent,
+        ConvComponent,
+        InputComponent
     ],
     imports: [
         BrowserModule,
