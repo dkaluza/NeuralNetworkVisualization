@@ -46,10 +46,9 @@ class Model(db.Model, CRUD):
     weights_path = db.Column(db.Text(256), nullable=False)
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
                         nullable=False)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
-                           nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
-    def __init__(self, name, description, weights_path, arch_id, dataset_id):
+    def __init__(self, name, description, weights_path, arch_id, dataset_id=None):
         self.name = name
         self.description = description
         self.weights_path = weights_path
