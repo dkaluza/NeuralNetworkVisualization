@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
 import { MatDialog, MatDialogRef } from '@angular/material';
+
+import { VisArchComponent } from '../vis-arch/vis-arch.component';
 
 @Component({
     selector: 'app-build',
@@ -10,10 +12,13 @@ import { MatDialog, MatDialogRef } from '@angular/material';
 })
 export class BuildComponent implements OnInit {
 
+    @ViewChild(VisArchComponent)
+    private visArch: VisArchComponent;
+
     private _saveCurrentMessage: string;
     private _saveNewMessage: string;
 
-    constructor(private selectedArchitectureService: SelectedArchitectureService,
+    constructor(private selArchService: SelectedArchitectureService,
                 private restangular: Restangular,
                 public dialog: MatDialog) {
         this._saveCurrentMessage = 'Save';
@@ -23,14 +28,20 @@ export class BuildComponent implements OnInit {
     ngOnInit() {
     }
 
+    clearCurrentArch(): void {
+        this.selArchService.currentNodes = [];
+        this.selArchService.currentLinks = [];
+        this.visArch.importFromCurrentArch();
+    }
+
     saveCurrentArch() {
-        if (this.selectedArchitectureService.architecture) {
-            const arch = this.selectedArchitectureService.architecture;
+        if (this.selArchService.architecture) {
+            const arch = this.selArchService.architecture;
 
             const data = {
                 graph: {
-                    nodes: this.selectedArchitectureService.currentNodes,
-                    links: this.selectedArchitectureService.currentLinks
+                    nodes: this.selArchService.currentNodesToDict(),
+                    links: this.selArchService.currentLinks
                 }
             };
             this.restangular.all('arch').all(arch.id)
@@ -65,8 +76,8 @@ export class BuildComponent implements OnInit {
             name: name,
             description: desc,
             graph: {
-                nodes: this.selectedArchitectureService.currentNodes,
-                links: this.selectedArchitectureService.currentLinks
+                nodes: this.selArchService.currentNodesToDict(),
+                links: this.selArchService.currentLinks
             }
         };
         this.restangular.all('arch')
