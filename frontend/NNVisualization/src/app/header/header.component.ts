@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { LogInDialogComponent } from "./log-in-dialog/log-in-dialog.component"
-
+import { AuthenticationService } from "../authentication/authentication.service"
 
 @Component({
     selector: 'app-header',
@@ -10,12 +10,10 @@ import { LogInDialogComponent } from "./log-in-dialog/log-in-dialog.component"
 })
 export class HeaderComponent implements OnInit {
 
-    public logged: Boolean = false;
-
     @ViewChild('toolbar')
     private toolbar: ElementRef;
 
-    constructor(private dialog: MatDialog) { }
+    constructor(private dialog: MatDialog, public auth: AuthenticationService) { }
 
     ngOnInit() {
     }
@@ -24,20 +22,20 @@ export class HeaderComponent implements OnInit {
         let username: string;
         let password: string;
 
-        console.log(this.toolbar);
-
         let dialogRef = this.dialog.open(LogInDialogComponent, {
             width: '250px',
             position: { right: "0%", top: this.toolbar.nativeElement.offsetHeight + "px" },
         });
 
-        dialogRef.afterClosed().subscribe(result => {
-            console.log(result);
-            this.logged = true;
-        });
+        dialogRef.afterClosed().subscribe(
+            (result: { username: string, password: string }) => {
+                if (result && !this.auth.logIn(result.username, result.password)) {
+                    // TODO login failed popup
+                }
+            });
     }
 
     public logOut() {
-        this.logged = false;
+        this.auth.logOut();
     }
 }

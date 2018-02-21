@@ -6,7 +6,7 @@
             </a>
         </span>
         <span class="fill-space"></span>
-        <div *ngIf="logged; then options; else login"></div>
+        <div *ngIf="auth.isAuthenticated(); then options; else login"></div>
 
         <ng-template #options>
             <span>

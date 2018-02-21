@@ -61,15 +61,20 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
 import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
+import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service'
+import { AuthenticationService } from './authentication/authentication.service'
+import { JwtHelper } from 'angular2-jwt'
+import { UnauthorizedComponent } from './unauthorized/unauthorized.component'
 
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full' },
-    { path: 'manage', component: ManageComponent },
-    { path: 'build', component: BuildComponent },
-    { path: 'train', component: TrainComponent },
-    { path: 'visualize', component: VisualizeComponent },
-    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent },
+    { path: 'manage', component: ManageComponent, canActivate: [AuthGuard] },
+    { path: 'build', component: BuildComponent, canActivate: [AuthGuard] },
+    { path: 'train', component: TrainComponent, canActivate: [AuthGuard] },
+    { path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'unauthorized', component: UnauthorizedComponent },
 ];
 
 // Function for setting the default restangular configuration
@@ -148,7 +153,8 @@ export class MaterialImportsModule { }
         InputImageComponent,
         OutputImageComponent,
         VisArchComponent,
-        LogInDialogComponent
+        LogInDialogComponent,
+        UnauthorizedComponent
     ],
     entryComponents: [
         LogInDialogComponent
@@ -166,7 +172,8 @@ export class MaterialImportsModule { }
         NgxGraphModule,
         NgxDnDModule
     ],
-    providers: [SelectedArchitectureService],
+    providers: [SelectedArchitectureService, AuthenticationService,
+        AuthGuard, JwtHelper],
     bootstrap: [AppComponent]
 })
 export class AppModule { }
