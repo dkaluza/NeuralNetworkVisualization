@@ -75,7 +75,22 @@ const appRoutes: Routes = [
 export function RestangularConfigFactory (RestangularProvider) {
     RestangularProvider.setBaseUrl('/api');
     RestangularProvider.setDefaultHeaders({});
+
+    // HACK! :(
+    // necessary so restangular's subscribe can work properly
+    RestangularProvider.addResponseInterceptor((data, operation, what, url, response) => {
+        switch (operation) {
+            case 'post':
+            case 'put':
+            case 'remove':
+                if (!data) { return {}; }
+                break;
+            default:
+                return data;
+        }
+    });
 }
+
 
 @NgModule({
     exports: [

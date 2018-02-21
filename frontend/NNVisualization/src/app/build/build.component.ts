@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service'
+import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
-import { MatDialog, MatDialogRef } from  '@angular/material';
+import { MatDialog, MatDialogRef } from '@angular/material';
 
 @Component({
     selector: 'app-build',
@@ -25,10 +25,19 @@ export class BuildComponent implements OnInit {
 
     saveCurrentArch() {
         if (this.selectedArchitectureService.architecture) {
-            let currId = this.selectedArchitectureService.architecture.id;
-            let currName = this.selectedArchitectureService.architecture.name;
-            let currDesc = this.selectedArchitectureService.architecture.description;
-            this.saveArch(currName, currDesc, currId);
+            const arch = this.selectedArchitectureService.architecture;
+
+            const data = {
+                graph: {
+                    nodes: this.selectedArchitectureService.currentNodes,
+                    links: this.selectedArchitectureService.currentLinks
+                }
+            };
+            this.restangular.all('arch').all(arch.id)
+                .post(data).subscribe(
+                    (nArch) => {},
+                    () => { alert('Error :('); }
+                );
         }
     }
 
@@ -47,28 +56,23 @@ export class BuildComponent implements OnInit {
         //         }, this._msgTimeout)
         //     });
 
-        let name = prompt("Enter a name:");
-        let desc = prompt("Enter a short description:");
+        const name = prompt('Enter a name:');
+        if (name === null || name === '') { return; }
+        const desc = prompt('Enter a short description:');
+        if (desc === null) { return; }
 
-        if (desc != null && name != null)
-            this.saveArch(name, desc, undefined);
-    }
-
-    private saveArch(name: string, description: string, id?: number) {
-        // TODO: passing the selected arch somehow
-        let postData = {
-            'name': name,
-            'description': description
+        const data = {
+            name: name,
+            description: desc,
+            graph: {
+                nodes: this.selectedArchitectureService.currentNodes,
+                links: this.selectedArchitectureService.currentLinks
+            }
         };
-
-        if (id) postData['id'] = id;
-
-        this.restangular
-            .one('add')
-            .post(postData)
-            .subscribe(
-                () => { alert('Save successful!') },
-                () => { alert('Something fucked up while saving') }
+        this.restangular.all('upload_arch')
+            .post(data).subscribe(
+                () => { alert('Save successful!'); },
+                () => { alert('Something fucked up while saving'); }
             );
     }
 

@@ -42,29 +42,27 @@ export class VisArchComponent implements OnInit {
     links: GraphLink[] = [];
 
     // toolbox data
-    layers: ToolboxLayer[] = [{
-        label: "Convolution",
-        color: "#6666aa"
-    },
-    {
-        label: "Fully Connected",
-        color: "#00FF00"
-    }]
+    layers: ToolboxLayer[] = [
+        {
+            label: 'Convolution',
+            color: '#6666aa'
+        }, {
+            label: 'Fully Connected',
+            color: '#00FF00'
+        }
+    ];
 
     connectingMode = false;
     deletingMode = false;
     private _selectedSource = undefined;
     private _selectedTarget = undefined;
 
-    // dummy counter for new nodes
-    private _idCounter = 10;
-
     private _nodeColor = '#6666aa';
 
     constructor(private selArchService: SelectedArchitectureService) {
         if (selArchService.architecture) {
             this.nodes = [];
-            for (let node of selArchService.architecture.nodes) {
+            for (const node of selArchService.architecture.nodes) {
                 this.nodes.push({
                     id: node.id,
                     label: node.label,
@@ -134,16 +132,33 @@ export class VisArchComponent implements OnInit {
         // makes changes visible on screen
         this.nodes = [...this.nodes];
         this.links = [...this.links];
+
+        this.selArchService.currentNodes = this.nodes.map(
+            (node) =>  ({id: node.id, label: node.label})
+        );
+        this.selArchService.currentLinks = this.links;
     }
 
     addNewNode(layer: ToolboxLayer): void {
+        // select new id and label
+        // temporary solution
+        let label = layer.label;
+        let id = 1;
+        while (!this.nodes.every((node) => node.label !== label)) {
+            label = layer.label + ' ' + id;
+            id += 1;
+        }
+        id = 1;
+        while (!this.nodes.every((node) => node.id !== String(id))) {
+            id += 1;
+        }
+
         this.nodes.push({
-            id: String(this._idCounter),
-            label: String(this._idCounter),
+            id: String(id),
+            label: label,
             selected: false,
             color: layer.color
         });
-        this._idCounter += 1;
         this.updateView();
     }
 
@@ -161,7 +176,7 @@ export class VisArchComponent implements OnInit {
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
         console.log(event);
-        let layer: ToolboxLayer = event.value;
+        const layer: ToolboxLayer = event.value;
         this.addNewNode(layer);
     }
 

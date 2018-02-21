@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Architecture } from './architecture';
+import { Architecture, ArchNode, ArchLink } from './architecture';
 import { Model } from './model';
 
 
@@ -8,6 +8,9 @@ export class SelectedArchitectureService {
 
     private _architecture: Architecture;
     private _model: Model;
+
+    private _currentNodes: ArchNode[];
+    private _currentLinks: ArchLink[];
 
     constructor() { }
 
@@ -26,5 +29,21 @@ export class SelectedArchitectureService {
 
     set model(newModel: Model) {
         this._model = newModel;
+    }
+
+    get currentNodes(): ArchNode[] {
+        return this._currentNodes;
+    }
+
+    set currentNodes(newNodes: ArchNode[]) {
+        this._currentNodes = newNodes;
+    }
+
+    get currentLinks(): ArchLink[] {
+        return this._currentLinks;
+    }
+
+    set currentLinks(newLinks: ArchLink[]) {
+        this._currentLinks = newLinks;
     }
 }

@@ -6,15 +6,15 @@ db = SQLAlchemy()
 
 class CRUD():
 
-    def add(self, resource):
-        db.session.add(resource)
+    def add(self):
+        db.session.add(self)
         return db.session.commit()
 
     def update(self):
         return db.session.commit()
 
-    def delete(self, resource):
-        db.session.delete(resource)
+    def delete(self):
+        db.session.delete(self)
         return db.session.commit()
 
 
@@ -22,16 +22,16 @@ class Architecture(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.Text(256))
-    graph_path = db.Column(db.String(256), unique=True, nullable=False)
+    graph = db.Column(db.Text, nullable=False)
     last_used = db.Column(db.Date)
     last_modified = db.Column(db.Date)
     models = db.relationship('Model', backref='architecture', lazy=True)
 
-    def __init__(self, name, description, graph_path):
+    def __init__(self, name, description, graph):
         self.name = name
         self.description = description
 
-        self.graph_path = graph_path
+        self.graph = graph
         self.last_used = None
         self.last_modified = datetime.utcnow()
 
@@ -46,10 +46,9 @@ class Model(db.Model, CRUD):
     weights_path = db.Column(db.Text(256), nullable=False)
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
                         nullable=False)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
-                           nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
-    def __init__(self, name, description, weights_path, arch_id, dataset_id):
+    def __init__(self, name, description, weights_path, arch_id, dataset_id=None):
         self.name = name
         self.description = description
         self.weights_path = weights_path

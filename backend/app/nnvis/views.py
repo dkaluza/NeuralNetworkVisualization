@@ -1,178 +1,37 @@
-from flask import Blueprint, make_response
-from flask_restful import Api, Resource
-from app.nnvis.models import Architecture
+from flask import Blueprint
+from flask_restful import Api
 
-from app.nnvis.models import Image
+from app.nnvis.rests.architecture import (ArchitectureTask,
+                                          UploadNewArchitecture,
+                                          ListAllArchitectures)
+from app.nnvis.rests.model import (ModelTask,
+                                   UploadNewModel,
+                                   ListAllModels)
+from app.nnvis.rests.dataset import (DatasetTask,
+                                     UploadNewDataset,
+                                     ListAllDatasets)
+from app.nnvis.rests.visualize import (Inference, Visualize, Images)
+from app.nnvis.rests.train import (TrainNewModel, TrainModel)
 
 nnvis = Blueprint('nnvis', __name__)
 api = Api(nnvis)
 
+api.add_resource(ArchitectureTask, 'arch/<int:arch_id>')
+api.add_resource(UploadNewArchitecture, 'upload_arch')
+api.add_resource(ListAllArchitectures, 'list_archs')
 
-class Init(Resource):
-    def get(self):
-        html = '<!DOCTYPE html> <html> <body> Hello ZPP! \
-                {arch} </body> </html>'
-        if len(Architecture.query.all()) == 0:
-            html = html.format(arch='')
-        else:
-            html = html.format(arch=Architecture.query.all()[0].name)
-        headers = {'Content-Type': 'text/html'}
-        return make_response(html, 200, headers)
+api.add_resource(ModelTask, 'model/<int:model_id>')
+api.add_resource(UploadNewModel, 'upload_model/<int:arch_id>')
+api.add_resource(ListAllModels, 'list_models/<int:arch_id>')
 
+api.add_resource(DatasetTask, 'dataset/<int:dataset_id>')
+api.add_resource(UploadNewDataset, 'upload_dataset')
+api.add_resource(ListAllDatasets, 'list_datasets')
 
-class AddArchitecture(Resource):
-    def get(self):
-        arch = Architecture('Best arch', 'Great arch!!!',
-                            'this is path to arch')
-        arch.add(arch)
-        return 'udało się <3'
-
-
-class GetArchitecture(Resource):
-    def get(self, arch_id):
-        print(arch_id)
-        mockup = [
-            {
-                'name': 'simple convolutions',
-                'id': 1,
-                'architecture': {
-                    'nodes': [
-                            {
-                                'id': '1',
-                                'label': 'input'
-                            }, {
-                                'id': '2',
-                                'label': 'conv1'
-                            }, {
-                                'id': '3',
-                                'label': 'conv2'
-                            }, {
-                                'id': '4',
-                                'label': 'fc1'
-                            }, {
-                                'id': '5',
-                                'label': 'fc2'
-                            }
-                        ],
-                    'links': [
-                            {
-                                'source': '1',
-                                'target': '2'
-                            }, {
-                                'source': '2',
-                                'target': '3'
-                            }, {
-                                'source': '3',
-                                'target': '4'
-                            }, {
-                                'source': '4',
-                                'target': '5'
-                            },
-                        ],
-                    }
-            }, {
-                'name': 'stupid',
-                'id': 2,
-                'architecture': {
-                    'nodes': [
-                        {
-                            'id': '1',
-                            'label': 'input1'
-                        }, {
-                            'id': '3',
-                            'label': 'input2'
-                        }, {
-                            'id': '2',
-                            'label': 'output'
-                        }, {
-                            'id': '4',
-                            'label': 'alone'
-                        }
-                        ],
-                    'links': [
-                        {
-                            'source': '1',
-                            'target': '2',
-                        }, {
-                            'source': '3',
-                            'target': '2',
-                        }
-                        ]
-                    }
-            }
-        ]
-
-        for arch in mockup:
-            print(arch)
-            if arch['id'] == arch_id:
-                print('selected {}'.format(arch))
-                return arch
-        return {}
-
-
-class ListAllArchitectures(Resource):
-    def get(self):
-        # TODO: REST /listarchs
-        mockup = [
-            {
-                'name': 'simple convolutions',
-                'id': 1
-            }, {
-                'name': 'stupid',
-                'id': 2
-            }
-        ]
-
-        return mockup
-
-
-class ListAllModels(Resource):
-    def get(self, arch_id):
-        # TODO: REST /listmodels
-        mockup = [
-                {'name': 'model1', 'id': 1},
-                {'name': 'model2', 'id': 2},
-                {'name': 'model3', 'id': 3},
-                {'name': 'model4', 'id': 4},
-                {'name': 'model5', 'id': 5}
-                ]
-        return mockup
-
-
-# /visualize/<string:algorithm>/<string:image_id>
-class Images(Resource):
-    def get(self, algorithm, image_id):
-        print('in get images')
-        if algorithm == 'GBP':
-            EXAMPLE_LIST = [['img1.jpg', 56],
-                            ['img2.jpg', 243],
-                            ['img3.jpg', 72]]
-
-            img_name, class_number = EXAMPLE_LIST[int(image_id)]
-            img_proc_name, ext = img_name.rsplit('.')
-            img_proc_name += '_GBP.jpg'
-
-            # compute here
-
-            prefix = 'api/static/'
-            img_path = prefix + 'original/' + img_name
-            img_proc_path = prefix + 'GBP/' + img_proc_name
-
-            image1 = Image(img_name, img_path)
-            image2 = Image(img_proc_name, img_proc_path)
-            print('returning  images')
-            return {'images': [image1.json(),
-                               image2.json()]}
-
-        print('returning error')
-        return {'error message': algorithm + ' alogrithm is not handled yet'}, 202
-
-
-
-api.add_resource(Init, '')
-api.add_resource(AddArchitecture, 'add')
-api.add_resource(GetArchitecture, 'getarch/<int:arch_id>')
-api.add_resource(ListAllArchitectures, 'listarchs')
-api.add_resource(ListAllModels, 'listmodels/<string:arch_id>')
+api.add_resource(Inference, 'inference/<int:model_id>')
+api.add_resource(Visualize, 'Visualize/<int:model_id>/<int:alg_id>')
 api.add_resource(Images, 'visualize/<string:algorithm>/<string:image_id>')
 
+api.add_resource(TrainNewModel,
+                 'train_new_model/<int:arch_id>/<int:dataset_id>')
+api.add_resource(TrainModel, 'train_model/<int:model_id>/<int:dataset_id>')
