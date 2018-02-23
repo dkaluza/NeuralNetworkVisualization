@@ -34,7 +34,12 @@ export class ManageComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.restangular.all('listarchs')
+        this._updateArchitectureList();
+        this._updateModelList();
+    }
+
+    private _updateArchitectureList(): void {
+        this.restangular.all('list_archs')
             .getList().subscribe(_architectures => {
                 this._architectures = _architectures;
 
@@ -50,28 +55,13 @@ export class ManageComponent implements OnInit {
             });
     }
 
-    applyFilter(dataSource, filterValue: string) {
-        filterValue = filterValue.trim();
-        filterValue = filterValue.toLowerCase();
-        dataSource.filter = filterValue;
-    }
+    private _updateModelList(): void {
+        if (!this.selectedArchitectureService.architecture) {
+            return;
+        }
 
-    selectArchitecture(pos: number) {
-        pos -= 1;
-
-        this.restangular.one('getarch', this._architectures[pos].id)
-            .get().subscribe(arch => {
-                console.log(arch);
-                const newArch = new Architecture(
-                    arch.id, arch.name,
-                    arch.architecture.nodes,
-                    arch.architecture.links,
-                    'Placeholder description' // TODO add desc in backend
-                );
-                this.selectedArchitectureService.architecture = newArch;
-            });
-
-        this.restangular.one('listmodels', this._architectures[pos].id)
+        const arch_id = this.selectedArchitectureService.architecture.id;
+        this.restangular.one('list_models', arch_id)
             .getList().subscribe(_models => {
                 this._models = _models;
 
@@ -87,12 +77,130 @@ export class ManageComponent implements OnInit {
             });
     }
 
+    applyFilter(dataSource, filterValue: string) {
+        filterValue = filterValue.trim();
+        filterValue = filterValue.toLowerCase();
+        dataSource.filter = filterValue;
+    }
+
+    selectArchitecture(pos: number) {
+        pos -= 1;
+        this.restangular.one('arch', this._architectures[pos].id)
+            .get().subscribe(
+                (arch) => {
+                    const newArch = new Architecture(
+                        arch.id, arch.name,
+                        arch.description,
+                        arch.architecture.nodes,
+                        arch.architecture.links,
+                        arch.last_used,
+                        arch.last_modified
+                    );
+                    this.selectedArchitectureService.architecture = newArch;
+                    this._updateModelList();
+                },
+                () => { alert('Error :('); }
+            );
+    }
+
     selectModel(pos: number) {
         pos -= 1;
-        const newModel = new Model(
-            this._models[pos].id,
-            this._models[pos].name
+        this.restangular.one('model', this._models[pos].id)
+            .get().subscribe(
+                (model) => {
+                    const newModel = new Model(
+                        model.id,
+                        model.name,
+                        model.description
+                    );
+                    this.selectedArchitectureService.model = newModel;
+                },
+                () => { alert('Error :('); }
+            );
+    }
+
+    editCurrentArchitecture(): void {
+        const arch = this.selectedArchitectureService.architecture;
+        const newName = prompt('Provide name:');
+        const newDesc = prompt('Provide description:');
+
+        const data = {};
+        if (newName !== '') {
+            data['name'] = newName;
+        }
+        if (newDesc !== '') {
+            data['description'] = newDesc;
+        }
+
+        this.restangular.all('arch').all(arch.id)
+            .post(data)
+            .subscribe(
+                (nArch) => {
+                    const newArch = new Architecture(
+                        nArch.id, nArch.name,
+                        nArch.description,
+                        nArch.architecture.nodes,
+                        nArch.architecture.links,
+                        nArch.last_used,
+                        nArch.last_modified
+                    );
+                    this.selectedArchitectureService.architecture = newArch;
+                },
+                (e) => { alert(e); }
+            );
+        this._updateArchitectureList();
+    }
+
+    deleteCurrentArchitecture(): void {
+        const arch = this.selectedArchitectureService.architecture;
+        this.restangular.one('arch', arch.id)
+            .remove().subscribe(
+                () => {
+                    this._updateArchitectureList();
+                    this.selectedArchitectureService.architecture = undefined;
+                },
+                (e) => { alert(e); }
         );
-        this.selectedArchitectureService.model = newModel;
+    }
+
+    editCurrentModel(): void {
+        const model = this.selectedArchitectureService.model;
+        const newName = prompt('Provide name:');
+        const newDesc = prompt('Provide description:');
+
+        const data = {};
+        if (newName !== '') {
+            data['name'] = newName;
+        }
+        if (newDesc !== '') {
+            data['description'] = newDesc;
+        }
+
+        this.restangular.all('model').all(model.id)
+            .post(data)
+            .subscribe(
+                (nModel) => {
+                    const newModel = new Model(
+                        nModel.id,
+                        nModel.name,
+                        nModel.description
+                    );
+                    this.selectedArchitectureService.model = newModel;
+                },
+                (e) => { alert(e); }
+            );
+        this._updateModelList();
+    }
+
+    deleteCurrentModel(): void {
+        const model = this.selectedArchitectureService.model;
+        this.restangular.one('model', model.id)
+            .remove().subscribe(
+                () => {
+                    this._updateModelList();
+                    this.selectedArchitectureService.model = undefined;
+                },
+                (e) => { alert(e); }
+            );
     }
 }
