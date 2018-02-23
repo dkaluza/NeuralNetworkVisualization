@@ -7,9 +7,9 @@ import { VisArchComponent } from '../vis-arch/vis-arch.component';
 
 import { ArchNode, ArchLink } from '../selected-architecture/architecture';
 
-import { Layer } from '../vis-arch/layers/layer/layer';
+import { Layer, StrToActivation } from '../vis-arch/layers/layer/layer';
 import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
-import { ConvLayer } from '../vis-arch/layers/conv/conv';
+import { ConvLayer, StrToPadding } from '../vis-arch/layers/conv/conv';
 import { InputLayer } from '../vis-arch/layers/input/input';
 
 @Component({
@@ -63,14 +63,15 @@ export class BuildComponent implements OnInit {
                     Number(node.id), node.label,
                     node.params.inputShape,
                     node.params.outputShape,
-                    node.params.activation
+                    StrToActivation(node.params.activation)
                 );
             case 'conv':
                 return new ConvLayer(
                     Number(node.id), node.label,
                     node.params.inputShape, node.params.outputShape,
                     node.params.filterShape, node.params.strides,
-                    node.params.padding, node.params.activation
+                    StrToPadding(node.params.padding),
+                    StrToActivation(node.params.activation)
                 );
             case 'input':
                 return new InputLayer(

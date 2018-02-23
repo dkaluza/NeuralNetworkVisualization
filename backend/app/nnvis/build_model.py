@@ -2,9 +2,6 @@ import tensorflow as tf
 import tensorflow.contrib.layers as layers
 
 
-def str2list(s):
-    return [int(n) if int(n) > 0 else None for n in s.split(',')]
-
 def get_activation(node):
     if node['params']['activation'] == 'None':
         return None
@@ -26,14 +23,14 @@ def get_padding(node):
 
 
 def build_input_op(node, input_ops):
-    shape = str2list(node['params']['outputShape'])
+    shape = node['params']['outputShape']
     return tf.placeholder(tf.float32, shape=shape)
 
 
 def build_fc_op(node, input_ops):
     x = input_ops[0]
     x = layers.flatten(x)
-    shape = str2list(node['params']['outputShape'])
+    shape = node['params']['outputShape']
     return layers.fully_connected(x,
                 num_outputs=shape[-1],
                 activation_fn=get_activation(node))
@@ -41,9 +38,9 @@ def build_fc_op(node, input_ops):
 
 def build_conv_op(node, input_ops):
     x = input_ops[0]
-    shape = str2list(node['params']['outputShape'])
-    filters = str2list(node['params']['filterShape'])
-    strides = str2list(node['params']['strides'])
+    shape = node['params']['outputShape']
+    filters = node['params']['filterShape']
+    strides = node['params']['strides']
 
     return layers.conv2d(x,
                 num_outputs=shape[-1],
@@ -107,18 +104,18 @@ if __name__ == '__main__':
                 'label': '1',
                 'layerType': 'input',
                 'params': {
-                        'inputShape': '-1, 28, 28, 1',
-                        'outputShape': '-1, 28, 28, 1'
+                        'inputShape': [None, 28, 28, 1],
+                        'outputShape': [None, 28, 28, 1]
                     }
             }, {
                 'id': '2',
                 'label': '2',
                 'layerType': 'conv',
                 'params': {
-                    'inputShape': '-1, 28, 28, 1',
-                    'outputShape': '-1, 28, 28, 16',
-                    'filterShape': '3, 3',
-                    'strides': '1, 1',
+                    'inputShape': [None, 28, 28, 1],
+                    'outputShape': [None, 28, 28, 16],
+                    'filterShape': [3, 3],
+                    'strides': [1, 1],
                     'padding': 'Same',
                     'activation': 'Relu'
                 }
@@ -127,8 +124,8 @@ if __name__ == '__main__':
                 'label': '3',
                 'layerType': 'fc',
                 'params': {
-                        'inputShape': '-1, 256',
-                        'outputShape': '-1, 10',
+                        'inputShape': [None, 256],
+                        'outputShape': [None, 10],
                         'activation': 'Sigmoid'
                     }
             },

@@ -20,7 +20,7 @@ export class FullyConnectedLayer extends Layer {
     }
 
     addAttributes(dict) {
-        dict['activation'] = this._activation;
+        dict['activation'] = Activation[this._activation];
         return dict;
     }
 }

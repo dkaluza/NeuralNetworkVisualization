@@ -72,3 +72,16 @@ export enum Activation {
     Relu,
     Sigmoid,
 }
+
+export function StrToActivation(str: string): Activation {
+    switch (str) {
+        case 'None':
+            return Activation.None;
+        case 'Relu':
+            return Activation.Relu;
+        case 'Sigmoid':
+            return Activation.Sigmoid;
+        default:
+            return Activation.None;
+    }
+}

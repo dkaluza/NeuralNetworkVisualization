@@ -5,6 +5,17 @@ export enum Padding {
     Valid
 }
 
+export function StrToPadding(str: string): Padding {
+    switch (str) {
+        case 'Same':
+            return Padding.Same;
+        case 'Valid':
+            return Padding.Valid;
+        default:
+            return Padding.Same;
+    }
+}
+
 export class ConvLayer extends Layer {
     private _filterShape: number[];
     private _strides: number[];
@@ -57,8 +68,8 @@ export class ConvLayer extends Layer {
     addAttributes(dict) {
         dict['filterShape'] = this._filterShape;
         dict['strides'] = this._strides;
-        dict['padding'] = this._padding;
-        dict['activation'] = this._activation;
+        dict['padding'] = Padding[this._padding];
+        dict['activation'] = Activation[this._activation];
         return dict;
     }
 }
