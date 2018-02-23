@@ -46,10 +46,9 @@ class Model(db.Model, CRUD):
     weights_path = db.Column(db.Text(256), nullable=False)
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
                         nullable=False)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
-                           nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
-    def __init__(self, name, description, weights_path, arch_id, dataset_id):
+    def __init__(self, name, description, weights_path, arch_id, dataset_id=None):
         self.name = name
         self.description = description
         self.weights_path = weights_path
@@ -76,3 +75,17 @@ class Dataset(db.Model, CRUD):
 
     def __repr__(self):
         return '<Dataset {name}>'.format(name=self.name)
+
+
+# todo
+class Image(db.Model, CRUD):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=64, nullable=False)
+    path = db.Column(db.Text(256), nullable=False)
+
+    def __init__(self, imageName, imagePath):
+        self.imageName = imageName
+        self.imagePath = imagePath
+
+    def json(self):
+        return {'imageName': self.imageName, 'imagePath': self.imagePath}

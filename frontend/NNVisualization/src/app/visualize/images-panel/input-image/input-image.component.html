@@ -1,0 +1,12 @@
+<img [src]="image.imagePath"
+     alt="{{ image.imageName }}"
+     class="img-responsive">
+
+<div class="container">
+    <div class="col-lg-2">
+        <button class="btn btn-primary" (click)="onGetPreviousImage()"> << </button>
+    </div>
+    <div class="col-lg-2">
+        <button class="btn btn-primary" (click)="onGetNextImage()"> >> </button>
+    </div>
+</div>

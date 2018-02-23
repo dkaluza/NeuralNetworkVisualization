@@ -146,7 +146,7 @@ export class BuildComponent implements OnInit {
                 links: this.selArchService.currentLinks
             }
         };
-        this.restangular.all('arch')
+        this.restangular.all('upload_arch')
             .post(data).subscribe(
                 () => { alert('Save successful!'); },
                 () => { alert('Something fucked up while saving'); }
