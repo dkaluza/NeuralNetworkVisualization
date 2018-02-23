@@ -1,6 +1,10 @@
-<mat-grid-list cols="3" rowHeight="fit" style="height: 50px">
+<mat-grid-list cols="5" rowHeight="fit" style="height: 50px">
     <mat-grid-tile>
         <button mat-button (click)="clearCurrentArch()">Clear</button>
+    </mat-grid-tile>
+    <mat-grid-tile>
+        <button mat-button (click)="resetArch()"
+            [disabled]="!selArchService.architecture">Reset</button>
     </mat-grid-tile>
     <mat-grid-tile>
         <button mat-button class="savebutton" (click)="saveCurrentArch()"
@@ -11,6 +15,7 @@
     <mat-grid-tile>
         <button mat-button class="savebutton" (click)="saveAsNewArch()">{{saveNewMsg}}</button>
     </mat-grid-tile>
+    <mat-grid-tile></mat-grid-tile>
 </mat-grid-list>
 <mat-grid-list cols="5" rowHeight="2:3">
     <mat-grid-tile colspan="4">

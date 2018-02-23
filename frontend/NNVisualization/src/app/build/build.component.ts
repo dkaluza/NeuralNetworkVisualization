@@ -73,6 +73,11 @@ export class BuildComponent implements OnInit {
         }
     }
 
+    private _unselectNode(): void {
+        this.selectedLayer = undefined;
+        this.selectedID = undefined;
+    }
+
     onGraphModified(data): void {
         console.log('onGraphModified');
         console.log(data.nodes);
@@ -96,6 +101,25 @@ export class BuildComponent implements OnInit {
         this.selArchService.currentLinks = [];
         this.nodes = this.selArchService.currentNodes;
         this.links = this.selArchService.currentLinks;
+
+        this._unselectNode();
+    }
+
+    resetArch(): void {
+        this.nodes = new Map;
+        this.selArchService.architecture.nodes.forEach(
+            node => {
+                return this.nodes.set(
+                    Number(node.id),
+                    this._archNodeToLayer(node));
+            }
+        );
+        this.links = this.selArchService.architecture.links;
+
+        this.selArchService.currentNodes = this.nodes;
+        this.selArchService.currentLinks = this.links;
+
+        this._unselectNode();
     }
 
     saveCurrentArch() {
