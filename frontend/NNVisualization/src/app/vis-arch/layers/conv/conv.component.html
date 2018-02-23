@@ -9,19 +9,26 @@
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="# Filters"
-        [value]="layer.numFilters"
-                        (input)="onChangeNumFilters($event.target.value)"
+                        [(ngModel)]="layer.numFilters"
                         type="number">
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Kernel shape"
-                        [value]="layer.kernelShape"
-                        (input)="onChangeKernelShape($event.target.value)">
+                        [(ngModel)]="layer.kernelShape"
+                        [formControl]="kernelShapeFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="kernelShapeFormControl.hasError('pattern')">
+            Invalid shape, try: 3,3
+        </mat-error>
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Strides"
-                        [value]="layer.strides"
-                        (input)="onChangeStrides($event.target.value)">
+                        [(ngModel)]="layer.strides"
+                        [formControl]="stridesFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="stridesFormControl.hasError('pattern')">
+            Invalid shape, try: 3,3
+        </mat-error>
     </mat-form-field>
     <mat-form-field>
         <mat-select placeholder="Activation" [(value)]="layer.activation">

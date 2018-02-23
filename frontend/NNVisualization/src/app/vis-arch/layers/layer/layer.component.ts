@@ -1,6 +1,16 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Layer, Activation } from './layer';
 
+import { FormControl, FormGroupDirective, NgForm } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
+
+export class LayerErrorStateMatcher implements ErrorStateMatcher {
+      isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+          const isSubmitted = form && form.submitted;
+          return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+      }
+}
+
 @Component({
     selector: 'app-layer',
     styleUrls: ['./layer.component.css'],
@@ -27,26 +37,5 @@ export class LayerComponent {
     onChangeLabel(value) {
         this.layer.label = value;
         this.changed.emit(this.layer.id);
-    }
-
-    onChangeShape(n: number, value: string): void {
-        const last = value[value.length - 1];
-        // don't do nothing on ','
-        if (last === ',') {
-            return;
-        }
-        // if it is not a digit, delete it
-        if (isNaN(parseInt(last, 10))) {
-            value = value.substr(0, value.length - 1);
-        }
-        if (n === 1) { // inputShape
-            this.layer.inputShape = this._strToArray(value);
-        } else if (n === 2) { // outputShape
-            this.layer.outputShape = this._strToArray(value);
-        }
-    }
-
-    protected _strToArray(value: string) {
-        return value.split(',').map(Number);
     }
 }

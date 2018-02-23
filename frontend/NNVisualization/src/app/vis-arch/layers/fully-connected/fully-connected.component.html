@@ -4,13 +4,12 @@
     </div>
     <mat-form-field>
         <input matInput placeholder="Label"
-        [value]="layer.label"
+                        [value]="layer.label"
                         (input)="onChangeLabel($event.target.value)">
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="# Output units"
-        [value]="layer.numOutputs"
-                        (input)="onChangeNumOutputs($event.target.value)"
+                        [(ngModel)]="layer.numOutputs"
                         type="number">
     </mat-form-field>
     <mat-form-field>

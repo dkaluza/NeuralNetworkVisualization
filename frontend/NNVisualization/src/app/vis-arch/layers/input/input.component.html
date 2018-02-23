@@ -10,6 +10,11 @@
     <mat-form-field>
         <input matInput placeholder="Shape"
                         [value]="layer.outputShape"
-                        (input)="onChangeShape(2, $event.target.value)">
+                        [(ngModel)]="layer.outputShape"
+                        [formControl]="shapeFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="shapeFormControl.hasError('pattern')">
+            Invalid shape, try: -1,28,28,1
+        </mat-error>
     </mat-form-field>
 </div>

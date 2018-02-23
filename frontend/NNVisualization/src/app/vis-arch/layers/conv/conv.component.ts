@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
-import { LayerComponent } from '../layer/layer.component';
+import { LayerComponent, LayerErrorStateMatcher } from '../layer/layer.component';
 import { ConvLayer, Padding } from './conv';
+
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-layer-conv',
@@ -9,6 +11,16 @@ import { ConvLayer, Padding } from './conv';
 })
 export class ConvComponent extends LayerComponent {
     @Input() layer: ConvLayer;
+
+    kernelShapeFormControl = new FormControl('', [
+        Validators.pattern('([0-9]+,)*([0-9]+)')
+    ]);
+
+    stridesFormControl = new FormControl('', [
+        Validators.pattern('([0-9]+,)*([0-9]+)')
+    ]);
+
+    matcher = new LayerErrorStateMatcher();
 
     paddings = [
         {
@@ -19,34 +31,4 @@ export class ConvComponent extends LayerComponent {
             'viewValue': Padding[Padding.Valid]
         }
     ];
-
-    onChangeNumFilters(value: string): void {
-        this.layer.numFilters = Number(value);
-    }
-
-    onChangeStrides(value: string): void {
-        const last = value[value.length - 1];
-        // don't do nothing on ','
-        if (last === ',') {
-            return;
-        }
-        // if it is not a digit, delete it
-        if (isNaN(parseInt(last, 10))) {
-            value = value.substr(0, value.length - 1);
-        }
-        this.layer.strides = this._strToArray(value);
-    }
-
-    onChangeKernelShape(value: string): void {
-        const last = value[value.length - 1];
-        // don't do nothing on ','
-        if (last === ',') {
-            return;
-        }
-        // if it is not a digit, delete it
-        if (isNaN(parseInt(last, 10))) {
-            value = value.substr(0, value.length - 1);
-        }
-        this.layer.kernelShape = this._strToArray(value);
-    }
 }

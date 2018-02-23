@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { LayerComponent } from '../layer/layer.component';
+import { LayerComponent, LayerErrorStateMatcher } from '../layer/layer.component';
 import { InputLayer } from './input';
+
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-layer-input',
@@ -9,4 +11,10 @@ import { InputLayer } from './input';
 })
 export class InputComponent extends LayerComponent {
     @Input() layer: InputLayer;
+
+    shapeFormControl = new FormControl('', [
+        Validators.pattern('((-1,)|([0-9]+,))*((-1)|([0-9]+))')
+    ]);
+
+    matcher = new LayerErrorStateMatcher();
 }
