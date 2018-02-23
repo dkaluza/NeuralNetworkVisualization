@@ -29,8 +29,16 @@ export class HeaderComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(
             (result: { username: string, password: string }) => {
-                if (result && !this.auth.logIn(result.username, result.password)) {
-                    // TODO login failed popup
+                if (result) {
+                    this.auth.logIn(result.username, result.password).subscribe(
+                        result => {
+                            console.log("success");
+                        },
+                        error => {
+                            // TODO error popup
+                            console.log(error);
+                        }
+                    );
                 }
             });
     }
