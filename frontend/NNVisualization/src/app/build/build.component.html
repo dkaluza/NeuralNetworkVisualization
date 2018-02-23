@@ -19,6 +19,7 @@
             <app-vis-arch
                 [(layers)]="nodes"
                 [(connections)]="links"
+                [hasLayersBeenModified]="hasNodesBeenModified"
                 (modified)="onGraphModified($event)"
                 (nodeSelected)="onNodeSelected($event)">
             </app-vis-arch>

@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Layer, Activation } from './layer';
 
-import { FormControl, FormGroupDirective, NgForm } from '@angular/forms';
+import { FormControl, FormGroupDirective, NgForm, Validators } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 
 export class LayerErrorStateMatcher implements ErrorStateMatcher {
@@ -21,6 +21,10 @@ export class LayerComponent {
 
     @Output() changed = new EventEmitter();
 
+    labelFormControl = new FormControl('', [
+        Validators.pattern('.{1,}')
+    ]);
+
     activations = [
         {
             value: Activation.None,
@@ -35,7 +39,7 @@ export class LayerComponent {
     ];
 
     onChangeLabel(value) {
-        this.layer.label = value;
+        // this.layer.label = value;
         this.changed.emit(this.layer.id);
     }
 }

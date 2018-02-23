@@ -4,12 +4,12 @@
     </div>
     <mat-form-field>
         <input matInput placeholder="Label"
-                        [value]="layer.label"
+                        required
+                        [(ngModel)]="layer.label"
                         (input)="onChangeLabel($event.target.value)">
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Shape"
-                        [value]="layer.outputShape"
                         [(ngModel)]="layer.outputShape"
                         [formControl]="shapeFormControl"
                         [errorStateMatcher]="matcher">

@@ -24,6 +24,7 @@ export class BuildComponent implements OnInit {
 
     nodes: Map<number, Layer>;
     links: ArchLink[];
+    hasNodesBeenModified = false;
 
     selectedLayer: Layer;
     private selectedID: number;
@@ -49,6 +50,9 @@ export class BuildComponent implements OnInit {
                 }
             );
             this.links = this.selArchService.architecture.links;
+
+            this.selArchService.currentNodes = this.nodes;
+            this.selArchService.currentLinks = this.links;
         } else {
             this.nodes = new Map;
             this.links = [];
@@ -84,13 +88,7 @@ export class BuildComponent implements OnInit {
     }
 
     onNodeUpdate(): void {
-        // Adam: hack :(
-        // needed so ngOnChanges will run
-        const hack = new Map;
-        this.nodes.forEach(
-            (n, id) => { hack.set(id, n); }
-        );
-        this.nodes = hack;
+        this.hasNodesBeenModified = !this.hasNodesBeenModified;
     }
 
     clearCurrentArch(): void {

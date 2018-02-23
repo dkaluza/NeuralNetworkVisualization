@@ -31,9 +31,9 @@ interface GraphLink {
     templateUrl: './vis-arch.component.html'
 })
 export class VisArchComponent implements OnInit, OnChanges {
-    // @Input() layers: { [id: number]: Layer };
     @Input() layers: Map<number, Layer>;
     @Input() connections: ArchLink[];
+    @Input() hasLayersBeenModified: boolean;
 
     @Output() modified = new EventEmitter();
     @Output() nodeSelected = new EventEmitter();
