@@ -4,7 +4,7 @@ import { ConvLayer, Padding } from './conv';
 
 @Component({
     selector: 'app-layer-conv',
-    styleUrls: ['./conv.component.css'],
+    styleUrls: ['../layer/layer.component.css', './conv.component.css'],
     templateUrl: './conv.component.html'
 })
 export class ConvComponent extends LayerComponent {
@@ -20,18 +20,8 @@ export class ConvComponent extends LayerComponent {
         }
     ];
 
-    onChangeFilterShape(value: string): void {
-        const last = value[value.length - 1];
-        // don't do nothing on ','
-        if (last === ',') {
-            return;
-        }
-        // if it is not a digit, delete it
-        if (isNaN(parseInt(last, 10))) {
-            value = value.substr(0, value.length - 1);
-        }
-        this.layer.filterShape = this._strToArray(value);
-
+    onChangeNumFilters(value: string): void {
+        this.layer.numFilters = Number(value);
     }
 
     onChangeStrides(value: string): void {
@@ -45,5 +35,18 @@ export class ConvComponent extends LayerComponent {
             value = value.substr(0, value.length - 1);
         }
         this.layer.strides = this._strToArray(value);
+    }
+
+    onChangeKernelShape(value: string): void {
+        const last = value[value.length - 1];
+        // don't do nothing on ','
+        if (last === ',') {
+            return;
+        }
+        // if it is not a digit, delete it
+        if (isNaN(parseInt(last, 10))) {
+            value = value.substr(0, value.length - 1);
+        }
+        this.layer.kernelShape = this._strToArray(value);
     }
 }

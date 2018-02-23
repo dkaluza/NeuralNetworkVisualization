@@ -56,27 +56,13 @@ export class BuildComponent implements OnInit {
     }
 
     private _archNodeToLayer(node: ArchNode): Layer {
-        // Adam: ugly, but what you gonna do ¯\_(ツ)_/¯
         switch (node.layerType) {
             case 'fc':
-                return new FullyConnectedLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape,
-                    node.params.outputShape,
-                    node.params.activation
-                );
+                return FullyConnectedLayer.fromDict(node);
             case 'conv':
-                return new ConvLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape, node.params.outputShape,
-                    node.params.filterShape, node.params.strides,
-                    node.params.padding, node.params.activation
-                );
+                return ConvLayer.fromDict(node);
             case 'input':
-                return new InputLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape, node.params.outputShape
-                );
+                return InputLayer.fromDict(node);
             default:
                 console.log('Unknown layerType: ' + node.layerType);
                 return undefined;

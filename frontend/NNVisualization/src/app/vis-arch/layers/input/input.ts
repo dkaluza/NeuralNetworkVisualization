@@ -7,6 +7,14 @@ export class InputLayer extends Layer {
         super(id, label, 'input', input, output);
     }
 
+    static fromDict(dict): InputLayer {
+        return new InputLayer(
+            dict.id, dict.label,
+            dict.params.inputShape,
+            dict.params.outputShape
+        );
+    }
+
     addAttributes(dict) {
         return dict;
     }

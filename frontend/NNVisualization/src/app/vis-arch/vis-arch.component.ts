@@ -198,6 +198,7 @@ export class VisArchComponent implements OnInit, OnChanges {
             color: layer.color
         });
         this._updateView();
+        this.nodeSelected.emit(id);
     }
 
     onLinkSelect(data): void {

@@ -1,0 +1,16 @@
+.node-container {
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.node-container > * {
+    width: 100%;
+}
+
+.node-header {
+    background-color: #aabb33;
+    padding: 5px;
+    margin-bottom: 5px;
+}

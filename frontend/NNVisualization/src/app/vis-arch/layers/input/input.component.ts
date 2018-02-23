@@ -4,7 +4,7 @@ import { InputLayer } from './input';
 
 @Component({
     selector: 'app-layer-input',
-    styleUrls: ['./input.component.css'],
+    styleUrls: ['../layer/layer.component.css', './input.component.css'],
     templateUrl: './input.component.html'
 })
 export class InputComponent extends LayerComponent {
