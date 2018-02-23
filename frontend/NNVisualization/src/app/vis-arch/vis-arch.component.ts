@@ -170,8 +170,7 @@ export class VisArchComponent implements OnInit, OnChanges {
         });
     }
 
-    onLayerDrop(event: {value: ToolboxLayer}): void {
-        console.log(event);
+    onLayerDrop(event: { value: ToolboxLayer}): void {
         const layer: ToolboxLayer = event.value;
 
         // find smallest free id
