@@ -175,7 +175,6 @@ export class VisArchComponent implements OnInit {
     }
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
-        console.log(event);
         const layer: ToolboxLayer = event.value;
         this.addNewNode(layer);
     }
