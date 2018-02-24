@@ -64,6 +64,7 @@ import { OutputImageComponent } from './visualize/images-panel/output-image/outp
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 const appRoutes: Routes = [
@@ -168,7 +169,8 @@ export class MaterialImportsModule {}
         MaterialImportsModule,
         NgxChartsModule,
         NgxGraphModule,
-        NgxDnDModule
+        NgxDnDModule,
+        FlexLayoutModule
     ],
     providers: [SelectedArchitectureService],
     bootstrap: [AppComponent]
