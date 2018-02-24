@@ -13,12 +13,12 @@ export class InputComponent extends LayerComponent {
     @Input() layer: InputLayer;
 
     shapeFormControl = new FormControl('', [
-        Validators.pattern('((-1,)|([0-9]+,))*((-1)|([0-9]+))')
+        Validators.pattern('(((-1)|([0-9]+)),[ ]?)*((-1)|([0-9]+))')
     ]);
 
     matcher = new LayerErrorStateMatcher();
 
-    private _pattern = new RegExp('^((-1,)|([0-9]+,))*((-1)|([0-9]+))$');
+    private _pattern = new RegExp('(((-1)|([0-9]+)),[ ]?)*((-1)|([0-9]+))');
 
     onShapeChange(value: string) {
         if (this._pattern.test(value)) {
