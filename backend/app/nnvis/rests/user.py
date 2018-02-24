@@ -1,35 +1,33 @@
+from flask import request, jsonify
 from flask_restful import abort, Resource
-from flask_jwt import JWT
+from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 
 from app.nnvis.models import User
 
 
-def authenticationTask(app):
-    def __abort_if_user_doesnt_exist(user, username):
+class AuthenticationTask(Resource):
+    def __abort_if_user_doesnt_exist(self, user, username):
         if user is None:
-            __abort(username)
+            self.__abort(username)
 
-    def __abort(username):
+    def __abort(self, username):
         message = 'User {username} doesn\'t exist or the password is incorrect'.format(
             username=username)
         abort(401, message=message)
 
-    def __abort_if_password_doesnt_match(user, username, password):
+    def __abort_if_password_doesnt_match(self, user, username, password):
         if not check_password_hash(user.password, password):
-            __abort(username)
+            self.__abort(username)
 
-    def authenticate(username, password):
+    def post(self):
+        args = request.get_json(force=True)
+        username = args['username']
+        password = args['password']
         user = User.query.filter_by(username=username).first()
         print(user, username, password)
-        __abort_if_user_doesnt_exist(user, username)
-        __abort_if_password_doesnt_match(user, username, password)
+        self.__abort_if_user_doesnt_exist(user, username)
+        self.__abort_if_password_doesnt_match(user, username, password)
 
-        return user
-
-    def identity(payload):
-        username = payload['username']
-
-        return User.query.filter_by(username=username).first()
-
-    jwt = JWT(app, authenticate, identity)
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
