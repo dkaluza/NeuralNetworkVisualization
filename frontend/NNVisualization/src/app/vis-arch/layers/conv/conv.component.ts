@@ -31,4 +31,18 @@ export class ConvComponent extends LayerComponent {
             'viewValue': Padding[Padding.Valid]
         }
     ];
+
+    private _pattern = new RegExp('^([0-9]+,)*([0-9]+)$');
+
+    onKernelShapeChange(value: string) {
+        if (this._pattern.test(value)) {
+            this.layer.kernelShape = value;
+        }
+    }
+
+    onStridesChange(value: string) {
+        if (this._pattern.test(value)) {
+            this.layer.strides = value;
+        }
+    }
 }

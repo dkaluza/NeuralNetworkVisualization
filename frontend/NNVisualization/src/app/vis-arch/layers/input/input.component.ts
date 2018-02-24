@@ -17,4 +17,12 @@ export class InputComponent extends LayerComponent {
     ]);
 
     matcher = new LayerErrorStateMatcher();
+
+    private _pattern = new RegExp('^((-1,)|([0-9]+,))*((-1)|([0-9]+))$');
+
+    onShapeChange(value: string) {
+        if (this._pattern.test(value)) {
+            this.layer.outputShape = value;
+        }
+    }
 }

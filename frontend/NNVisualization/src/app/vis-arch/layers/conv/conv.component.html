@@ -15,7 +15,8 @@
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Kernel shape"
-                        [(ngModel)]="layer.kernelShape"
+                        [ngModel]="layer.kernelShape"
+                        (ngModelChange)="onKernelShapeChange($event)"
                         [formControl]="kernelShapeFormControl"
                         [errorStateMatcher]="matcher">
         <mat-error *ngIf="kernelShapeFormControl.hasError('pattern')">
@@ -24,7 +25,8 @@
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Strides"
-                        [(ngModel)]="layer.strides"
+                        [ngModel]="layer.strides"
+                        (ngModelChange)="onStridesChange($event)"
                         [formControl]="stridesFormControl"
                         [errorStateMatcher]="matcher">
         <mat-error *ngIf="stridesFormControl.hasError('pattern')">

@@ -3,11 +3,11 @@ export abstract class Layer {
     private _label: string;
     private _layerType: string;
 
-    private _inputShape: number[];
-    private _outputShape: number[];
+    private _inputShape: string;
+    private _outputShape: string;
 
     constructor(id: number, label: string, layerType: string,
-                input: number[], output: number[]) {
+                input: string, output: string) {
         this._id = id;
         this._label = label;
         this._layerType = layerType;
@@ -34,23 +34,28 @@ export abstract class Layer {
         this._label = label;
     }
 
-    get inputShape(): number[] {
+    get inputShape(): string {
         return this._inputShape;
     }
 
-    set inputShape(input: number[]) {
+    set inputShape(input: string) {
         this._inputShape = input;
     }
 
-    get outputShape(): number[] {
+    get outputShape(): string {
         return this._outputShape;
     }
 
-    set outputShape(output: number[]) {
+    set outputShape(output: string) {
         this._outputShape = output;
     }
 
     abstract addAttributes(dict);
+
+    // assumes that value is already valid number array
+    strToArray(value: string): number[] {
+        return value.split(',').map(Number);
+    }
 
     toDict() {
         const dict = {
@@ -58,8 +63,8 @@ export abstract class Layer {
             label: this._label,
             layerType: this._layerType,
             params: {
-                inputShape: this._inputShape,
-                outputShape: this._outputShape
+                inputShape: this.strToArray(this._inputShape),
+                outputShape: this.strToArray(this._outputShape)
             }
         };
         dict.params = this.addAttributes(dict.params);

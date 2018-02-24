@@ -6,9 +6,9 @@ export class FullyConnectedLayer extends Layer {
 
 
     constructor(id: number, label: string,
-                input = [1], numOutputs = 1,
+                input = '1', numOutputs = 1,
                 activation = Activation.Relu) {
-        super(id, label, 'fc', input, [numOutputs]);
+        super(id, label, 'fc', input, String(numOutputs));
 
         this._activation = activation;
         this._numOutputs = numOutputs;
