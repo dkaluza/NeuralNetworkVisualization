@@ -24,6 +24,7 @@ export class BuildComponent implements OnInit {
 
     nodes: Map<number, Layer>;
     links: ArchLink[];
+    hasNodesBeenModified = false;
 
     selectedLayer: Layer;
     private selectedID: number;
@@ -49,6 +50,9 @@ export class BuildComponent implements OnInit {
                 }
             );
             this.links = this.selArchService.architecture.links;
+
+            this.selArchService.currentNodes = this.nodes;
+            this.selArchService.currentLinks = this.links;
         } else {
             this.nodes = new Map;
             this.links = [];
@@ -56,32 +60,22 @@ export class BuildComponent implements OnInit {
     }
 
     private _archNodeToLayer(node: ArchNode): Layer {
-        // Adam: ugly, but what you gonna do ¯\_(ツ)_/¯
         switch (node.layerType) {
             case 'fc':
-                return new FullyConnectedLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape,
-                    node.params.outputShape,
-                    StrToActivation(node.params.activation)
-                );
+                return FullyConnectedLayer.fromDict(node);
             case 'conv':
-                return new ConvLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape, node.params.outputShape,
-                    node.params.filterShape, node.params.strides,
-                    StrToPadding(node.params.padding),
-                    StrToActivation(node.params.activation)
-                );
+                return ConvLayer.fromDict(node);
             case 'input':
-                return new InputLayer(
-                    Number(node.id), node.label,
-                    node.params.inputShape, node.params.outputShape
-                );
+                return InputLayer.fromDict(node);
             default:
                 console.log('Unknown layerType: ' + node.layerType);
                 return undefined;
         }
+    }
+
+    private _unselectNode(): void {
+        this.selectedLayer = undefined;
+        this.selectedID = undefined;
     }
 
     onGraphModified(data): void {
@@ -99,13 +93,7 @@ export class BuildComponent implements OnInit {
     }
 
     onNodeUpdate(): void {
-        // Adam: hack :(
-        // needed so ngOnChanges will run
-        const hack = new Map;
-        this.nodes.forEach(
-            (n, id) => { hack.set(id, n); }
-        );
-        this.nodes = hack;
+        this.hasNodesBeenModified = !this.hasNodesBeenModified;
     }
 
     clearCurrentArch(): void {
@@ -113,6 +101,25 @@ export class BuildComponent implements OnInit {
         this.selArchService.currentLinks = [];
         this.nodes = this.selArchService.currentNodes;
         this.links = this.selArchService.currentLinks;
+
+        this._unselectNode();
+    }
+
+    resetArch(): void {
+        this.nodes = new Map;
+        this.selArchService.architecture.nodes.forEach(
+            node => {
+                return this.nodes.set(
+                    Number(node.id),
+                    this._archNodeToLayer(node));
+            }
+        );
+        this.links = this.selArchService.architecture.links;
+
+        this.selArchService.currentNodes = this.nodes;
+        this.selArchService.currentLinks = this.links;
+
+        this._unselectNode();
     }
 
     saveCurrentArch() {
@@ -161,7 +168,7 @@ export class BuildComponent implements OnInit {
                 links: this.selArchService.currentLinks
             }
         };
-        this.restangular.all('arch')
+        this.restangular.all('upload_arch')
             .post(data).subscribe(
                 () => { alert('Save successful!'); },
                 () => { alert('Something fucked up while saving'); }

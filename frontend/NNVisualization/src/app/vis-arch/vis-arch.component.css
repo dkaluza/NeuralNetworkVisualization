@@ -1,11 +1,21 @@
-.setting {
-    margin: 5px 10px;
+.settings-row {
+    /* margin: 5px 10px; */
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.settings-row mat-checkbox {
+    background-color: #aabb33;
+    padding: 10px;
 }
 
 /* drag and drop hack do not touch or be careful */
+
 .graph {
     width: 100%;
-    height: 100%;
+    height: 500px;
+
+    border-style: solid;
 }
 
 .node-selected {
@@ -13,15 +23,12 @@
     stroke-width: 2px;
 }
 
-.edge > path {
+.edge>path {
     stroke-width: 5px;
 }
 
 .toolbox {
-    position: fixed;
-    top: 87%;
-    height: 10%;
-    width: 100%;
+    margin-top: 2%;
     display: flex;
     justify-content: space-around;
 }
@@ -32,13 +39,28 @@
     display: inline-block;
 }
 
-/* drag and drop hack do not touch */
+/* drag and drop hacks do not touch */
+
 .gu-mirror {
-    position: fixed;
-    z-index: -1;
+    position: fixed !important;
+    margin: 0 !important;
+    z-index: 9999 !important;
+    opacity: 0.9;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+    filter: alpha(opacity=90);
 }
 
-/* drag and drop hack do not touch */
+.gu-hide {
+    display: none !important;
+}
+
+.gu-unselectable {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
 .gu-transit {
-    display: none;
+    display: none !important;
 }

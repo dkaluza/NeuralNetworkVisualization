@@ -2,7 +2,24 @@
     text-align: center;
 }
 
-.graph {
-    border-style: dotted;
-    border-width: 1px;
+.buttons-row {
+    margin-top: 2%;
+    text-align: center;
+}
+
+.buttons-row button {
+    background-color: lightblue;
+}
+
+.vis-arch-container {
+    height: 100%;
+    margin-top: 2%;
+}
+
+.selected-layer {
+}
+
+.not-selected-message {
+    text-align: center;
+    padding-top: 50%;
 }

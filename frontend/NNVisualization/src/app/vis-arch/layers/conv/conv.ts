@@ -17,35 +17,57 @@ export function StrToPadding(str: string): Padding {
 }
 
 export class ConvLayer extends Layer {
-    private _filterShape: number[];
-    private _strides: number[];
+    private _numFilters: number;
+    private _kernelShape: string;
+    private _strides: string;
     private _padding: Padding;
     private _activation: Activation;
 
-    constructor(id: number, label: string, input = [1],
-                output = [1], filter = [3, 3], strides = [1],
+    constructor(id: number, label: string, input = '1',
+                numFilters = 1, kernelShape = '3, 3', strides = '1, 1',
                 padding = Padding.Same, activation = Activation.Relu) {
-        super(id, label, 'conv', input, output);
+        super(id, label, 'conv', input, String(numFilters));
 
-        this._filterShape = filter;
+        this._numFilters = numFilters;
+        this._kernelShape = kernelShape;
         this._strides = strides;
         this._padding = padding;
         this._activation = activation;
     }
 
-    get filterShape(): number[] {
-        return this._filterShape;
+    static fromDict(dict): ConvLayer {
+        return new ConvLayer(
+            dict.id, dict.label,
+            dict.params.inputShape,
+            dict.params.numFilters,
+            dict.params.kernelShape,
+            dict.params.strides,
+            dict.params.padding,
+            dict.params.activation
+        );
     }
 
-    set filterShape(filterShape: number[]) {
-        this._filterShape = filterShape;
+    get numFilters(): number {
+        return this._numFilters;
     }
 
-    get strides(): number[] {
+    set numFilters(numFilters: number) {
+        this._numFilters = numFilters;
+    }
+
+    get kernelShape(): string {
+        return this._kernelShape;
+    }
+
+    set kernelShape(kernelShape: string) {
+        this._kernelShape = kernelShape;
+    }
+
+    get strides(): string {
         return this._strides;
     }
 
-    set strides(strides: number[]) {
+    set strides(strides: string) {
         this._strides = strides;
     }
 
@@ -66,10 +88,11 @@ export class ConvLayer extends Layer {
     }
 
     addAttributes(dict) {
-        dict['filterShape'] = this._filterShape;
-        dict['strides'] = this._strides;
-        dict['padding'] = Padding[this._padding];
-        dict['activation'] = Activation[this._activation];
+        dict['numFilters'] = this._numFilters;
+        dict['kernelShape'] = this.strToArray(this._kernelShape);
+        dict['strides'] = this.strToArray(this._strides);
+        dict['padding'] = this._padding;
+        dict['activation'] = this._activation;
         return dict;
     }
 }

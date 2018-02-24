@@ -1,8 +1,13 @@
-<div>
-    <mat-checkbox class="setting" [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
-    <mat-checkbox class="setting" [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
+<div fxLayout class="settings-row">
+    <div fxFlex="50">
+        <mat-checkbox [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
+    </div>
+    <div fxFlex="50">
+        <mat-checkbox [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
+    </div>
 </div>
-<div class="graph"  ngxDroppable="graph" (drop)="onLayerDrop($event)" [model] = []>
+<div fxLayout>
+<div fxFlex="100" class="graph"  ngxDroppable="graph" (drop)="onLayerDrop($event)" [model] = []>
         <ngx-graph
          [autoZoom]="true"
          [legend]="false"
@@ -47,6 +52,7 @@
             </ng-template>
 
         </ngx-graph>
+</div>
 </div>
 
 <mat-divider></mat-divider>

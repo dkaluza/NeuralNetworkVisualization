@@ -31,9 +31,9 @@ interface GraphLink {
     templateUrl: './vis-arch.component.html'
 })
 export class VisArchComponent implements OnInit, OnChanges {
-    // @Input() layers: { [id: number]: Layer };
     @Input() layers: Map<number, Layer>;
     @Input() connections: ArchLink[];
+    @Input() hasLayersBeenModified: boolean;
 
     @Output() modified = new EventEmitter();
     @Output() nodeSelected = new EventEmitter();
@@ -170,8 +170,7 @@ export class VisArchComponent implements OnInit, OnChanges {
         });
     }
 
-    onLayerDrop(event: {value: ToolboxLayer}): void {
-        console.log(event);
+    onLayerDrop(event: { value: ToolboxLayer}): void {
         const layer: ToolboxLayer = event.value;
 
         // find smallest free id
@@ -198,6 +197,7 @@ export class VisArchComponent implements OnInit, OnChanges {
             color: layer.color
         });
         this._updateView();
+        this.nodeSelected.emit(id);
     }
 
     onLinkSelect(data): void {

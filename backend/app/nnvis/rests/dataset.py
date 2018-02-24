@@ -12,7 +12,7 @@ def dataset_to_dict(dataset):
 
 
 class DatasetTask(Resource):
-    def __abort_if_dataset_doesnt_exist(dataset_id):
+    def __abort_if_dataset_doesnt_exist(self, dataset_id):
         if Dataset.query.get(dataset_id) is None:
             message = 'Dataset {id} doesn\'t exist' \
                       .format(id=dataset_id)
@@ -26,10 +26,9 @@ class DatasetTask(Resource):
     def delete(self, dataset_id):
         self.__abort_if_dataset_doesnt_exist(dataset_id)
         models = Model.query.filter_by(dataset_id=dataset_id).all()
-        if len(models) > 0:
-            message = 'Dataset {id} still has some models' \
-                      .format(id=dataset_id)
-            abort(404, message=message)
+        for model in models:
+            model.dataset_id = None
+            model.update()
         dataset = Dataset.query.get(dataset_id)
         dataset.delete()
         return '', 204

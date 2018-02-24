@@ -9,9 +9,11 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { ManageComponent } from './manage/manage.component';
 import { BuildComponent } from './build/build.component';
 import { TrainComponent } from './train/train.component';
+import { ImagesPanelComponent } from './visualize/images-panel/images-panel.component';
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
+import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
 import { VisArchComponent } from './vis-arch/vis-arch.component';
 
 import { LayerComponent } from './vis-arch/layers/layer/layer.component';
@@ -21,6 +23,7 @@ import { InputComponent } from './vis-arch/layers/input/input.component';
 
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { RestangularModule, Restangular } from 'ngx-restangular';
 import {
     MatAutocompleteModule,
@@ -56,9 +59,13 @@ import {
     MatStepperModule,
 } from '@angular/material';
 import { CdkTableModule } from '@angular/cdk/table';
+import { InputImageComponent } from './visualize/images-panel/input-image/input-image.component';
+import { OutputImageComponent } from './visualize/images-panel/output-image/output-image.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
+import { FlexLayoutModule } from '@angular/flex-layout';
+
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full'},
@@ -66,6 +73,7 @@ const appRoutes: Routes = [
     { path: 'build', component: BuildComponent},
     { path: 'train', component: TrainComponent},
     { path: 'visualize', component: VisualizeComponent},
+    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent},
 ];
 
 // Function for setting the default restangular configuration
@@ -123,7 +131,8 @@ export function RestangularConfigFactory (RestangularProvider) {
         MatTabsModule,
         MatToolbarModule,
         MatTooltipModule,
-    ]
+    ],
+    declarations: []
 })
 export class MaterialImportsModule {}
 
@@ -142,19 +151,26 @@ export class MaterialImportsModule {}
         LayerComponent,
         FullyConnectedComponent,
         ConvComponent,
-        InputComponent
+        InputComponent,
+        ImagesPanelComponent,
+        NavAlgorithmsComponent,
+        InputImageComponent,
+        OutputImageComponent,
+        VisArchComponent
     ],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
         ReactiveFormsModule,
+        HttpClientModule,
         RouterModule.forRoot(appRoutes),
         RestangularModule.forRoot(RestangularConfigFactory),
         MaterialImportsModule,
         NgxChartsModule,
         NgxGraphModule,
-        NgxDnDModule
+        NgxDnDModule,
+        FlexLayoutModule
     ],
     providers: [SelectedArchitectureService],
     bootstrap: [AppComponent]
