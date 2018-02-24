@@ -20,7 +20,7 @@ def authenticationTask(app):
             __abort(username)
 
     def authenticate(username, password):
-        user = User.query.all()
+        user = User.query.filter_by(username=username).first()
         print(user, username, password)
         __abort_if_user_doesnt_exist(user, username)
         __abort_if_password_doesnt_match(user, username, password)

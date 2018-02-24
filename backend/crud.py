@@ -87,7 +87,6 @@ if __name__ == '__main__':
             user = User(username=args.username,
                         password=args.password)
             user.add()
-            print(User.query.all())
         elif args.method == 'update':
             user = User.query.get(args.id)
             if args.username is not None:
