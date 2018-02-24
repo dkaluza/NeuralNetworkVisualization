@@ -9,8 +9,10 @@ export class AuthenticationService {
 
     constructor(private jwtHelper: JwtHelper, private restangular: Restangular) { }
 
+    private _tokenPath = 'token';
+
     public getToken(): string {
-        return localStorage.getItem('token');
+        return localStorage.getItem(this._tokenPath);
     }
 
     public isAuthenticated(): boolean {
@@ -20,10 +22,10 @@ export class AuthenticationService {
     }
 
     public logIn(username: string, password: string): Observable<boolean> {
-        return this.restangular.all('authentiacate')
+        return this.restangular.all('authenticate')
             .post({ username: username, password: password })
             .map(response => {
-                localStorage.setItem('token', response);
+                localStorage.setItem(this._tokenPath, response);
                 this.restangular.withConfig(restangularConfigurer => {
                     restangularConfigurer
                         .setDefaultHeaders({ 'Authorization': 'Bearer ' + this.getToken() })
@@ -33,7 +35,7 @@ export class AuthenticationService {
     }
 
     public logOut() {
-        localStorage.removeItem('token');
+        localStorage.removeItem(this._tokenPath);
         this.restangular.withConfig(restangularConfigurer => {
             restangularConfigurer.setDefaultHeaders({})
         });
