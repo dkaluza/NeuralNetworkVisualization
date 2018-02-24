@@ -10,8 +10,8 @@ class TrainNewModel(Resource):
         arch = Architecture.query.get(arch_id)
         graph = json.loads(arch.graph)
 
-        ops, graph = build_model(arch.name, graph['nodes'], graph['links'])
-        print(graph.get_operations())
+        ops = build_model(graph['nodes'], graph['links'])
+        print(ops)
 
         return {'ok': 'ok'}, 200
 

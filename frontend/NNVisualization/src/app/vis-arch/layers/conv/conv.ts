@@ -1,4 +1,4 @@
-import { Layer, Activation } from '../layer/layer';
+import { Layer, Activation, StrToActivation } from '../layer/layer';
 
 export enum Padding {
     Same,
@@ -42,8 +42,8 @@ export class ConvLayer extends Layer {
             dict.params.numFilters,
             dict.params.kernelShape,
             dict.params.strides,
-            dict.params.padding,
-            dict.params.activation
+            StrToPadding(dict.params.padding),
+            StrToActivation(dict.params.activation)
         );
     }
 
@@ -91,8 +91,8 @@ export class ConvLayer extends Layer {
         dict['numFilters'] = this._numFilters;
         dict['kernelShape'] = this.strToArray(this._kernelShape);
         dict['strides'] = this.strToArray(this._strides);
-        dict['padding'] = this._padding;
-        dict['activation'] = this._activation;
+        dict['padding'] = Padding[this._padding];
+        dict['activation'] = Activation[this._activation];
         return dict;
     }
 }

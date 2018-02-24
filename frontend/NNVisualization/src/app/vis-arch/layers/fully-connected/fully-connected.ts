@@ -1,4 +1,4 @@
-import { Layer, Activation } from '../layer/layer';
+import { Layer, Activation, StrToActivation } from '../layer/layer';
 
 export class FullyConnectedLayer extends Layer {
     private _activation: Activation;
@@ -19,7 +19,7 @@ export class FullyConnectedLayer extends Layer {
             dict.id, dict.label,
             dict.params.inputShape,
             dict.params.numOutputs,
-            dict.params.activation
+            StrToActivation(dict.params.activation)
         );
     }
 
@@ -40,7 +40,7 @@ export class FullyConnectedLayer extends Layer {
     }
 
     addAttributes(dict) {
-        dict['activation'] = this._activation;
+        dict['activation'] = Activation[this._activation];
         dict['numOutputs'] = this._numOutputs;
         return dict;
     }
