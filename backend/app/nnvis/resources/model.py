@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import abort, Resource
 
-from app.nnvis.models import Model
+from app.nnvis.models.model import Model
 
 
 def model_to_dict(model):

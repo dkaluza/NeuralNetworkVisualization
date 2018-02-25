@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from app.nnvis.models import Image
+from app.nnvis.models.image import Image
 
 
 class Inference(Resource):
@@ -29,15 +29,12 @@ class Images(Resource):
 
             # compute here
 
-            prefix = 'api/static/'
+            prefix = 'api/static/img/'
             img_path = prefix + 'original/' + img_name
             img_proc_path = prefix + 'GBP/' + img_proc_name
 
             image1 = Image(img_name, img_path)
             image2 = Image(img_proc_name, img_proc_path)
-            print('returning  images')
-            return {'images': [image1.json(),
-                               image2.json()]}
+            return {'images': [image1.json(), image2.json()]}
 
-        print('returning error')
         return {'error message': algorithm + ' alogrithm is not handled yet'}, 202

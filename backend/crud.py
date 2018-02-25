@@ -1,5 +1,7 @@
 from app import create_app
-from app.nnvis.models import Architecture, Model, Dataset
+from app.nnvis.models.architecture import Architecture
+from app.nnvis.models.model import Model
+from app.nnvis.models.dataset import Dataset
 import argparse
 
 parser = argparse.ArgumentParser()

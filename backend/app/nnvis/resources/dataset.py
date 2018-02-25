@@ -1,6 +1,7 @@
 from flask_restful import abort, Resource
 
-from app.nnvis.models import Dataset, Model
+from app.nnvis.models.dataset import Dataset
+from app.nnvis.models.model import Model
 
 
 def dataset_to_dict(dataset):

@@ -1,5 +1,5 @@
 from flask import Flask
-from app.nnvis.models import db
+from db import db
 from app.nnvis.views import nnvis
 
 from app import create_app

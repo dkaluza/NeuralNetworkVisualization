@@ -1,17 +1,11 @@
 from flask import Blueprint
 from flask_restful import Api
 
-from app.nnvis.rests.architecture import (ArchitectureTask,
-                                          UploadNewArchitecture,
-                                          ListAllArchitectures)
-from app.nnvis.rests.model import (ModelTask,
-                                   UploadNewModel,
-                                   ListAllModels)
-from app.nnvis.rests.dataset import (DatasetTask,
-                                     UploadNewDataset,
-                                     ListAllDatasets)
-from app.nnvis.rests.visualize import (Inference, Visualize, Images)
-from app.nnvis.rests.train import (TrainNewModel, TrainModel)
+from app.nnvis.resources.architecture import ArchitectureTask, UploadNewArchitecture, ListAllArchitectures
+from app.nnvis.resources.model import ModelTask, UploadNewModel, ListAllModels
+from app.nnvis.resources.dataset import DatasetTask, UploadNewDataset, ListAllDatasets
+from app.nnvis.resources.image import Inference, Visualize, Images
+from app.nnvis.resources.train import TrainNewModel, TrainModel
 
 nnvis = Blueprint('nnvis', __name__)
 api = Api(nnvis)
@@ -28,10 +22,9 @@ api.add_resource(DatasetTask, 'dataset/<int:dataset_id>')
 api.add_resource(UploadNewDataset, 'upload_dataset')
 api.add_resource(ListAllDatasets, 'list_datasets')
 
-api.add_resource(Inference, 'inference/<int:model_id>')
-api.add_resource(Visualize, 'Visualize/<int:model_id>/<int:alg_id>')
+# api.add_resource(Inference, 'inference/<int:model_id>')
+# api.add_resource(Visualize, 'Visualize/<int:model_id>/<int:alg_id>')
 api.add_resource(Images, 'visualize/<string:algorithm>/<string:image_id>')
 
-api.add_resource(TrainNewModel,
-                 'train_new_model/<int:arch_id>/<int:dataset_id>')
+api.add_resource(TrainNewModel, 'train_new_model/<int:arch_id>/<int:dataset_id>')
 api.add_resource(TrainModel, 'train_model/<int:model_id>/<int:dataset_id>')
