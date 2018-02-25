@@ -98,7 +98,7 @@ class User(db.Model, CRUD):
     username = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(64), nullable=False)
 
-    def _init_(self, username, password):
+    def __init__(self, username, password):
         self.username = username
         self.password = generate_password_hash(password)
 
