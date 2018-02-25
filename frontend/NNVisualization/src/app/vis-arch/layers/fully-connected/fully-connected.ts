@@ -1,4 +1,5 @@
 import { Layer, Activation, StrToActivation } from '../layer/layer';
+import { ArchNode } from '../../../selected-architecture/architecture';
 
 export class FullyConnectedLayer extends Layer {
     private _activation: Activation;
@@ -14,10 +15,10 @@ export class FullyConnectedLayer extends Layer {
         this._numOutputs = numOutputs;
     }
 
-    static fromDict(dict): FullyConnectedLayer {
+    static fromDict(dict: ArchNode): FullyConnectedLayer {
         return new FullyConnectedLayer(
-            dict.id, dict.label,
-            dict.params.inputShape,
+            Number(dict.id), dict.label,
+            String(dict.params.inputShape),
             dict.params.numOutputs,
             StrToActivation(dict.params.activation)
         );
