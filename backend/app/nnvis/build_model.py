@@ -54,6 +54,25 @@ def build_conv_op(node, input_ops):
                 activation_fn=get_activation(node))
 
 
+def build_pool_op(node, input_ops):
+    x = input_ops[0]
+    kernel_size = node['params']['kernelShape']
+    strides = node['params']['strides']
+
+    if node['params']['pool'] == 'Max':
+        return layers.max_pool2d(x,
+                                 kernel_size=kernel_size,
+                                 stride=strides,
+                                 padding=get_padding(node))
+    elif node['params']['pool'] == 'Avarage':
+        return layers.avg_pool2d(x,
+                                 kernel_size=kernel_size,
+                                 stride=strides,
+                                 padding=get_padding(node))
+    else:
+        raise Exception('Unkown pool: {}'.format(node['params']['pool']))
+
+
 def build_op(node, map_op, inputs):
     input_ops = [map_op[v] for v in inputs]
 
@@ -63,6 +82,8 @@ def build_op(node, map_op, inputs):
         return build_fc_op(node, input_ops)
     elif node['layerType'] == 'conv':
         return build_conv_op(node, input_ops)
+    elif node['layerType'] == 'pool':
+        return build_pool_op(node, input_ops)
     else:
         raise Exception('Unknown type of layer')
 
@@ -125,6 +146,11 @@ def calculate_logloss(y, pred):
     return tf.losses.log_loss(y, pred)
 
 
+def calculate_accuracy(y, pred):
+    n = tf.equal(tf.argmax(y, 1), tf.argmax(pred, 1))
+    return tf.reduce_mean(tf.cast(n, tf.float32))
+
+
 def minimize_with_adam(loss):
     return tf.train.AdamOptimizer().minimize(loss)
 
@@ -147,9 +173,8 @@ class TrainMnistThread(threading.Thread):
         y = tf.placeholder(tf.float32, shape=(None, 10))
         pred = ops[get_output_ids(self.nodes, self.links)[0]]
         loss = calculate_logloss(y, pred)
+        acc = calculate_accuracy(y, pred)
         opt = minimize_with_adam(loss)
-
-        losses = []
 
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
@@ -159,18 +184,38 @@ class TrainMnistThread(threading.Thread):
                 rounds = int(mnist.train.num_examples / BATCH_SIZE)
 
                 avarage_loss = 0.
+                avarage_accuracy = 0.
                 cnt = 0
                 for i in range(rounds):
                     batch_xs, batch_ys = mnist.train.next_batch(BATCH_SIZE)
-                    _, l = sess.run([opt, loss], feed_dict={X: batch_xs, y: batch_ys})
+                    _, l, a = sess.run([opt, loss, acc], feed_dict={X: batch_xs, y: batch_ys})
 
                     avarage_loss += l
+                    avarage_accuracy += a
                     cnt += 1
                     if cnt == 100:
-                        print('Avg. loss = {l}'.format(l=avarage_loss))
-                        losses.append(avarage_loss)
+                        avarage_loss /= float(cnt)
+                        avarage_accuracy /= float(cnt)
+                        print('Avg. loss = {l}, Avg. accuracy = {a}'.format(l=avarage_loss, a=avarage_accuracy))
                         avarage_loss = 0.
+                        avarage_accuracy = 0.
                         cnt = 0
+
+            rounds = int(mnist.test.num_examples / BATCH_SIZE)
+            avarage_loss = 0.
+            avarage_accuracy = 0.
+            cnt = 0
+            for i in range(100):
+                batch_xs, batch_ys = mnist.test.next_batch(BATCH_SIZE)
+                _, l, a = sess.run([opt, loss, acc], feed_dict={X: batch_xs, y: batch_ys})
+
+                avarage_loss += l
+                avarage_accuracy += a
+                cnt += 1
+
+            print(avarage_loss / float(cnt))
+            print(avarage_accuracy / float(cnt))
+        print('end train_mnist')
 
 
 if __name__ == '__main__':
