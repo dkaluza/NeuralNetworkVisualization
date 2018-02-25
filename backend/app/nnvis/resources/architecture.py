@@ -1,7 +1,8 @@
 from flask import request
 from flask_restful import abort, Resource
 
-from app.nnvis.models import Architecture, Model
+from app.nnvis.models.architecture import Architecture
+from app.nnvis.models.model import Model
 from datetime import datetime
 import json
 

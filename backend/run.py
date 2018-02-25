@@ -1,5 +1,5 @@
 from flask import Flask
-from app.nnvis.models import db
+from db import db
 from app.nnvis.views import nnvis
 from flask_cors import CORS
 
@@ -8,7 +8,8 @@ CORS(app)
 app.config.from_object('config')
 
 db.init_app(app)
-with app.app_context():
+@app.before_first_request
+def create_tables():
     db.create_all()
 
 app.register_blueprint(nnvis, url_prefix='/')
