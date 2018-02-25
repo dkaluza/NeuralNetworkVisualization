@@ -1,17 +1,25 @@
 from flask_restful import Resource
 import json
 
-from app.nnvis.models import Architecture
-from app.nnvis.build_model import build_model
+import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
 
+from app.nnvis.models import Architecture
+from app.nnvis.build_model import TrainMnistThread
 
 class TrainNewModel(Resource):
     def get(self, arch_id, dataset_id):
         arch = Architecture.query.get(arch_id)
         graph = json.loads(arch.graph)
+        nodes = graph['nodes']
+        links = graph['links']
 
-        ops = build_model(graph['nodes'], graph['links'])
-        print(ops)
+        try:
+            thread1 = TrainMnistThread(nodes, links)
+            thread1.start()
+            # thread1.join()
+        except:
+            print('Error: unable to start thread')
 
         return {'ok': 'ok'}, 200
 

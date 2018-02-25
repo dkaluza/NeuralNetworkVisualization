@@ -1,6 +1,8 @@
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
+import threading
 
+from tensorflow.examples.tutorials.mnist import input_data
 
 def get_activation(node):
     activation = node['params']['activation']
@@ -99,6 +101,78 @@ def build_model(nodes, links):
     return ret
 
 
+def get_input_ids(nodes, links):
+    ids = [node['id'] for node in nodes]
+    num_inputs = {id: 0 for id in ids}
+
+    for l in links:
+        num_inputs[l['target']] += 1
+
+    return list(filter(lambda id: num_inputs[id] == 0, ids))
+
+
+def get_output_ids(nodes, links):
+    ids = [node['id'] for node in nodes]
+    num_outputs = {id: 0 for id in ids}
+
+    for l in links:
+        num_outputs[l['source']] += 1
+
+    return list(filter(lambda id: num_outputs[id] == 0, ids))
+
+
+def calculate_logloss(y, pred):
+    return tf.losses.log_loss(y, pred)
+
+
+def minimize_with_adam(loss):
+    return tf.train.AdamOptimizer().minimize(loss)
+
+
+class TrainMnistThread(threading.Thread):
+    def __init__(self, nodes, links):
+        threading.Thread.__init__(self)
+        self.nodes = nodes
+        self.links = links
+
+    def run(self):
+        print('starting train_mnist')
+        EPOCHS = 10
+        BATCH_SIZE = 32
+        mnist = input_data.read_data_sets('../../mnist/', one_hot=True, reshape=False)
+
+        print('building graph...')
+        ops = build_model(self.nodes, self.links)
+        X = ops[get_input_ids(self.nodes, self.links)[0]]
+        y = tf.placeholder(tf.float32, shape=(None, 10))
+        pred = ops[get_output_ids(self.nodes, self.links)[0]]
+        loss = calculate_logloss(y, pred)
+        opt = minimize_with_adam(loss)
+
+        losses = []
+
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+
+            for e in range(EPOCHS):
+                print('---- Epoch {e} ----'.format(e=e))
+                rounds = int(mnist.train.num_examples / BATCH_SIZE)
+
+                avarage_loss = 0.
+                cnt = 0
+                for i in range(rounds):
+                    batch_xs, batch_ys = mnist.train.next_batch(BATCH_SIZE)
+                    _, l = sess.run([opt, loss], feed_dict={X: batch_xs, y: batch_ys})
+
+                    avarage_loss += l
+                    cnt += 1
+                    if cnt == 100:
+                        print('Avg. loss = {l}'.format(l=avarage_loss))
+                        losses.append(avarage_loss)
+                        avarage_loss = 0.
+                        cnt = 0
+
+
 if __name__ == '__main__':
     # simple neural network for testing
     nodes = [
@@ -145,7 +219,8 @@ if __name__ == '__main__':
             ]
 
     try:
-        ops = build_model(nodes, links)
-        print(ops)
-    except Exception as e:
-        print(e)
+        thread1 = TrainMnistThread(nodes, links)
+        thread1.start()
+        thread1.join()
+    except:
+        print('Error: unable to start thread')
