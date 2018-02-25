@@ -11,6 +11,7 @@ import { Layer, StrToActivation } from '../vis-arch/layers/layer/layer';
 import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
 import { ConvLayer, StrToPadding } from '../vis-arch/layers/conv/conv';
 import { InputLayer } from '../vis-arch/layers/input/input';
+import { PoolLayer } from '../vis-arch/layers/pool/pool';
 
 @Component({
     selector: 'app-build',
@@ -67,6 +68,8 @@ export class BuildComponent implements OnInit {
                 return ConvLayer.fromDict(node);
             case 'input':
                 return InputLayer.fromDict(node);
+            case 'pool':
+                return PoolLayer.fromDict(node);
             default:
                 console.log('Unknown layerType: ' + node.layerType);
                 return undefined;

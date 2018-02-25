@@ -38,8 +38,11 @@
                 <ng-template ngSwitchCase="input">
                     <app-layer-input [layer]="selectedLayer" (changed)="onNodeUpdate()"></app-layer-input>
                 </ng-template>
+                <ng-template ngSwitchCase="pool">
+                    <app-layer-pool [layer]="selectedLayer" (changed)="onNodeUpdate()"></app-layer-pool>
+                </ng-template>
                 <ng-template ngSwitchDefault>
-                    <h4>Wrong type of layer :( {{ selectedLayer.layerType }}</h4>
+                    <h4>Wrong type of layer: {{ selectedLayer.layerType }}</h4>
                 </ng-template>
             </div>
         </ng-container>

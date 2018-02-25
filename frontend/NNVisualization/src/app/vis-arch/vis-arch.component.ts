@@ -11,6 +11,7 @@ import { Layer, Activation } from './layers/layer/layer';
 import { FullyConnectedLayer } from './layers/fully-connected/fully-connected';
 import { ConvLayer } from './layers/conv/conv';
 import { InputLayer } from './layers/input/input';
+import { PoolLayer } from './layers/pool/pool';
 
 interface GraphNode {
     id: string;
@@ -187,6 +188,9 @@ export class VisArchComponent implements OnInit, OnChanges {
                 break;
             case 'input':
                 this.layers.set(id, new InputLayer(id, layer.shortcut));
+                break;
+            case 'pool':
+                this.layers.set(id, new PoolLayer(id, layer.shortcut));
                 break;
         }
 

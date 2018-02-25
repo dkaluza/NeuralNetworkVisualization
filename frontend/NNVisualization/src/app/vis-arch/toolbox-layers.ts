@@ -21,6 +21,11 @@ export const layerTemplates: ToolboxLayer[] = [
         label: 'Input',
         shortcut: 'input',
         color: '#994499'
+    }, {
+        id: 'pool',
+        label: 'Pooling',
+        shortcut: 'pool',
+        color: '#bbaa77'
     }// , {
         // id: 'concat',
         // label: 'Concatenation',
