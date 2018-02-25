@@ -1,4 +1,5 @@
 import { Layer, Activation } from '../layer/layer';
+import { ArchNode } from '../../../selected-architecture/architecture';
 
 export enum Padding {
     Same,
@@ -24,13 +25,13 @@ export class ConvLayer extends Layer {
         this._activation = activation;
     }
 
-    static fromDict(dict): ConvLayer {
+    static fromDict(dict: ArchNode): ConvLayer {
         return new ConvLayer(
-            dict.id, dict.label,
-            dict.params.inputShape,
+            Number(dict.id), dict.label,
+            String(dict.params.inputShape),
             dict.params.numFilters,
-            dict.params.kernelShape,
-            dict.params.strides,
+            String(dict.params.kernelShape),
+            String(dict.params.strides),
             dict.params.padding,
             dict.params.activation
         );
