@@ -1,4 +1,4 @@
-import { Layer, Activation } from '../layer/layer';
+import { Layer } from '../layer/layer';
 import { ArchNode } from '../../../selected-architecture/architecture';
 
 export class InputLayer extends Layer {
