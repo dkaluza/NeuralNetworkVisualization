@@ -2,6 +2,8 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { LogInDialogComponent } from "./log-in-dialog/log-in-dialog.component"
 import { AuthenticationService } from "../authentication/authentication.service"
+import { Router } from '@angular/router';
+
 
 @Component({
     selector: 'app-header',
@@ -13,7 +15,8 @@ export class HeaderComponent implements OnInit {
     @ViewChild('toolbar')
     private toolbar: ElementRef;
 
-    constructor(private dialog: MatDialog, public auth: AuthenticationService) { }
+    constructor(private dialog: MatDialog, public auth: AuthenticationService,
+        private router: Router) { }
 
     ngOnInit() {
     }
@@ -31,8 +34,8 @@ export class HeaderComponent implements OnInit {
             (result: { username: string, password: string }) => {
                 if (result) {
                     this.auth.logIn(result.username, result.password).subscribe(
-                        result => {
-                            console.log("success");
+                        () => {
+                            this.refreshRouter();
                         },
                         error => {
                             // TODO error popup
@@ -43,7 +46,17 @@ export class HeaderComponent implements OnInit {
             });
     }
 
+    private refreshRouter() {
+        this.router.navigateByUrl("/").then(
+            () => { },
+            error => {
+                console.log(error);
+            }
+        )
+    }
+
     public logOut() {
         this.auth.logOut();
+        this.refreshRouter();
     }
 }
