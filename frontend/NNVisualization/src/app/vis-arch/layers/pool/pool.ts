@@ -37,9 +37,9 @@ export class PoolLayer extends Layer {
     static fromDict(dict): PoolLayer {
         return new PoolLayer(
             dict.id, dict.label,
-            dict.params.inputShape,
-            dict.params.kernelShape,
-            dict.params.strides,
+            String(dict.params.inputShape),
+            String(dict.params.kernelShape),
+            String(dict.params.strides),
             StrToPadding(dict.params.padding),
             StrToPool(dict.params.pool)
         );
