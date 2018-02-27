@@ -65,10 +65,10 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
 import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
-import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service'
-import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service'
-import { JwtHelper } from 'angular2-jwt'
-import { UnauthorizedComponent } from './unauthorized/unauthorized.component'
+import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service';
+import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service';
+import { JwtHelper } from 'angular2-jwt';
+import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 const appRoutes: Routes = [

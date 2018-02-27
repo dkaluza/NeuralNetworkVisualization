@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { LogInDialogComponent } from "./log-in-dialog/log-in-dialog.component"
-import { AuthenticationService } from "../authentication/authentication.service"
+import { LogInDialogComponent } from "./log-in-dialog/log-in-dialog.component";
+import { AuthenticationService } from "../authentication/authentication.service";
 import { Router } from '@angular/router';
 
 
