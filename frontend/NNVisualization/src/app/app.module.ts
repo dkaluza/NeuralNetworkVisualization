@@ -82,7 +82,6 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
     RestangularProvider.setBaseUrl('/api');
 
     RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
-        debugger;
         if (authService.isAuthenticated()) {
             let bearerToken = authService.getToken();
 
