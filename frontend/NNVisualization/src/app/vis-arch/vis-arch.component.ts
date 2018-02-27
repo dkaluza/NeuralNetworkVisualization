@@ -1,7 +1,16 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnChanges,
+         ViewEncapsulation, Input, Output, EventEmitter } from '@angular/core';
 import * as shape from 'd3-shape';
 
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
+import { ArchNode, ArchLink } from '../selected-architecture/architecture';
+import { ToolboxLayer, layerTemplates } from './toolbox-layers';
+import { Graph } from './graph';
+
+import { Layer } from './layers/layer/layer';
+import { FullyConnectedLayer } from './layers/fully-connected/fully-connected';
+import { ConvLayer } from './layers/conv/conv';
+import { InputLayer } from './layers/input/input';
 
 interface GraphNode {
     id: string;
@@ -15,18 +24,19 @@ interface GraphLink {
     target: string;
 }
 
-interface ToolboxLayer {
-    label: string;
-    color: string;
-}
-
 @Component({
     selector: 'app-vis-arch',
     encapsulation: ViewEncapsulation.None,
     styleUrls: ['./vis-arch.component.css'],
     templateUrl: './vis-arch.component.html'
 })
-export class VisArchComponent implements OnInit {
+export class VisArchComponent implements OnInit, OnChanges {
+    @Input() layers: Map<number, Layer>;
+    @Input() connections: ArchLink[];
+    @Input() hasLayersBeenModified: boolean;
+
+    @Output() modified = new EventEmitter();
+    @Output() nodeSelected = new EventEmitter();
 
     // options
     orientation = 'LR'; // LR, RL, TB, BT
@@ -35,57 +45,80 @@ export class VisArchComponent implements OnInit {
     // possible curves:
     //    'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
     //    'Monotone Y', 'Natural', 'Step', 'Step After', 'Step Before'
-    curve: any = shape.curveCardinal;
+    curve: any = shape.curveMonotoneX;
 
-    // graph data
+    // this is data for visualizing architecture
     nodes: GraphNode[] = [];
     links: GraphLink[] = [];
 
-    // toolbox data
-    layers: ToolboxLayer[] = [
-        {
-            label: 'Convolution',
-            color: '#6666aa'
-        }, {
-            label: 'Fully Connected',
-            color: '#00FF00'
-        }
-    ];
+    // stores only graph structure
+    private _graph: Graph;
+    // stores information abouts layers
+    // private _layerData: { [id: number]: Layer };
+    // private _layerData: Layer[];
 
+    // used for architecture manipulations
     connectingMode = false;
     deletingMode = false;
     private _selectedSource = undefined;
     private _selectedTarget = undefined;
 
-    private _nodeColor = '#6666aa';
+    // used for drag 'n' drop
+    toolboxLayers = layerTemplates;
 
     constructor(private selArchService: SelectedArchitectureService) {
-        if (selArchService.architecture) {
-            this.nodes = [];
-            for (const node of selArchService.architecture.nodes) {
-                this.nodes.push({
-                    id: node.id,
-                    label: node.label,
-                    selected: false,
-                    color: this._nodeColor
-                });
-            }
-            this.links = selArchService.architecture.links;
-        }
+        this._graph = new Graph();
+        // this._layerData = [];
     }
 
     ngOnInit() {
     }
 
+    ngOnChanges(changes) {
+        console.log('OnChanges');
+
+        this._graph = new Graph();
+        this.layers.forEach(
+            (node, id) => { this._graph.addNode(id); }
+        );
+        this.connections.forEach(
+            link => { this._graph.addLink(Number(link.source),
+                                          Number(link.target)); }
+        );
+
+        this._setGraphData();
+    }
+
+    private _setGraphData(): void {
+        this.nodes = this._graph.nodes.map(
+            n => {
+                const layer = this.layers.get(n);
+                const color = layerTemplates.find(
+                    l => (l.id === layer.layerType)
+                ).color;
+                return {
+                    id: String(layer.id),
+                    label: layer.label,
+                    selected: false,
+                    color: color
+                };
+            }
+        );
+        this.links = this._graph.links;
+    }
+
     onNodeSelect(data) {
         if (this.connectingMode) {
-            this.handleSelectInConnectingMode(data);
+            this._handleSelectInConnectionMode(data);
         } else if (this.deletingMode) {
-            this.handleSelectInDeletingMode(data);
+            this._handleSelectInDeletionMode(data);
+        } else {
+            // this.selectedLayer = this.layers.get(Number(data.id));
+            this.nodeSelected.emit(Number(data.id));
         }
     }
 
-    private handleSelectInConnectingMode(data): void {
+    private _handleSelectInConnectionMode(data): void {
         if (!this._selectedSource) {
             // select staring node
             this._selectedSource = data;
@@ -101,65 +134,28 @@ export class VisArchComponent implements OnInit {
             this._selectedTarget = data;
             this._selectedSource.selected = false;
 
-            if (!this.links.some(link =>
-                link.source === this._selectedSource.id &&
-                link.target === this._selectedTarget.id)) {
-                this.links.push({
-                    source: this._selectedSource.id,
-                    target: this._selectedTarget.id
-                });
-            }
+            this._graph.addLink(Number(this._selectedSource.id),
+                                Number(this._selectedTarget.id));
 
             this._selectedSource = undefined;
             this._selectedTarget = undefined;
-            this.updateView();
+            this._updateView();
         }
     }
 
-    private handleSelectInDeletingMode(data): void {
-        this.links = this.links.filter(link =>
-            link.source !== data.id &&
-            link.target !== data.id
-        );
-        this.nodes = this.nodes.filter(node =>
-            node.id !== data.id
-        );
-        this.updateView();
+    private _handleSelectInDeletionMode(data): void {
+        const id = Number(data.id);
+
+        this._graph.removeNode(id);
+        this.layers.delete(id);
+
+        this._updateView();
     }
 
-    private updateView(): void {
-        // HACK!
-        // makes changes visible on screen
-        this.nodes = [...this.nodes];
-        this.links = [...this.links];
+    private _updateView(): void {
+        this._setGraphData();
 
-        this.selArchService.currentNodes = this.nodes.map(
-            (node) =>  ({id: node.id, label: node.label})
-        );
-        this.selArchService.currentLinks = this.links;
-    }
-
-    addNewNode(layer: ToolboxLayer): void {
-        // select new id and label
-        // temporary solution
-        let label = layer.label;
-        let id = 1;
-        while (!this.nodes.every((node) => node.label !== label)) {
-            label = layer.label + ' ' + id;
-            id += 1;
-        }
-        id = 1;
-        while (!this.nodes.every((node) => node.id !== String(id))) {
-            id += 1;
-        }
-
-        this.nodes.push({
-            id: String(id),
-            label: label,
-            selected: false,
-            color: layer.color
-        });
-        this.updateView();
+        this.modified.emit({nodes: this.layers, links: this.links});
     }
 
     toggleLinking(): void {
@@ -176,16 +172,43 @@ export class VisArchComponent implements OnInit {
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
         const layer: ToolboxLayer = event.value;
-        this.addNewNode(layer);
+
+        // find smallest free id
+        let id = this._graph.nodes.reduce((p, n) => (n > p ? n : p), 0);
+        id += 1;
+        this._graph.addNode(id);
+
+        switch (layer.id) {
+            case 'fc':
+                this.layers.set(id, new FullyConnectedLayer(id, layer.shortcut));
+                break;
+            case 'conv':
+                this.layers.set(id, new ConvLayer(id, layer.shortcut));
+                break;
+            case 'input':
+                this.layers.set(id, new InputLayer(id, layer.shortcut));
+                break;
+        }
+
+        this.nodes.push({
+            id: String(id),
+            label: layer.shortcut,
+            selected: false,
+            color: layer.color
+        });
+        this._updateView();
+        this.nodeSelected.emit(id);
     }
 
     onLinkSelect(data): void {
         if (this.deletingMode) {
-            this.links = this.links.filter(link =>
-                link.source !== data.source ||
-                link.target !== data.target
-            );
-            this.updateView();
+            this._graph.removeLink(Number(data.source),
+                                   Number(data.target));
+            this._updateView();
         }
+    }
+
+    update() {
+        this._updateView();
     }
 }

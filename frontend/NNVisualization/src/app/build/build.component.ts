@@ -3,6 +3,15 @@ import { SelectedArchitectureService } from '../selected-architecture/selected-a
 import { Restangular } from 'ngx-restangular';
 import { MatDialog, MatDialogRef } from '@angular/material';
 
+import { VisArchComponent } from '../vis-arch/vis-arch.component';
+
+import { ArchNode, ArchLink } from '../selected-architecture/architecture';
+
+import { Layer } from '../vis-arch/layers/layer/layer';
+import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
+import { ConvLayer } from '../vis-arch/layers/conv/conv';
+import { InputLayer } from '../vis-arch/layers/input/input';
+
 @Component({
     selector: 'app-build',
     templateUrl: './build.component.html',
@@ -13,7 +22,14 @@ export class BuildComponent implements OnInit {
     private _saveCurrentMessage: string;
     private _saveNewMessage: string;
 
-    constructor(private selectedArchitectureService: SelectedArchitectureService,
+    nodes: Map<number, Layer>;
+    links: ArchLink[];
+    hasNodesBeenModified = false;
+
+    selectedLayer: Layer;
+    private selectedID: number;
+
+    constructor(private selArchService: SelectedArchitectureService,
                 private restangular: Restangular,
                 public dialog: MatDialog) {
         this._saveCurrentMessage = 'Save';
@@ -21,16 +37,95 @@ export class BuildComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (this.selArchService.currentNodes) {
+            this.nodes = this.selArchService.currentNodes;
+            this.links = this.selArchService.currentLinks;
+        } else if (this.selArchService.architecture) {
+            this.nodes = new Map;
+            this.selArchService.architecture.nodes.forEach(
+                node => {
+                    return this.nodes.set(
+                                Number(node.id),
+                                this._archNodeToLayer(node));
+                }
+            );
+            this.links = this.selArchService.architecture.links;
+
+            this.selArchService.currentNodes = this.nodes;
+            this.selArchService.currentLinks = this.links;
+        } else {
+            this.nodes = new Map;
+            this.links = [];
+        }
+    }
+
+    private _archNodeToLayer(node: ArchNode): Layer {
+        switch (node.layerType) {
+            case 'fc':
+                return FullyConnectedLayer.fromDict(node);
+            case 'conv':
+                return ConvLayer.fromDict(node);
+            case 'input':
+                return InputLayer.fromDict(node);
+            default:
+                return undefined;
+        }
+    }
+
+    private _unselectNode(): void {
+        this.selectedLayer = undefined;
+        this.selectedID = undefined;
+    }
+
+    onGraphModified(data): void {
+        this.selArchService.currentNodes = data.nodes;
+        this.selArchService.currentLinks = data.links;
+    }
+
+    onNodeSelected(id): void {
+        this.selectedLayer = this.nodes.get(id);
+        this.selectedID = id;
+    }
+
+    onNodeUpdate(): void {
+        this.hasNodesBeenModified = !this.hasNodesBeenModified;
+        // this.hasNodesBeenModified = true;
+    }
+
+    clearCurrentArch(): void {
+        this.selArchService.currentNodes.clear();
+        this.selArchService.currentLinks = [];
+        this.nodes = this.selArchService.currentNodes;
+        this.links = this.selArchService.currentLinks;
+
+        this._unselectNode();
+    }
+
+    resetArch(): void {
+        this.nodes = new Map;
+        this.selArchService.architecture.nodes.forEach(
+            node => {
+                return this.nodes.set(
+                    Number(node.id),
+                    this._archNodeToLayer(node));
+            }
+        );
+        this.links = this.selArchService.architecture.links;
+
+        this.selArchService.currentNodes = this.nodes;
+        this.selArchService.currentLinks = this.links;
+
+        this._unselectNode();
     }
 
     saveCurrentArch() {
-        if (this.selectedArchitectureService.architecture) {
-            const arch = this.selectedArchitectureService.architecture;
+        if (this.selArchService.architecture) {
+            const arch = this.selArchService.architecture;
 
             const data = {
                 graph: {
-                    nodes: this.selectedArchitectureService.currentNodes,
-                    links: this.selectedArchitectureService.currentLinks
+                    nodes: this.selArchService.currentNodesToDict(),
+                    links: this.selArchService.currentLinks
                 }
             };
             this.restangular.all('arch').all(arch.id)
@@ -65,8 +160,8 @@ export class BuildComponent implements OnInit {
             name: name,
             description: desc,
             graph: {
-                nodes: this.selectedArchitectureService.currentNodes,
-                links: this.selectedArchitectureService.currentLinks
+                nodes: this.selArchService.currentNodesToDict(),
+                links: this.selArchService.currentLinks
             }
         };
         this.restangular.all('upload_arch')

@@ -16,10 +16,14 @@ import { VisualizeComponent } from './visualize/visualize.component';
 import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
 import { VisArchComponent } from './vis-arch/vis-arch.component';
 
+import { LayerComponent } from './vis-arch/layers/layer/layer.component';
+import { FullyConnectedComponent } from './vis-arch/layers/fully-connected/fully-connected.component';
+import { ConvComponent } from './vis-arch/layers/conv/conv.component';
+import { InputComponent } from './vis-arch/layers/input/input.component';
 
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from "@angular/common/http";
+import { HttpClientModule } from '@angular/common/http';
 import { RestangularModule, Restangular } from 'ngx-restangular';
 import {
     MatAutocompleteModule,
@@ -60,6 +64,7 @@ import { OutputImageComponent } from './visualize/images-panel/output-image/outp
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 const appRoutes: Routes = [
@@ -142,12 +147,16 @@ export class MaterialImportsModule {}
         TrainComponent,
         SelectedBarComponent,
         VisualizeComponent,
+        VisArchComponent,
+        LayerComponent,
+        FullyConnectedComponent,
+        ConvComponent,
+        InputComponent,
         ImagesPanelComponent,
         NavAlgorithmsComponent,
         InputImageComponent,
         OutputImageComponent,
         VisArchComponent
-
     ],
     imports: [
         BrowserModule,
@@ -160,7 +169,8 @@ export class MaterialImportsModule {}
         MaterialImportsModule,
         NgxChartsModule,
         NgxGraphModule,
-        NgxDnDModule
+        NgxDnDModule,
+        FlexLayoutModule
     ],
     providers: [SelectedArchitectureService],
     bootstrap: [AppComponent]
