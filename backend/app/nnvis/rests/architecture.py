@@ -26,7 +26,7 @@ class ArchitectureTask(Resource):
     def __abort_if_arch_doesnt_exist(self, arch_id):
         if Architecture.query.get(arch_id) is None:
             message = 'Architecture {id} doesn\'t exist'.format(id=arch_id)
-            abort(404, message=message)
+            abort(403, message=message)
 
     def get(self, arch_id):
         self.__abort_if_arch_doesnt_exist(arch_id)
@@ -39,7 +39,7 @@ class ArchitectureTask(Resource):
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
                       .format(id=arch_id)
-            abort(404, message=message)
+            abort(403, message=message)
 
         arch = Architecture.query.get(arch_id)
         arch.delete()
@@ -51,7 +51,7 @@ class ArchitectureTask(Resource):
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
                       .format(id=arch_id)
-            abort(404, message=message)
+            abort(403, message=message)
 
         arch = Architecture.query.get(arch_id)
 
@@ -78,7 +78,7 @@ class UploadNewArchitecture(Resource):
         try:
             new_arch.add()
         except Exception as e:
-            return abort(400, message=e.message)
+            return abort(403, message=e.message)
 
         return arch_to_dict(new_arch), 201
 

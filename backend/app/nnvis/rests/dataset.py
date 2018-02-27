@@ -16,7 +16,7 @@ class DatasetTask(Resource):
         if Dataset.query.get(dataset_id) is None:
             message = 'Dataset {id} doesn\'t exist' \
                       .format(id=dataset_id)
-            abort(404, message=message)
+            abort(403, message=message)
 
     def get(self, dataset_id):
         self.__abort_if_dataset_doesnt_exist(dataset_id)
