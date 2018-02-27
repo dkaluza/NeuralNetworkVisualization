@@ -17,7 +17,7 @@ class ModelTask(Resource):
         if Model.query.get(model_id) is None:
             message = 'Model {id} doesn\'t exist' \
                       .format(id=model_id)
-            abort(404, message=message)
+            abort(403, message=message)
 
     def get(self, model_id):
         self.__abort_if_model_doesnt_exist(model_id)
