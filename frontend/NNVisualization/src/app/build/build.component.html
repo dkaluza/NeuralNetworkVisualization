@@ -1,11 +1,52 @@
-<div class="row">
-    <div class="col-md-6 centered">
-        <button mat-button class="savebutton" (click)="saveCurrentArch()" [disabled]="!selectedArchitectureService.architecture">{{saveCurrentMsg}}</button>
+<div fxLayout class="buttons-row" >
+    <div fxFlex="20%">
+        <button mat-button (click)="clearCurrentArch()">Clear</button>
     </div>
-    <div class="col-md-6 centered">
+    <div fxFlex="20%">
+        <button mat-button (click)="resetArch()"
+         [disabled]="!selArchService.architecture">Reset</button>
+    </div>
+    <div fxFlex="20%">
+        <button mat-button class="savebutton" (click)="saveCurrentArch()"
+                           [disabled]="!selArchService.architecture">
+            {{saveCurrentMsg}}
+        </button>
+    </div>
+    <div fxFlex="20%">
         <button mat-button class="savebutton" (click)="saveAsNewArch()">{{saveNewMsg}}</button>
     </div>
 </div>
-<div style="width: 100%; height: 500px">
-    <app-vis-arch></app-vis-arch>
+<div fxLayout>
+    <div fxFlex="80%" class="vis-arch-container">
+        <app-vis-arch
+         [(layers)]="nodes"
+         [(connections)]="links"
+         [hasLayersBeenModified]="hasNodesBeenModified"
+         (modified)="onGraphModified($event)"
+         (nodeSelected)="onNodeSelected($event)">
+        </app-vis-arch>
+    </div>
+    <div fxFlex="20%" class="selected-layer">
+        <ng-container *ngIf="selectedLayer">
+            <div [ngSwitch]="selectedLayer.layerType">
+                <ng-template ngSwitchCase="fc">
+                    <app-layer-fc [layer]="selectedLayer" (changed)="onNodeUpdate()"></app-layer-fc>
+                </ng-template>
+                <ng-template ngSwitchCase="conv">
+                    <app-layer-conv [layer]="selectedLayer" (changed)="onNodeUpdate()"></app-layer-conv>
+                </ng-template>
+                <ng-template ngSwitchCase="input">
+                    <app-layer-input [layer]="selectedLayer" (changed)="onNodeUpdate()"></app-layer-input>
+                </ng-template>
+                <ng-template ngSwitchDefault>
+                    <h4>Wrong type of layer :( {{ selectedLayer.layerType }}</h4>
+                </ng-template>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="!selectedLayer">
+            <div class="not-selected-message">
+                <h3>Layer not selected</h3>
+            </div>
+        </ng-container>
+    </div>
 </div>

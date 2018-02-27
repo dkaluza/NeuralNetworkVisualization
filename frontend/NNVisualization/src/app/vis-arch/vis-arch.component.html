@@ -1,14 +1,17 @@
-<div>
-    <mat-checkbox class="setting" [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
-    <mat-checkbox class="setting" [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
+<div fxLayout class="settings-row">
+    <div fxFlex="50%">
+        <mat-checkbox [(ngModel)]="connectingMode" (change)="toggleLinking()">Connect</mat-checkbox>
+    </div>
+    <div fxFlex="50%">
+        <mat-checkbox [(ngModel)]="deletingMode"  (change)="toggleDeleting()">Delete</mat-checkbox>
+    </div>
 </div>
-<div class="graph"  ngxDroppable="graph" (drop)="onLayerDrop($event)" [model] = []>
+<div fxLayout>
+<div fxFlex="100%" class="graph"  ngxDroppable="graph" (drop)="onLayerDrop($event)" [model] = []>
         <ngx-graph
-         [view]="view"
          [autoZoom]="true"
          [legend]="false"
          [links]="links"
-         (legendLabelClick)="onLegendLabelClick($event)"
          [nodes]="nodes"
          [orientation]="orientation"
          [curve]="curve"
@@ -50,9 +53,10 @@
 
         </ngx-graph>
 </div>
+</div>
 
 <mat-divider></mat-divider>
 <div ngxDroppable [copy]="true" class="toolbox">
-    <div *ngFor="let layer of layers" ngxDraggable="graph"
+    <div *ngFor="let layer of toolboxLayers" ngxDraggable="graph"
     [model]="layer" class="layer" [style.background-color]="layer.color">{{layer.label}}</div>
 </div>

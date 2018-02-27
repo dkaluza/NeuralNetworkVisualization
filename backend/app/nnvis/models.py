@@ -38,7 +38,7 @@ class Architecture(db.Model, CRUD):
         self.last_modified = datetime.utcnow()
 
     def __repr__(self):
-        return '<Archtecture {name}>'.format(name=self.name)
+        return '<Archtecture {id} {name}>'.format(id=self.id, name=self.name)
 
 
 class Model(db.Model, CRUD):
@@ -58,7 +58,7 @@ class Model(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def __repr__(self):
-        return '<Model {name}>'.format(name=self.name)
+        return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
 
 class Dataset(db.Model, CRUD):
@@ -76,7 +76,7 @@ class Dataset(db.Model, CRUD):
         self.split_path = split_path
 
     def __repr__(self):
-        return '<Dataset {name}>'.format(name=self.name)
+        return '<Dataset {id} {name}>'.format(id=self.id, name=self.name)
 
 
 # todo

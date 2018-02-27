@@ -1,0 +1,23 @@
+<div class="node-container">
+    <div class="node-header">
+        <span><strong>ID: {{ layer.id }}</strong></span>
+    </div>
+    <mat-form-field>
+        <input matInput placeholder="Label"
+                        required
+                        [(ngModel)]="layer.label"
+                        (input)="onChangeLabel($event.target.value)">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput placeholder="# Output units"
+                        [(ngModel)]="layer.numOutputs"
+                        type="number">
+    </mat-form-field>
+    <mat-form-field>
+        <mat-select placeholder="Activation" [(value)]="layer.activation">
+            <mat-option *ngFor="let a of activations" [value]="a.value">
+                {{ a.viewValue }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
