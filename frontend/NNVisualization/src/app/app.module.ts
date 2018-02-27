@@ -62,7 +62,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
 import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
 import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service'
-import { AuthenticationService } from './authentication/authentication.service'
+import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service'
 import { JwtHelper } from 'angular2-jwt'
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component'
 
@@ -78,9 +78,20 @@ const appRoutes: Routes = [
 ];
 
 // Function for setting the default restangular configuration
-export function RestangularConfigFactory(RestangularProvider) {
+export function RestangularConfigFactory(RestangularProvider, authService: AuthenticationWithoutLoginService) {
     RestangularProvider.setBaseUrl('/api');
-    RestangularProvider.setDefaultHeaders({});
+
+    RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
+        debugger;
+        if (authService.isAuthenticated()) {
+            let bearerToken = authService.getToken();
+
+            return {
+                headers: Object.assign({}, headers, { Authorization: `Bearer ${bearerToken}` })
+            };
+        }
+        return {};
+    });
 
     // HACK! :(
     // necessary so restangular's subscribe can work properly
@@ -166,14 +177,14 @@ export class MaterialImportsModule { }
         ReactiveFormsModule,
         HttpClientModule,
         RouterModule.forRoot(appRoutes),
-        RestangularModule.forRoot(RestangularConfigFactory),
+        RestangularModule.forRoot([AuthenticationWithoutLoginService], RestangularConfigFactory),
         MaterialImportsModule,
         NgxChartsModule,
         NgxGraphModule,
         NgxDnDModule
     ],
     providers: [SelectedArchitectureService, AuthenticationService,
-        AuthGuard, JwtHelper],
+        AuthenticationWithoutLoginService, AuthGuard, JwtHelper],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

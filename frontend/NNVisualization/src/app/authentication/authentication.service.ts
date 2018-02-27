@@ -4,24 +4,50 @@ import { Restangular } from 'ngx-restangular';
 import { Observable } from 'rxjs/Observable';
 
 @Injectable()
-export class AuthenticationService {
+export class AuthenticationWithoutLoginService {
+    protected _tokenPath = 'token';
 
-    constructor(private jwtHelper: JwtHelper, private restangular: Restangular) {
-        this.restangular = restangular.withConfig((RestangularConfigurer) => {
-            RestangularConfigurer.setFullResponse(true);
-        });
+    constructor(protected jwtHelper: JwtHelper) {
+
     }
-
-    private _tokenPath = 'token';
 
     public getToken(): string {
         return localStorage.getItem(this._tokenPath);
     }
 
+
+
     public isAuthenticated(): boolean {
         const token = this.getToken();
 
-        return token ? !this.jwtHelper.isTokenExpired(token) : false;
+        if (token) {
+            if (this.jwtHelper.isTokenExpired(token)) {
+                this.logOut();
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    public logOut() {
+        localStorage.removeItem(this._tokenPath);
+    }
+
+}
+
+@Injectable()
+export class AuthenticationService extends AuthenticationWithoutLoginService {
+
+
+    constructor(jwtHelper: JwtHelper, private restangular: Restangular) {
+        super(jwtHelper);
+        this.restangular = restangular.withConfig((RestangularConfigurer) => {
+            RestangularConfigurer.setFullResponse(true);
+        });
     }
 
     public logIn(username: string, password: string): Observable<void> {
@@ -30,18 +56,6 @@ export class AuthenticationService {
             .map(response => {
                 response = JSON.parse(response._body);
                 localStorage.setItem(this._tokenPath, response.access_token);
-                this.restangular.withConfig(restangularConfigurer => {
-                    restangularConfigurer
-                        .setDefaultHeaders({ 'Authorization': 'Bearer ' + this.getToken() })
-                });
             });
     }
-
-    public logOut() {
-        localStorage.removeItem(this._tokenPath);
-        this.restangular.withConfig(restangularConfigurer => {
-            restangularConfigurer.setDefaultHeaders({})
-        });
-    }
-
 }
