@@ -64,22 +64,37 @@ import { OutputImageComponent } from './visualize/images-panel/output-image/outp
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
+import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
+import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service';
+import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service';
+import { JwtHelper } from 'angular2-jwt';
+import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
-
 const appRoutes: Routes = [
-    { path: '', redirectTo: 'manage', pathMatch: 'full'},
-    { path: 'manage', component: ManageComponent},
-    { path: 'build', component: BuildComponent},
-    { path: 'train', component: TrainComponent},
-    { path: 'visualize', component: VisualizeComponent},
-    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent},
+    { path: '', redirectTo: 'manage', pathMatch: 'full' },
+    { path: 'manage', component: ManageComponent, canActivate: [AuthGuard] },
+    { path: 'build', component: BuildComponent, canActivate: [AuthGuard] },
+    { path: 'train', component: TrainComponent, canActivate: [AuthGuard] },
+    { path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'unauthorized', component: UnauthorizedComponent },
 ];
 
 // Function for setting the default restangular configuration
-export function RestangularConfigFactory (RestangularProvider) {
+export function RestangularConfigFactory(RestangularProvider, authService: AuthenticationWithoutLoginService) {
     RestangularProvider.setBaseUrl('/api');
-    RestangularProvider.setDefaultHeaders({});
+
+    RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
+        if (authService.isAuthenticated()) {
+            let bearerToken = authService.getToken();
+
+            return {
+                headers: Object.assign({}, headers, { Authorization: `Bearer ${bearerToken}` })
+            };
+        }
+        return {};
+    });
 
     // HACK! :(
     // necessary so restangular's subscribe can work properly
@@ -134,7 +149,7 @@ export function RestangularConfigFactory (RestangularProvider) {
     ],
     declarations: []
 })
-export class MaterialImportsModule {}
+export class MaterialImportsModule { }
 
 
 @NgModule({
@@ -156,7 +171,12 @@ export class MaterialImportsModule {}
         NavAlgorithmsComponent,
         InputImageComponent,
         OutputImageComponent,
-        VisArchComponent
+        VisArchComponent,
+        LogInDialogComponent,
+        UnauthorizedComponent
+    ],
+    entryComponents: [
+        LogInDialogComponent
     ],
     imports: [
         BrowserModule,
@@ -165,14 +185,15 @@ export class MaterialImportsModule {}
         ReactiveFormsModule,
         HttpClientModule,
         RouterModule.forRoot(appRoutes),
-        RestangularModule.forRoot(RestangularConfigFactory),
+        RestangularModule.forRoot([AuthenticationWithoutLoginService], RestangularConfigFactory),
         MaterialImportsModule,
         NgxChartsModule,
         NgxGraphModule,
         NgxDnDModule,
         FlexLayoutModule
     ],
-    providers: [SelectedArchitectureService],
+    providers: [SelectedArchitectureService, AuthenticationService,
+        AuthenticationWithoutLoginService, AuthGuard, JwtHelper],
     bootstrap: [AppComponent]
 })
 export class AppModule { }
