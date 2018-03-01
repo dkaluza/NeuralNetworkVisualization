@@ -1,24 +1,37 @@
-from flask_restful import Resource
-import json
+from flask import request
+from flask_restful import abort, Resource
 
-import tensorflow as tf
-from tensorflow.examples.tutorials.mnist import input_data
+from app.nnvis.models import Architecture, Model
+from app.nnvis.build_model import TrainThread
 
-from app.nnvis.models import Architecture
-from app.nnvis.build_model import TrainMnistThread
 
 class TrainNewModel(Resource):
-    def get(self, arch_id, dataset_id):
+    def post(self, arch_id, dataset_id):
         arch = Architecture.query.get(arch_id)
-        graph = json.loads(arch.graph)
-        nodes = graph['nodes']
-        links = graph['links']
+        if arch is None:
+            abort(403, message='This Architecture doesn\'t exists')
 
+        args = request.get_json(force=True)
+        name = args['name']
+        desc = args['description']
+
+        if len(Model.query.filter_by(arch_id=arch_id, name=name).all()) > 0:
+            abort(403, message='Model with this name already exists')
+        model = Model(name=name, description=desc, weights_path='',
+                      arch_id=arch_id, dataset_id=dataset_id)
+        model.add()
         try:
-            thread1 = TrainMnistThread(nodes, links)
+            params = {
+                    'nepochs': int(args['nepochs']),
+                    'batch_size': int(args['batch_size']),
+                    'learning_rate': float(args['learning_rate'])
+                    }
+            thread1 = TrainThread(model.arch_id, model.id,
+                                  model.dataset_id, params)
             thread1.start()
             # thread1.join()
-        except:
+        except Exception as e:
+            print(e)
             print('Error: unable to start thread')
 
         return {'ok': 'ok'}, 200

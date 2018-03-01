@@ -2,7 +2,12 @@ import tensorflow as tf
 import tensorflow.contrib.layers as layers
 import threading
 
+import json
+
 from tensorflow.examples.tutorials.mnist import input_data
+
+from app.nnvis.models import Architecture
+
 
 def get_activation(node):
     activation = node['params']['activation']
@@ -35,9 +40,9 @@ def build_input_op(node, input_ops):
 def build_fc_op(node, input_ops):
     x = input_ops[0]
     x = layers.flatten(x)
-    return layers.fully_connected(x,
-                num_outputs=node['params']['numOutputs'],
-                activation_fn=get_activation(node))
+    return layers.fully_connected(
+            x, num_outputs=node['params']['numOutputs'],
+            activation_fn=get_activation(node))
 
 
 def build_conv_op(node, input_ops):
@@ -46,12 +51,12 @@ def build_conv_op(node, input_ops):
     kernel_size = node['params']['kernelShape']
     strides = node['params']['strides']
 
-    return layers.conv2d(x,
-                num_outputs=num_filters,
-                kernel_size=kernel_size,
-                stride=strides,
-                padding=get_padding(node),
-                activation_fn=get_activation(node))
+    return layers.conv2d(
+            x, num_outputs=num_filters,
+            kernel_size=kernel_size,
+            stride=strides,
+            padding=get_padding(node),
+            activation_fn=get_activation(node))
 
 
 def build_pool_op(node, input_ops):
@@ -151,121 +156,86 @@ def calculate_accuracy(y, pred):
     return tf.reduce_mean(tf.cast(n, tf.float32))
 
 
-def minimize_with_adam(loss):
-    return tf.train.AdamOptimizer().minimize(loss)
+def minimize_with_adam(loss, lr):
+    return tf.train.AdamOptimizer(lr).minimize(loss)
 
 
-class TrainMnistThread(threading.Thread):
-    def __init__(self, nodes, links):
+class TrainThread(threading.Thread):
+    def __init__(self, arch_id, model_id, dataset_id, params):
         threading.Thread.__init__(self)
-        self.nodes = nodes
-        self.links = links
+        self._arch_id = arch_id
+        self._model_id = model_id
+        self._dataset_id = dataset_id
+        arch = Architecture.query.get(arch_id)
+        graph = json.loads(arch.graph)
+        self._nodes = graph['nodes']
+        self._links = graph['links']
+
+        self._nepochs = params['nepochs']
+        self._batch_size = params['batch_size']
+        self._lr = params['learning_rate']
+
+    def __build_model(self):
+        print('building graph...')
+        self._ops = build_model(self._nodes, self._links)
+        self._X = self._ops[get_input_ids(self._nodes, self._links)[0]]
+        self._y = tf.placeholder(tf.float32, shape=(None, 10))
+        self._pred = self._ops[get_output_ids(self._nodes, self._links)[0]]
+        self._loss = calculate_logloss(self._y, self._pred)
+        self._acc = calculate_accuracy(self._y, self._pred)
+        self._opt = minimize_with_adam(self._loss, self._lr)
 
     def run(self):
         print('starting train_mnist')
-        EPOCHS = 10
-        BATCH_SIZE = 32
-        mnist = input_data.read_data_sets('../../mnist/', one_hot=True, reshape=False)
+        mnist = input_data.read_data_sets(
+                    '../../mnist/', one_hot=True, reshape=False)
+        train = mnist.train
+        test = mnist.test
+        self.__build_model()
 
-        print('building graph...')
-        ops = build_model(self.nodes, self.links)
-        X = ops[get_input_ids(self.nodes, self.links)[0]]
-        y = tf.placeholder(tf.float32, shape=(None, 10))
-        pred = ops[get_output_ids(self.nodes, self.links)[0]]
-        loss = calculate_logloss(y, pred)
-        acc = calculate_accuracy(y, pred)
-        opt = minimize_with_adam(loss)
+        saver = tf.train.Saver()
 
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
 
-            for e in range(EPOCHS):
+            for e in range(self._nepochs):
                 print('---- Epoch {e} ----'.format(e=e))
-                rounds = int(mnist.train.num_examples / BATCH_SIZE)
+                rounds = int(mnist.train.num_examples / self._batch_size)
 
                 avarage_loss = 0.
                 avarage_accuracy = 0.
-                cnt = 0
                 for i in range(rounds):
-                    batch_xs, batch_ys = mnist.train.next_batch(BATCH_SIZE)
-                    _, l, a = sess.run([opt, loss, acc], feed_dict={X: batch_xs, y: batch_ys})
+                    batch_xs, batch_ys = train.next_batch(self._batch_size)
+                    _, l, a = sess.run(
+                            [self._opt, self._loss, self._acc],
+                            feed_dict={self._X: batch_xs, self._y: batch_ys})
 
                     avarage_loss += l
                     avarage_accuracy += a
-                    cnt += 1
-                    if cnt == 100:
-                        avarage_loss /= float(cnt)
-                        avarage_accuracy /= float(cnt)
-                        print('Avg. loss = {l}, Avg. accuracy = {a}'.format(l=avarage_loss, a=avarage_accuracy))
-                        avarage_loss = 0.
-                        avarage_accuracy = 0.
-                        cnt = 0
 
-            rounds = int(mnist.test.num_examples / BATCH_SIZE)
+                avarage_loss /= float(rounds)
+                avarage_accuracy /= float(rounds)
+                print('Avg. loss = {l}, Avg. accuracy = {a}'.format(
+                    l=avarage_loss, a=avarage_accuracy))
+                avarage_loss = 0.
+                avarage_accuracy = 0.
+
+            path = './app/nnvis/weights/{arch_id}/{model_id}/model.ckpt' \
+                .format(arch_id=self._arch_id, model_id=self._model_id)
+            saver.save(sess, path)
+
+            rounds = int(mnist.test.num_examples / self._batch_size)
             avarage_loss = 0.
             avarage_accuracy = 0.
-            cnt = 0
-            for i in range(100):
-                batch_xs, batch_ys = mnist.test.next_batch(BATCH_SIZE)
-                _, l, a = sess.run([opt, loss, acc], feed_dict={X: batch_xs, y: batch_ys})
+            for i in range(rounds):
+                batch_xs, batch_ys = test.next_batch(self._batch_size)
+                _, l, a = sess.run(
+                        [self._opt, self._loss, self._acc],
+                        feed_dict={self._X: batch_xs, self._y: batch_ys})
 
                 avarage_loss += l
                 avarage_accuracy += a
-                cnt += 1
 
-            print(avarage_loss / float(cnt))
-            print(avarage_accuracy / float(cnt))
+            print(avarage_loss / float(rounds))
+            print(avarage_accuracy / float(rounds))
         print('end train_mnist')
-
-
-if __name__ == '__main__':
-    # simple neural network for testing
-    nodes = [
-            {
-                'id': '1',
-                'label': '1',
-                'layerType': 'input',
-                'params': {
-                        'inputShape': [-1, 28, 28, 1],
-                        'outputShape': [-1, 28, 28, 1]
-                    }
-            }, {
-                'id': '2',
-                'label': '2',
-                'layerType': 'conv',
-                'params': {
-                    'inputShape': [-1, 28, 28, 1],
-                    'outputShape': [-1, 28, 28, 16],
-                    'numFilters': 16,
-                    'kernelShape': [3, 3],
-                    'strides': [1, 1],
-                    'padding': 'Same',
-                    'activation': 'Relu'
-                }
-            }, {
-                'id': '3',
-                'label': '3',
-                'layerType': 'fc',
-                'params': {
-                        'inputShape': [-1, 256],
-                        'outputShape': [-1, 10],
-                        'numOutputs': 10,
-                        'activation': 'Sigmoid'
-                    }
-            },
-            ]
-
-    links = [
-            {
-                'source': '1', 'target': '2'
-            }, {
-                'source': '2', 'target': '3'
-            }
-            ]
-
-    try:
-        thread1 = TrainMnistThread(nodes, links)
-        thread1.start()
-        thread1.join()
-    except:
-        print('Error: unable to start thread')

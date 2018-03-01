@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 db = SQLAlchemy()
 
@@ -38,6 +39,16 @@ class Architecture(db.Model, CRUD):
     def __repr__(self):
         return '<Archtecture {name}>'.format(name=self.name)
 
+    def add(self):
+        super().add()
+        os.makedirs('./app/nnvis/weights/{id}/'.format(id=self.id))
+
+    def delete(self):
+        path = './app/nnvis/weights/{id}/'.format(id=self.id)
+        if os.path.isdir(path):
+            os.rmdir(path)
+        super().delete()
+
 
 class Model(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,7 +59,8 @@ class Model(db.Model, CRUD):
                         nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
-    def __init__(self, name, description, weights_path, arch_id, dataset_id=None):
+    def __init__(self, name, description, weights_path,
+                 arch_id, dataset_id=None):
         self.name = name
         self.description = description
         self.weights_path = weights_path
@@ -57,6 +69,21 @@ class Model(db.Model, CRUD):
 
     def __repr__(self):
         return '<Model {name}>'.format(name=self.name)
+
+    def add(self):
+        path = './app/nnvis/weights/{arch_id}/{model_id}/'.format(
+                arch_id=self.arch_id, model_id=self.id)
+        self.weights_path = path
+        super().add()
+
+    def delete(self):
+        path = './app/nnvis/weights/{arch_id}/{model_id}'.format(
+                  arch_id=self.arch_id, model_id=self.id)
+        if os.path.isdir(path):
+            for f in os.listdir(path):
+                os.remove(os.path.join(path, f))
+            os.rmdir(path)
+        super().delete()
 
 
 class Dataset(db.Model, CRUD):

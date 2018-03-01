@@ -1,2 +1,11 @@
 <p>train works!</p>
-<button mat-button (click)="onTrain()"><h4>Train!</h4></button>
+<mat-form-field>
+    <input matInput placeholder="Number of epochs" [(ngModel)]="nepochs">
+</mat-form-field>
+<mat-form-field>
+    <input matInput placeholder="Batch size" [(ngModel)]="batchSize">
+</mat-form-field>
+<mat-form-field>
+    <input matInput placeholder="Learning rate" [(ngModel)]="learningRate">
+</mat-form-field>
+<button mat-button (click)="onTrain()"><h4>Train MNIST!</h4></button>

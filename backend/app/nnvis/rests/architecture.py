@@ -78,7 +78,8 @@ class UploadNewArchitecture(Resource):
         try:
             new_arch.add()
         except Exception as e:
-            return abort(400, message=e.message)
+            print(e)
+            return abort(400, message='Error')
 
         return arch_to_dict(new_arch), 201
 
