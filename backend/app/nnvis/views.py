@@ -12,6 +12,7 @@ from app.nnvis.rests.dataset import (DatasetTask,
                                      ListAllDatasets)
 from app.nnvis.rests.visualize import (Inference, Visualize, Images)
 from app.nnvis.rests.train import (TrainNewModel, TrainModel)
+from app.nnvis.rests.user import AuthenticationTask
 
 nnvis = Blueprint('nnvis', __name__)
 api = Api(nnvis)
@@ -35,3 +36,5 @@ api.add_resource(Images, 'visualize/<string:algorithm>/<string:image_id>')
 api.add_resource(TrainNewModel,
                  'train_new_model/<int:arch_id>/<int:dataset_id>')
 api.add_resource(TrainModel, 'train_model/<int:model_id>/<int:dataset_id>')
+
+api.add_resource(AuthenticationTask, 'authenticate')

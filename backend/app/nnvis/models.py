@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
+from werkzeug.security import generate_password_hash
 
 db = SQLAlchemy()
 
@@ -37,7 +38,7 @@ class Architecture(db.Model, CRUD):
         self.last_modified = datetime.utcnow()
 
     def __repr__(self):
-        return '<Archtecture {name}>'.format(name=self.name)
+        return '<Archtecture {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
         super().add()
@@ -68,7 +69,7 @@ class Model(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def __repr__(self):
-        return '<Model {name}>'.format(name=self.name)
+        return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
         path = './app/nnvis/weights/{arch_id}/{model_id}/'.format(
@@ -101,7 +102,7 @@ class Dataset(db.Model, CRUD):
         self.split_path = split_path
 
     def __repr__(self):
-        return '<Dataset {name}>'.format(name=self.name)
+        return '<Dataset {id} {name}>'.format(id=self.id, name=self.name)
 
 
 # todo
@@ -116,3 +117,16 @@ class Image(db.Model, CRUD):
 
     def json(self):
         return {'imageName': self.imageName, 'imagePath': self.imagePath}
+
+
+class User(db.Model, CRUD):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, nullable=False)
+    password = db.Column(db.String(64), nullable=False)
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = generate_password_hash(password)
+
+    def __repr__(self):
+        return '<User {username}>'.format(username=self.username)

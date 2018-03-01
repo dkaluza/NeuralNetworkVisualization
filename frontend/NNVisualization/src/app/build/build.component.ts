@@ -71,7 +71,6 @@ export class BuildComponent implements OnInit {
             case 'pool':
                 return PoolLayer.fromDict(node);
             default:
-                console.log('Unknown layerType: ' + node.layerType);
                 return undefined;
         }
     }
@@ -82,10 +81,6 @@ export class BuildComponent implements OnInit {
     }
 
     onGraphModified(data): void {
-        console.log('onGraphModified');
-        console.log(data.nodes);
-        console.log(data.links);
-
         this.selArchService.currentNodes = data.nodes;
         this.selArchService.currentLinks = data.links;
     }
@@ -97,6 +92,7 @@ export class BuildComponent implements OnInit {
 
     onNodeUpdate(): void {
         this.hasNodesBeenModified = !this.hasNodesBeenModified;
+        // this.hasNodesBeenModified = true;
     }
 
     clearCurrentArch(): void {
