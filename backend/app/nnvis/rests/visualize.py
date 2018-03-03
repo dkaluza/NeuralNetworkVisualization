@@ -1,21 +1,21 @@
-from flask_restful import Resource
+from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
 
 
-class Inference(Resource):
+class Inference(ProtectedResource):
     def get(self, model_id):
         # TODO: inference REST
         pass
 
 
-class Visualize(Resource):
+class Visualize(ProtectedResource):
     def get(self, model_id, alg_id):
         # TODO: visualize REST
         pass
 
 
 # /visualize/<string:algorithm>/<string:image_id>
-class Images(Resource):
+class Images(ProtectedResource):
     def get(self, algorithm, image_id):
         print('in get images')
         if algorithm == 'GBP':

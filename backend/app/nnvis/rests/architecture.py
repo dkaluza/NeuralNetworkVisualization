@@ -1,6 +1,6 @@
 from flask import request
-from flask_restful import abort, Resource
-
+from flask_restful import abort
+from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Architecture, Model
 from datetime import datetime
 import json
@@ -13,16 +13,16 @@ def arch_to_dict(arch):
         last_used = 'None'
 
     return {
-            'id': arch.id,
-            'name': arch.name,
-            'description': arch.description,
-            'architecture': json.loads(arch.graph),
-            'last_used': last_used,
-            'last_modified': arch.last_modified.strftime('%Y-%m-%d')
-            }
+        'id': arch.id,
+        'name': arch.name,
+        'description': arch.description,
+        'architecture': json.loads(arch.graph),
+        'last_used': last_used,
+        'last_modified': arch.last_modified.strftime('%Y-%m-%d')
+    }
 
 
-class ArchitectureTask(Resource):
+class ArchitectureTask(ProtectedResource):
     def __abort_if_arch_doesnt_exist(self, arch_id):
         if Architecture.query.get(arch_id) is None:
             message = 'Architecture {id} doesn\'t exist'.format(id=arch_id)
@@ -68,7 +68,7 @@ class ArchitectureTask(Resource):
         return arch_to_dict(arch), 201
 
 
-class UploadNewArchitecture(Resource):
+class UploadNewArchitecture(ProtectedResource):
     def post(self):
         args = request.get_json(force=True)
         new_arch = Architecture(name=args['name'],
@@ -83,7 +83,7 @@ class UploadNewArchitecture(Resource):
         return arch_to_dict(new_arch), 201
 
 
-class ListAllArchitectures(Resource):
+class ListAllArchitectures(ProtectedResource):
     def get(self):
         archs = Architecture.query.all()
         return [arch_to_dict(arch) for arch in archs]
