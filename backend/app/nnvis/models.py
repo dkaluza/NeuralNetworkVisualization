@@ -28,6 +28,8 @@ class Architecture(db.Model, CRUD):
     last_used = db.Column(db.Date)
     last_modified = db.Column(db.Date)
     models = db.relationship('Model', backref='architecture', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
     def __init__(self, name, description, graph):
         self.name = name
@@ -38,7 +40,9 @@ class Architecture(db.Model, CRUD):
         self.last_modified = datetime.utcnow()
 
     def __repr__(self):
-        return '<Archtecture {id} {name}>'.format(id=self.id, name=self.name)
+        return '<Archtecture {id} {name} {user_id}>'.format(id=self.id,
+                                                            name=self.name,
+                                                            user_id=self.user_id)
 
 
 class Model(db.Model, CRUD):
@@ -49,6 +53,8 @@ class Model(db.Model, CRUD):
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
                         nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
     def __init__(self, name, description, weights_path, arch_id, dataset_id=None):
         self.name = name
@@ -58,7 +64,9 @@ class Model(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def __repr__(self):
-        return '<Model {id} {name}>'.format(id=self.id, name=self.name)
+        return '<Model {id} {name} {user_id}>'.format(id=self.id,
+                                                      name=self.name,
+                                                      user_id=self.user_id)
 
 
 class Dataset(db.Model, CRUD):
@@ -68,6 +76,8 @@ class Dataset(db.Model, CRUD):
     trainset_path = db.Column(db.Text(256), nullable=False)
     split_path = db.Column(db.Text(256))
     models = db.relationship('Model', backref='dataset', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
     def __init__(self, name, description, trainset_path, split_path):
         self.name = name
@@ -76,7 +86,8 @@ class Dataset(db.Model, CRUD):
         self.split_path = split_path
 
     def __repr__(self):
-        return '<Dataset {id} {name}>'.format(id=self.id, name=self.name)
+        return '<Dataset {id} {name} {user_id}>'.format(id=self.id, name=self.name,
+                                                        user_id=self.user_id)
 
 
 # todo
@@ -84,6 +95,8 @@ class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=64, nullable=False)
     path = db.Column(db.Text(256), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
     def __init__(self, imageName, imagePath):
         self.imageName = imageName
@@ -97,6 +110,14 @@ class User(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(64), nullable=False)
+    archs = db.relationship('Architecture', backref='user', lazy=True,
+                            cascade="all, delete-orphan")
+    models = db.relationship('Model', backref='user', lazy=True,
+                             cascade="all, delete-orphan")
+    datasets = db.relationship('Dataset', backref='user', lazy=True,
+                               cascade="all, delete-orphan")
+    images = db.relationship('Image', backref='user', lazy=True,
+                             cascade="all, delete-orphan")
 
     def __init__(self, username, password):
         self.username = username
