@@ -63,8 +63,7 @@ class Model(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def __repr__(self):
-        return '<Model {id} {name}>'.format(id=self.id,
-                                            name=self.name)
+        return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
 
 class Dataset(db.Model, CRUD):
