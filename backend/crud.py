@@ -57,8 +57,7 @@ def crudModel(args):
                       description=args.desc,
                       arch_id=args.arch_id,
                       dataset_id=args.dataset_id,
-                      weights_path='',
-                      user_id=args.user_id)
+                      weights_path='')
         model.add()
     elif args.method == 'update':
         model = Model.query.get(args.id)
@@ -66,8 +65,6 @@ def crudModel(args):
             model.name = args.name
         if args.desc is not None:
             model.description = args.desc
-        if args.user_id is not None:
-            model.user_id = args.user_id
         model.update()
     elif args.method == 'delete':
         model = Model.query.get(args.id)

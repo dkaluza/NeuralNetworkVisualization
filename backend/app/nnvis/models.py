@@ -31,9 +31,10 @@ class Architecture(db.Model, CRUD):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                         nullable=False)
 
-    def __init__(self, name, description, graph):
+    def __init__(self, name, description, graph, user_id):
         self.name = name
         self.description = description
+        self.user_id = user_id
 
         self.graph = graph
         self.last_used = None
@@ -53,8 +54,6 @@ class Model(db.Model, CRUD):
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
                         nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
-                        nullable=False)
 
     def __init__(self, name, description, weights_path, arch_id, dataset_id=None):
         self.name = name
@@ -79,11 +78,12 @@ class Dataset(db.Model, CRUD):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                         nullable=False)
 
-    def __init__(self, name, description, trainset_path, split_path):
+    def __init__(self, name, description, trainset_path, split_path, user_id):
         self.name = name
         self.description = description
         self.trainset_path = trainset_path
         self.split_path = split_path
+        self.user_id = user_id
 
     def __repr__(self):
         return '<Dataset {id} {name} {user_id}>'.format(id=self.id, name=self.name,
@@ -98,9 +98,10 @@ class Image(db.Model, CRUD):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                         nullable=False)
 
-    def __init__(self, imageName, imagePath):
+    def __init__(self, imageName, imagePath, user_id):
         self.imageName = imageName
         self.imagePath = imagePath
+        self.user_id = user_id
 
     def json(self):
         return {'imageName': self.imageName, 'imagePath': self.imagePath}
@@ -112,8 +113,6 @@ class User(db.Model, CRUD):
     password = db.Column(db.String(64), nullable=False)
     archs = db.relationship('Architecture', backref='user', lazy=True,
                             cascade="all, delete-orphan")
-    models = db.relationship('Model', backref='user', lazy=True,
-                             cascade="all, delete-orphan")
     datasets = db.relationship('Dataset', backref='user', lazy=True,
                                cascade="all, delete-orphan")
     images = db.relationship('Image', backref='user', lazy=True,

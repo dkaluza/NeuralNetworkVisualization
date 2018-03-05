@@ -28,5 +28,5 @@ class AuthenticationTask(Resource):
         self.__abort_if_user_doesnt_exist(user, username)
         self.__abort_if_password_doesnt_match(user, username, password)
 
-        access_token = create_access_token(identity=username)
+        access_token = create_access_token(identity=user.id)
         return {'access_token': access_token}, 200

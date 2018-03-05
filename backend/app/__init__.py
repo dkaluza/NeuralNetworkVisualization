@@ -1,6 +1,7 @@
 from flask import Flask
 from app.nnvis.models import db
 from app.nnvis.views import nnvis
+from app.nnvis.auth_init import auth_init
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
@@ -15,6 +16,7 @@ def create_app(config_filename):
         db.create_all()
 
     jwt = JWTManager(app)
+    auth_init(jwt)
 
     app.register_blueprint(nnvis, url_prefix='/')
 
