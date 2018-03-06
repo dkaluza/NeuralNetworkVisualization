@@ -41,9 +41,9 @@ class Architecture(db.Model, CRUD):
         self.last_modified = datetime.utcnow()
 
     def __repr__(self):
-        return '<Archtecture {id} {name} {user_id}>'.format(id=self.id,
-                                                            name=self.name,
-                                                            user_id=self.user_id)
+        return '<Archtecture {id} {name} of user {user_id}>'.format(id=self.id,
+                                                                    name=self.name,
+                                                                    user_id=self.user_id)
 
 
 class Model(db.Model, CRUD):
@@ -84,8 +84,8 @@ class Dataset(db.Model, CRUD):
         self.user_id = user_id
 
     def __repr__(self):
-        return '<Dataset {id} {name} {user_id}>'.format(id=self.id, name=self.name,
-                                                        user_id=self.user_id)
+        return '<Dataset {id} {name} of user {user_id}>'.format(id=self.id, name=self.name,
+                                                                user_id=self.user_id)
 
 
 # todo
@@ -121,4 +121,4 @@ class User(db.Model, CRUD):
         self.password = generate_password_hash(password)
 
     def __repr__(self):
-        return '<User {username}>'.format(username=self.username)
+        return '<User {id} {username}>'.format(id=self.id, username=self.username)
