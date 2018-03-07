@@ -17,6 +17,7 @@ parser.add_argument('--arch_id', '-a', type=int, default=None)
 parser.add_argument('--dataset_id', '-did', type=int, default=None)
 parser.add_argument('--dataset', type=str, default=None)
 parser.add_argument('--split', type=str, default=None)
+parser.add_argument('--user_id', '-uid', type=int, default=None)
 parser.add_argument('--username', type=str, default=None)
 parser.add_argument('--password', type=str, default=None)
 
@@ -28,7 +29,8 @@ def crudArchitecture(args):
     if args.method == 'create':
         arch = Architecture(name=args.name,
                             description=args.desc,
-                            graph=args.graph)
+                            graph=args.graph,
+                            user_id=args.user_id)
         arch.add()
     elif args.method == 'update':
         arch = Architecture.query.get(args.id)
@@ -38,6 +40,8 @@ def crudArchitecture(args):
             arch.description = args.desc
         if args.graph is not None:
             arch.graph = args.graph
+        if args.user_id is not None:
+            arch.user_id = args.user_id
         arch.update()
     elif args.method == 'delete':
         arch = Architecture.query.get(args.id)
@@ -75,7 +79,8 @@ def crudDataset(args):
         dataset = Dataset(name=args.name,
                           description=args.desc,
                           trainset_path=args.dataset,
-                          split_path=args.split)
+                          split_path=args.split,
+                          user_id=args.user_id)
         dataset.add()
     elif args.method == 'update':
         dataset = Dataset.query.get(args.id)
@@ -83,6 +88,8 @@ def crudDataset(args):
             dataset.name = args.name
         if args.desc is not None:
             dataset.description = args.desc
+        if args.user_id is not None:
+            datasets.user_id = args.user_id
         dataset.update()
     elif args.method == 'delete':
         dataset = Dataset.query.get(args.id)
