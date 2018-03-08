@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
-import { MatDialog, MatDialogRef } from '@angular/material';
 
 import { VisArchComponent } from '../vis-arch/vis-arch.component';
 
@@ -11,6 +10,7 @@ import { Layer } from '../vis-arch/layers/layer/layer';
 import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
 import { ConvLayer } from '../vis-arch/layers/conv/conv';
 import { InputLayer } from '../vis-arch/layers/input/input';
+import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service'
 
 @Component({
     selector: 'app-build',
@@ -30,8 +30,8 @@ export class BuildComponent implements OnInit {
     private selectedID: number;
 
     constructor(private selArchService: SelectedArchitectureService,
-                private restangular: Restangular,
-                public dialog: MatDialog) {
+        private restangular: Restangular,
+        private genericDialogs: GenericDialogsService) {
         this._saveCurrentMessage = 'Save';
         this._saveNewMessage = 'Save as new';
     }
@@ -45,8 +45,8 @@ export class BuildComponent implements OnInit {
             this.selArchService.architecture.nodes.forEach(
                 node => {
                     return this.nodes.set(
-                                Number(node.id),
-                                this._archNodeToLayer(node));
+                        Number(node.id),
+                        this._archNodeToLayer(node));
                 }
             );
             this.links = this.selArchService.architecture.links;
@@ -130,26 +130,14 @@ export class BuildComponent implements OnInit {
             };
             this.restangular.all('arch').all(arch.id)
                 .post(data).subscribe(
-                    (nArch) => {},
-                    () => { alert('Error :('); }
+                (nArch) => { },
+                () => { alert('Error :('); }
                 );
         }
     }
 
     saveAsNewArch() {
         // TODO use MatDialog
-        // let dialogRef = this.dialog.open(DescDialog);
-
-        // dialogRef
-        //     .afterClosed()
-        //     .filter(result => result)
-        //     .subscribe(result => {
-        //         this.saveArch(name, result, undefined)
-        //         this._saveNewMessage = 'Saved successfully!'
-        //         setTimeout(() => {
-        //             this._saveNewMessage = 'Save as new'
-        //         }, this._msgTimeout)
-        //     });
 
         const name = prompt('Enter a name:');
         if (name === null || name === '') { return; }
@@ -166,8 +154,8 @@ export class BuildComponent implements OnInit {
         };
         this.restangular.all('upload_arch')
             .post(data).subscribe(
-                () => { alert('Save successful!'); },
-                () => { alert('Something fucked up while saving'); }
+            () => { alert('Save successful!'); },
+            () => { this.genericDialogs.createWarning("Something went wrong while saving!", "Warning!") }
             );
     }
 
@@ -177,26 +165,5 @@ export class BuildComponent implements OnInit {
 
     get saveNewMsg(): string {
         return this._saveNewMessage;
-    }
-}
-
-@Component({
-    selector: 'desc-dialog',
-    templateUrl: 'desc-dialog.component.html'
-})
-export class DescDialog {
-
-    private _text: string;
-
-    constructor(
-        private dialogRef: MatDialogRef<DescDialog>
-    ) {}
-
-    save() {
-        this.dialogRef.close(this._text);
-    }
-
-    cancel() {
-        this.dialogRef.close();
     }
 }

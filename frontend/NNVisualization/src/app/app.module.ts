@@ -70,6 +70,8 @@ import { AuthenticationService, AuthenticationWithoutLoginService } from './auth
 import { JwtHelper } from 'angular2-jwt';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { WarningDialogComponent } from './generic-dialogs/warning-dialog/warning-dialog.component';
+import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service'
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full' },
@@ -173,10 +175,12 @@ export class MaterialImportsModule { }
         OutputImageComponent,
         VisArchComponent,
         LogInDialogComponent,
-        UnauthorizedComponent
+        UnauthorizedComponent,
+        WarningDialogComponent
     ],
     entryComponents: [
-        LogInDialogComponent
+        LogInDialogComponent,
+        WarningDialogComponent
     ],
     imports: [
         BrowserModule,
@@ -193,7 +197,8 @@ export class MaterialImportsModule { }
         FlexLayoutModule
     ],
     providers: [SelectedArchitectureService, AuthenticationService,
-        AuthenticationWithoutLoginService, AuthGuard, JwtHelper],
+        AuthenticationWithoutLoginService, AuthGuard, JwtHelper,
+        GenericDialogsService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }
