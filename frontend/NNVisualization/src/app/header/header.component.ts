@@ -1,8 +1,9 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { LogInDialogComponent } from "./log-in-dialog/log-in-dialog.component";
-import { AuthenticationService } from "../authentication/authentication.service";
+import { LogInDialogComponent } from './log-in-dialog/log-in-dialog.component';
+import { AuthenticationService } from '../authentication/authentication.service';
 import { Router } from '@angular/router';
+import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 
 
 @Component({
@@ -16,18 +17,16 @@ export class HeaderComponent implements OnInit {
     private toolbar: ElementRef;
 
     constructor(private dialog: MatDialog, public auth: AuthenticationService,
-        private router: Router) { }
+        private router: Router, private genericDialogs: GenericDialogsService) { }
 
     ngOnInit() {
     }
 
     public logIn() {
-        let username: string;
-        let password: string;
 
-        let dialogRef = this.dialog.open(LogInDialogComponent, {
+        const dialogRef = this.dialog.open(LogInDialogComponent, {
             width: '250px',
-            position: { right: "0%", top: this.toolbar.nativeElement.offsetHeight + "px" },
+            position: { right: '0%', top: this.toolbar.nativeElement.offsetHeight + 'px' },
         });
 
         dialogRef.afterClosed().subscribe(
@@ -36,10 +35,11 @@ export class HeaderComponent implements OnInit {
                     this.auth.logIn(result.username, result.password).subscribe(
                         () => {
                             this.refreshRouter();
+                            this.genericDialogs.createSuccess('Successfuly logged in');
                         },
                         error => {
-                            // TODO error popup
-                            console.log(error);
+                            const message = JSON.parse(error._body).message;
+                            this.genericDialogs.createWarning(message, 'Error!');
                         }
                     );
                 }
@@ -47,12 +47,11 @@ export class HeaderComponent implements OnInit {
     }
 
     private refreshRouter() {
-        this.router.navigateByUrl("/").then(
+        this.router.navigateByUrl('/').then(
             () => { },
             error => {
                 console.log(error);
-            }
-        )
+            });
     }
 
     public logOut() {

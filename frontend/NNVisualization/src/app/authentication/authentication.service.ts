@@ -45,16 +45,12 @@ export class AuthenticationService extends AuthenticationWithoutLoginService {
 
     constructor(jwtHelper: JwtHelper, private restangular: Restangular) {
         super(jwtHelper);
-        this.restangular = restangular.withConfig((RestangularConfigurer) => {
-            RestangularConfigurer.setFullResponse(true);
-        });
     }
 
     public logIn(username: string, password: string): Observable<void> {
         return this.restangular.all('authenticate')
             .post({ username: username, password: password })
             .map(response => {
-                response = JSON.parse(response._body);
                 localStorage.setItem(this._tokenPath, response.access_token);
             });
     }
