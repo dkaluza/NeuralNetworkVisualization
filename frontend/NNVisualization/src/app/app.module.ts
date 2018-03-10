@@ -71,7 +71,8 @@ import { JwtHelper } from 'angular2-jwt';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-alert.component';
-import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service'
+import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service';
+import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full' },
@@ -89,7 +90,7 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
 
     RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
         if (authService.isAuthenticated()) {
-            let bearerToken = authService.getToken();
+            const bearerToken = authService.getToken();
 
             return {
                 headers: Object.assign({}, headers, { Authorization: `Bearer ${bearerToken}` })
@@ -178,11 +179,13 @@ export class MaterialImportsModule { }
         VisArchComponent,
         LogInDialogComponent,
         UnauthorizedComponent,
-        TimeoutAlertComponent
+        TimeoutAlertComponent,
+        InputsDialogComponent
     ],
     entryComponents: [
         LogInDialogComponent,
-        TimeoutAlertComponent
+        TimeoutAlertComponent,
+        InputsDialogComponent
     ],
     imports: [
         BrowserModule,

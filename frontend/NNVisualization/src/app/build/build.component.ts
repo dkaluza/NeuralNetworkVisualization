@@ -10,7 +10,7 @@ import { Layer } from '../vis-arch/layers/layer/layer';
 import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
 import { ConvLayer } from '../vis-arch/layers/conv/conv';
 import { InputLayer } from '../vis-arch/layers/input/input';
-import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service'
+import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 
 @Component({
     selector: 'app-build',
@@ -137,12 +137,16 @@ export class BuildComponent implements OnInit {
     }
 
     saveAsNewArch() {
-        // TODO use MatDialog
+        // TODO fix save
 
-        const name = prompt('Enter a name:');
-        if (name === null || name === '') { return; }
-        const desc = prompt('Enter a short description:');
-        if (desc === null) { return; }
+        this.genericDialogs.createInputs(['Name', 'Description']).afterClosed().subscribe(
+            result => {
+                console.log(result);
+            }
+        );
+
+        let name = '';
+        let desc = '';
 
         const data = {
             name: name,
@@ -154,8 +158,8 @@ export class BuildComponent implements OnInit {
         };
         this.restangular.all('upload_arch')
             .post(data).subscribe(
-                () => { this.genericDialogs.createSuccess("Save successful!") },
-                () => { this.genericDialogs.createWarning("Something went wrong while saving!", "Warning!") }
+                () => { this.genericDialogs.createSuccess('Save successful!'); },
+                () => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
             );
     }
 
