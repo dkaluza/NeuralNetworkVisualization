@@ -130,8 +130,8 @@ export class BuildComponent implements OnInit {
             };
             this.restangular.all('arch').all(arch.id)
                 .post(data).subscribe(
-                (nArch) => { },
-                () => { alert('Error :('); }
+                    (nArch) => { },
+                    () => { alert('Error :('); }
                 );
         }
     }
@@ -154,8 +154,8 @@ export class BuildComponent implements OnInit {
         };
         this.restangular.all('upload_arch')
             .post(data).subscribe(
-            () => { alert('Save successful!'); },
-            () => { this.genericDialogs.createWarning("Something went wrong while saving!", "Warning!") }
+                () => { this.genericDialogs.createSuccess("Save successful!") },
+                () => { this.genericDialogs.createWarning("Something went wrong while saving!", "Warning!") }
             );
     }
 

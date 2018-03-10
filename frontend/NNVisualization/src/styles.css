@@ -6,3 +6,9 @@
     color: white;
     opacity: 0.9 !important;
 }
+
+.success-dialog .mat-dialog-container {
+    background-color: #69f0ae;
+    color: rgba(0, 0, 0, 0.87);
+    opacity: 0.9 !important;
+}

@@ -70,7 +70,7 @@ import { AuthenticationService, AuthenticationWithoutLoginService } from './auth
 import { JwtHelper } from 'angular2-jwt';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { WarningDialogComponent } from './generic-dialogs/warning-dialog/warning-dialog.component';
+import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-alert.component';
 import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service'
 
 const appRoutes: Routes = [
@@ -103,10 +103,12 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
     RestangularProvider.addResponseInterceptor((data, operation, what, url, response) => {
         switch (operation) {
             case 'post':
+                return data;
             case 'put':
+                return data;
             case 'remove':
                 if (!data) { return {}; }
-                break;
+                return data;
             default:
                 return data;
         }
@@ -176,11 +178,11 @@ export class MaterialImportsModule { }
         VisArchComponent,
         LogInDialogComponent,
         UnauthorizedComponent,
-        WarningDialogComponent
+        TimeoutAlertComponent
     ],
     entryComponents: [
         LogInDialogComponent,
-        WarningDialogComponent
+        TimeoutAlertComponent
     ],
     imports: [
         BrowserModule,
