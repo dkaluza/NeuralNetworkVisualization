@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-class GuideBackprop(object):
+class GuidedBackprop(object):
 
     def __init__(self, graph, session, y):
         pass
