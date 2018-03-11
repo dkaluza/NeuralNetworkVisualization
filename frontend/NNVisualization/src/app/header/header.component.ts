@@ -50,7 +50,7 @@ export class HeaderComponent implements OnInit {
         this.router.navigateByUrl('/').then(
             () => { },
             error => {
-                console.log(error);
+                this.genericDialogs.createWarning(error);
             });
     }
 

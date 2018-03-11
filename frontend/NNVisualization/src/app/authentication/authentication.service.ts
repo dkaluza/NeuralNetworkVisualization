@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JwtHelper } from 'angular2-jwt'
+import { JwtHelper } from 'angular2-jwt';
 import { Restangular } from 'ngx-restangular';
 import { Observable } from 'rxjs/Observable';
 
@@ -24,12 +24,10 @@ export class AuthenticationWithoutLoginService {
             if (this.jwtHelper.isTokenExpired(token)) {
                 this.logOut();
                 return false;
-            }
-            else {
+            } else {
                 return true;
             }
-        }
-        else {
+        } else {
             return false;
         }
     }
