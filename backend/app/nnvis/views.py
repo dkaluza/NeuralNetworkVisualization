@@ -10,7 +10,7 @@ from app.nnvis.rests.model import (ModelTask,
 from app.nnvis.rests.dataset import (DatasetTask,
                                      UploadNewDataset,
                                      ListAllDatasets)
-from app.nnvis.rests.visualize import (Inference, Visualize, Images)
+from app.nnvis.rests.visualize import (Inference, Visualize, Images, Algorithms)
 from app.nnvis.rests.train import (TrainNewModel, TrainModel)
 from app.nnvis.rests.user import AuthenticationTask
 
@@ -32,6 +32,7 @@ api.add_resource(ListAllDatasets, 'list_datasets')
 api.add_resource(Inference, 'inference/<int:model_id>')
 api.add_resource(Visualize, 'Visualize/<int:model_id>/<int:alg_id>')
 api.add_resource(Images, 'visualize/<string:algorithm>/<string:image_id>')
+api.add_resource(Algorithms, 'list_algorithms')
 
 api.add_resource(TrainNewModel,
                  'train_new_model/<int:arch_id>/<int:dataset_id>')
