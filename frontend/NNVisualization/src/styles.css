@@ -12,3 +12,7 @@
     color: rgba(0, 0, 0, 0.87);
     opacity: 0.9 !important;
 }
+
+.inputs-dialog .mat-dialog-container {
+    padding: 35px;
+}

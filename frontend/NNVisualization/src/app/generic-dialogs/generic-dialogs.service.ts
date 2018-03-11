@@ -55,7 +55,8 @@ export class GenericDialogsService {
                 title: title,
                 proceedButtonLabel: proceedButtonLabel,
                 abortButtonLabel: abortButtonLabel
-            }
+            },
+            panelClass: 'inputs-dialog'
         });
     }
 }

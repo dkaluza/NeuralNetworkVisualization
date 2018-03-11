@@ -1,13 +1,18 @@
+<h2 mat-dialog-title>{{data.title}}</h2>
 <div mat-dialog-content>
     <div *ngFor="let inputName of data.inputsNames">
         <mat-form-field>
-            <input matInput [(ngModel)]="results[inputName]" [placeholder]="inputName">
+            <input matInput
+                   [(ngModel)]="results[inputName]"
+                   [placeholder]="inputName">
         </mat-form-field>
     </div>
 </div>
 <div mat-dialog-actions>
-    <button mat-button mat-dialog-close>{{data.abortButtonLabel}}</button>
-    <button mat-button [mat-dialog-close]="results">
+    <button mat-button
+            mat-dialog-close>{{data.abortButtonLabel}}</button>
+    <button mat-button
+            [mat-dialog-close]="results">
         {{data.proceedButtonLabel}}
     </button>
 </div>

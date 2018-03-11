@@ -125,8 +125,8 @@ export class BuildComponent implements OnInit {
             };
             this.restangular.all('arch').all(arch.id)
                 .post(data).subscribe(
-                    (nArch) => { },
-                    () => { alert('Error :('); }
+                    (nArch) => { this.genericDialogs.createSuccess('Save successful!'); },
+                    () => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
                 );
         }
     }
