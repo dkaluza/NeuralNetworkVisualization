@@ -24,7 +24,7 @@ class ModelTask(ProtectedResource):
     def __abort_if_model_isnt_owned_by_user(self, model):
         if model.architecture.user_id != get_current_user():
             message = "Model {id} isn't owned by the user".format(
-                id=dataset.id)
+                id=model.id)
             abort(401, message=message)
 
     def get(self, model_id):
