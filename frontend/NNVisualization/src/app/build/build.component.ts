@@ -19,9 +19,6 @@ import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.servic
 })
 export class BuildComponent implements OnInit {
 
-    private _saveCurrentMessage: string;
-    private _saveNewMessage: string;
-
     nodes: Map<number, Layer>;
     links: ArchLink[];
     hasNodesBeenModified = false;
@@ -32,8 +29,6 @@ export class BuildComponent implements OnInit {
     constructor(private selArchService: SelectedArchitectureService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
-        this._saveCurrentMessage = 'Save';
-        this._saveNewMessage = 'Save as new';
     }
 
     ngOnInit() {
@@ -137,17 +132,16 @@ export class BuildComponent implements OnInit {
     }
 
     saveAsNewArch() {
-        // TODO fix save
-
         this.genericDialogs.createInputs(['Name', 'Description']).afterClosed().subscribe(
             result => {
-                console.log(result);
+                if (result && result['Name']) {
+                    this._saveAsNewArchWithNameAndDesc(result['Name'], result['Description']);
+                }
             }
         );
+    }
 
-        let name = '';
-        let desc = '';
-
+    private _saveAsNewArchWithNameAndDesc(name: string, desc: string) {
         const data = {
             name: name,
             description: desc,
@@ -156,18 +150,11 @@ export class BuildComponent implements OnInit {
                 links: this.selArchService.currentLinks
             }
         };
+
         this.restangular.all('upload_arch')
             .post(data).subscribe(
                 () => { this.genericDialogs.createSuccess('Save successful!'); },
                 () => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
             );
-    }
-
-    get saveCurrentMsg(): string {
-        return this._saveCurrentMessage;
-    }
-
-    get saveNewMsg(): string {
-        return this._saveNewMessage;
     }
 }
