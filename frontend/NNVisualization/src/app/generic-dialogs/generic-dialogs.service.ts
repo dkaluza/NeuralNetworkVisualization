@@ -11,8 +11,6 @@ interface AlertData {
 @Injectable()
 export class GenericDialogsService {
 
-
-
     private readonly _initialAlertTopMargin = '8rem';
     private readonly _initialAlertRightMargin = '5rem';
     private readonly _alertConfig: MatDialogConfig<AlertData> = {
@@ -24,7 +22,6 @@ export class GenericDialogsService {
         hasBackdrop: false,
         autoFocus: false
     };
-
 
     constructor(private dialog: MatDialog) { }
 
