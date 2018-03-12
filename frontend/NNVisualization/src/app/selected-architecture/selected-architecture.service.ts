@@ -4,6 +4,10 @@ import { Model } from './model';
 
 import { Layer } from '../vis-arch/layers/layer/layer';
 
+import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
+import { ConvLayer } from '../vis-arch/layers/conv/conv';
+import { InputLayer } from '../vis-arch/layers/input/input';
+
 @Injectable()
 export class SelectedArchitectureService {
 
@@ -23,8 +27,33 @@ export class SelectedArchitectureService {
         this._architecture = newArchitecture;
         this._model = undefined;
 
-        this._currentNodes = undefined;
-        this._currentLinks = undefined;
+        if (this._architecture !== undefined) {
+            this._currentNodes = new Map;
+            this._architecture.nodes.forEach(
+                node => {
+                    return this._currentNodes.set(
+                                Number(node.id),
+                                this._archNodeToLayer(node));
+                }
+            );
+            this._currentLinks = this._architecture.links;
+        } else {
+            this._currentNodes = new Map;
+            this._currentLinks = [];
+        }
+    }
+
+    private _archNodeToLayer(node: ArchNode): Layer {
+        switch (node.layerType) {
+            case 'fc':
+                return FullyConnectedLayer.fromDict(node);
+            case 'conv':
+                return ConvLayer.fromDict(node);
+            case 'input':
+                return InputLayer.fromDict(node);
+            default:
+                return undefined;
+        }
     }
 
     get model(): Model {

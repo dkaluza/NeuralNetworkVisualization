@@ -37,39 +37,12 @@ export class BuildComponent implements OnInit {
     }
 
     ngOnInit() {
-        if (this.selArchService.currentNodes) {
-            this.nodes = this.selArchService.currentNodes;
-            this.links = this.selArchService.currentLinks;
-        } else if (this.selArchService.architecture) {
-            this.nodes = new Map;
-            this.selArchService.architecture.nodes.forEach(
-                node => {
-                    return this.nodes.set(
-                                Number(node.id),
-                                this._archNodeToLayer(node));
-                }
-            );
-            this.links = this.selArchService.architecture.links;
-
-            this.selArchService.currentNodes = this.nodes;
-            this.selArchService.currentLinks = this.links;
-        } else {
-            this.nodes = new Map;
-            this.links = [];
+        if (!this.selArchService.architecture) {
+            this.selArchService.currentNodes = new Map;
+            this.selArchService.currentLinks = [];
         }
-    }
-
-    private _archNodeToLayer(node: ArchNode): Layer {
-        switch (node.layerType) {
-            case 'fc':
-                return FullyConnectedLayer.fromDict(node);
-            case 'conv':
-                return ConvLayer.fromDict(node);
-            case 'input':
-                return InputLayer.fromDict(node);
-            default:
-                return undefined;
-        }
+        this.nodes = this.selArchService.currentNodes;
+        this.links = this.selArchService.currentLinks;
     }
 
     private _unselectNode(): void {
@@ -102,18 +75,9 @@ export class BuildComponent implements OnInit {
     }
 
     resetArch(): void {
-        this.nodes = new Map;
-        this.selArchService.architecture.nodes.forEach(
-            node => {
-                return this.nodes.set(
-                    Number(node.id),
-                    this._archNodeToLayer(node));
-            }
-        );
-        this.links = this.selArchService.architecture.links;
-
-        this.selArchService.currentNodes = this.nodes;
-        this.selArchService.currentLinks = this.links;
+        this.selArchService.architecture = this.selArchService.architecture;
+        this.nodes = this.selArchService.currentNodes;
+        this.links = this.selArchService.currentLinks;
 
         this._unselectNode();
     }
