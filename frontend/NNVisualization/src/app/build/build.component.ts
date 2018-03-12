@@ -75,6 +75,9 @@ export class BuildComponent implements OnInit {
     onGraphModified(data): void {
         this.selArchService.currentNodes = data.nodes;
         this.selArchService.currentLinks = data.links;
+
+        this.nodes = data.nodes;
+        this.links = data.links;
     }
 
     onNodeSelected(id): void {
