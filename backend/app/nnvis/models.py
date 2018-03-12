@@ -70,17 +70,17 @@ class Dataset(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=64, nullable=False)
     description = db.Column(db.Text(256))
-    trainset_path = db.Column(db.Text(256), nullable=False)
-    split_path = db.Column(db.Text(256))
+    path = db.Column(db.Text(256), nullable=False)
+    labels = db.Column(db.Text(256), nullable=False)
     models = db.relationship('Model', backref='dataset', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                         nullable=False)
 
-    def __init__(self, name, description, trainset_path, split_path, user_id):
+    def __init__(self, name, description, path, labels, user_id):
         self.name = name
         self.description = description
-        self.trainset_path = trainset_path
-        self.split_path = split_path
+        self.path = path
+        self.labels = labels
         self.user_id = user_id
 
     def __repr__(self):
@@ -88,17 +88,16 @@ class Dataset(db.Model, CRUD):
                                                                 user_id=self.user_id)
 
 
-# todo
 class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=64, nullable=False)
-    path = db.Column(db.Text(256), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
-                        nullable=False)
+    relative_path = db.Column(db.Text(256), nullable=False)
+    label = db.Column(db.Text(256))
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
-    def __init__(self, imageName, imagePath, user_id):
+    def __init__(self, imageName, relPath, user_id):
         self.imageName = imageName
-        self.imagePath = imagePath
+        self.relative_path = relPath
         self.user_id = user_id
 
     def json(self):

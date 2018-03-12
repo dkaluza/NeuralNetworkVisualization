@@ -1,9 +1,15 @@
+from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
-from app.nnvis.models import Dataset, Model
+import app
+from app.nnvis.models import Dataset, Model, Image
 from app.nnvis.rests.protected_resource import ProtectedResource
 
+import os
+import shutil
+import pandas as pd
+from zipfile import ZipFile
 
 def dataset_to_dict(dataset):
     return {
@@ -12,6 +18,32 @@ def dataset_to_dict(dataset):
         'description': dataset.description
     }
 
+def unzip_validate_archive(path, file):
+    labels_filename = app.config['LABELS_FILENAME']
+    def process_validate_split(splitname):
+        # Read labels file
+        labelsdf = pd.read_csv(os.path.join(path, splitname, labels_filename))
+
+        with os.scandir(os.path.join(path, splitname)) as pathit:
+            for entry in pathit:
+                assert entry.is_file()
+                if entry.name.endswith('.jpg'):
+                    # Add image to db
+                    pass
+                elif entry.name != labels_filename:
+                    raise AssertionError('Fockin hell')
+
+    try:
+        os.makedirs(path)
+        archive = ZipFile(file)
+        assert archive.namelist() == ['train/', 'validate/']
+        archive.extractall(path)
+
+        process_validate_split('train')
+        process_validate_split('validate')
+    except:
+        shutil.rmtree(path, ignore_errors=True)
+        raise
 
 class DatasetTask(ProtectedResource):
     def __abort_if_dataset_doesnt_exist(self, dataset, dataset_id):
@@ -40,15 +72,47 @@ class DatasetTask(ProtectedResource):
         for model in models:
             model.dataset_id = None
             model.update()
+
+        shutil.rmtree(dataset.path, ignore_errors=True)
         dataset.delete()
         return '', 204
 
 
 class UploadNewDataset(ProtectedResource):
-    def post(self):
-        # TODO: upload_new_dataset REST
-        pass
+    def __abort_400(self, msg):
+        abort(400, message=msg)
 
+    def __verify_postdata(self, postdata):
+        if 'name' not in postdata:
+            self.__abort_400('Name for new dataset required')
+        if 'labels' not in postdata:
+            self.__abort_400('Labels for new dataset required')
+
+        # TODO: verify labels format, probably something like "[class1, class2, ...]" using a Regex or something
+
+    def post(self):
+        if 'file' not in request.files:
+            self.__abort_400('No dataset file attached')
+
+        postfile = request.files['file']
+        if postfile.filename == '':
+            self.__abort_400('No dataset file selected')
+
+        postdata = request.get_json(force=True)
+        self.__verify_postdata(postdata)
+
+        dataset_path = os.path.join(app.config['DATASET_FOLDER'], postdata['name'])
+        new_dataset = Dataset(name=postdata['name'],
+                              description=postdata.get('description'), # None if isn't given, TODO: check this works
+                              path=dataset_path,
+                              labels=postdata['labels'],
+                              user_id=get_current_user())
+
+        try:
+            unzip_validate_archive(dataset_path, postfile.stream)
+            new_dataset.add()
+        except Exception as e:
+            abort(500, message=e.message)
 
 class ListAllDatasets(ProtectedResource):
     def get(self):
