@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material';
 
 import { Architecture } from '../selected-architecture/architecture';
 import { Model } from '../selected-architecture/model';
+import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 
 interface Element {
     position: number;
@@ -26,7 +27,8 @@ export class ManageComponent implements OnInit {
     modelDataSource;
 
     constructor(private selectedArchitectureService: SelectedArchitectureService,
-                private restangular: Restangular) {
+        private restangular: Restangular,
+        private genericDialogs: GenericDialogsService) {
         this._architectures = [];
         this._models = [];
         this.archDataSource = new MatTableDataSource<Element>([]);
@@ -99,7 +101,7 @@ export class ManageComponent implements OnInit {
                     this.selectedArchitectureService.architecture = newArch;
                     this._updateModelList();
                 },
-                () => { alert('Error :('); }
+                (e) => { this.genericDialogs.createWarning(e); }
             );
     }
 
@@ -115,23 +117,30 @@ export class ManageComponent implements OnInit {
                     );
                     this.selectedArchitectureService.model = newModel;
                 },
-                () => { alert('Error :('); }
+                (e) => { this.genericDialogs.createWarning(e); }
             );
     }
 
     editCurrentArchitecture(): void {
         const arch = this.selectedArchitectureService.architecture;
-        const newName = prompt('Provide name:');
-        const newDesc = prompt('Provide description:');
+        this.genericDialogs.createInputs(['Name', 'Description']).afterClosed().subscribe(
+            result => {
+                if (result) {
+                    const data = {};
+                    if (result['Name']) {
+                        data['name'] = result['Name'];
+                    }
+                    if (result['Description']) {
+                        data['description'] = result['Description'];
+                    }
 
-        const data = {};
-        if (newName !== '') {
-            data['name'] = newName;
-        }
-        if (newDesc !== '') {
-            data['description'] = newDesc;
-        }
+                    this._editCurrentArchitectureWithData(arch, data);
+                }
+            }
+        );
+    }
 
+    private _editCurrentArchitectureWithData(arch, data) {
         this.restangular.all('arch').all(arch.id)
             .post(data)
             .subscribe(
@@ -146,7 +155,7 @@ export class ManageComponent implements OnInit {
                     );
                     this.selectedArchitectureService.architecture = newArch;
                 },
-                (e) => { alert(e); }
+                (e) => { this.genericDialogs.createWarning(e); }
             );
         this._updateArchitectureList();
     }
@@ -159,8 +168,8 @@ export class ManageComponent implements OnInit {
                     this._updateArchitectureList();
                     this.selectedArchitectureService.architecture = undefined;
                 },
-                (e) => { alert(e); }
-        );
+                (e) => { this.genericDialogs.createWarning(e); }
+            );
     }
 
     editCurrentModel(): void {
@@ -187,7 +196,7 @@ export class ManageComponent implements OnInit {
                     );
                     this.selectedArchitectureService.model = newModel;
                 },
-                (e) => { alert(e); }
+                (e) => { this.genericDialogs.createWarning(e); }
             );
         this._updateModelList();
     }
@@ -200,7 +209,7 @@ export class ManageComponent implements OnInit {
                     this._updateModelList();
                     this.selectedArchitectureService.model = undefined;
                 },
-                (e) => { alert(e); }
+                (e) => { this.genericDialogs.createWarning(e); }
             );
     }
 }
