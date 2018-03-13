@@ -27,7 +27,7 @@ export class SelectedArchitectureService {
         this._architecture = newArchitecture;
         this._model = undefined;
 
-        if (this._architecture !== undefined) {
+        if (this._architecture) {
             this._currentNodes = new Map;
             this._architecture.nodes.forEach(
                 node => {
@@ -37,9 +37,6 @@ export class SelectedArchitectureService {
                 }
             );
             this._currentLinks = this._architecture.links;
-        } else {
-            this._currentNodes = new Map;
-            this._currentLinks = [];
         }
     }
 
