@@ -12,5 +12,5 @@ if os.path.exists(os.path.join('app', TEST_DB_FILENAME)):
 test_app = create_app('test_config')
 test_app.testing = True
 test_app.app_context().push()
-# logging.disable(logging.CRITICAL)
+logging.disable(logging.CRITICAL)
 add_testuser()

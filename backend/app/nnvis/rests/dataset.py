@@ -20,14 +20,14 @@ def dataset_to_dict(dataset):
 
 def add_image(fname, labelsdict, dataset_id):
     assert fname.endswith('.jpg')
-    strippedname = fname.rstrip[:-4]
-    new_image = Image(imageName=strippedname,
+    new_image = Image(imageName=fname[:-4],
                       relPath=fname,
-                      label=labelsdict.get(fname, labelsdict[strippedname]),
+                      label=labelsdict[fname],
                       dataset_id=dataset_id)
 
     new_image.add()
 
+# TODO: Label validation against labels passed to db
 def unzip_validate_archive(path, file, dataset_id):
     labels_filename = app.config['LABELS_FILENAME']
 
@@ -38,15 +38,15 @@ def unzip_validate_archive(path, file, dataset_id):
 
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
         cols = labelsdf.columns
-        labelsdict = pd.Series(labelsdf[cols[0]].values, index=labelsdf[cols[1]]).to_dict()
+        labelsdict = pd.Series(labelsdf[cols[1]].values, index=labelsdf[cols[0]]).to_dict()
 
-        with os.scandir(path) as pathit:
-            for entry in pathit:
-                assert entry.is_file()
-                if entry.name.endswith('.jpg'):
-                    add_image(entry.name, labelsdict, dataset_id)
-                elif entry.name != labels_filename:
-                    raise AssertionError("Fockin' hell!")
+        for entry in os.scandir(path):
+            assert entry.is_file()
+            if entry.name.endswith('.jpg'):
+                add_image(entry.name, labelsdict, dataset_id)
+            elif entry.name != labels_filename:
+                raise AssertionError("Fockin' hell!")
+
     except:
         shutil.rmtree(path, ignore_errors=True)
         raise
@@ -115,9 +115,10 @@ class UploadNewDataset(ProtectedResource):
                               user_id=get_current_user())
 
         try:
-            unzip_validate_archive(dataset_path, postfile.stream, new_dataset.id)
             new_dataset.add()
+            unzip_validate_archive(dataset_path, postfile.stream, new_dataset.id)
         except Exception as e:
+            new_dataset.delete()
             abort(500, message=str(e))
 
         return '', 201

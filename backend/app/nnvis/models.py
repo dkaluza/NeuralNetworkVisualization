@@ -96,7 +96,7 @@ class Image(db.Model, CRUD):
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
     def __init__(self, imageName, relPath, label, dataset_id):
-        self.imageName = imageName
+        self.name = imageName
         self.relative_path = relPath
         self.label = label
         self.dataset_id = dataset_id
