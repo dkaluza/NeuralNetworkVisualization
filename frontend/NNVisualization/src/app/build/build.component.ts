@@ -32,7 +32,8 @@ export class BuildComponent implements OnInit {
     }
 
     ngOnInit() {
-        if (!this.selArchService.architecture) {
+        if (!this.selArchService.architecture &&
+                this.selArchService.currentNodes.size === 0) {
             this.selArchService.currentNodes = new Map;
             this.selArchService.currentLinks = [];
         }
