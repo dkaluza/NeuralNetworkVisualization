@@ -1,17 +1,32 @@
 <div mat-dialog-content>
     <mat-form-field>
-        <input matInput [(ngModel)]="username" placeholder="Username" cdkFocusInitial>
+        <input matInput
+               [(ngModel)]="username"
+               placeholder="Username"
+               (keyup.enter)="confirm()"
+               cdkFocusInitial>
     </mat-form-field>
     <mat-form-field>
-        <input matInput [(ngModel)]="password" type="password" placeholder="Password">
-        <button mat-button *ngIf="password" matSuffix mat-icon-button aria-label="Clear" (click)="password=''">
+        <input matInput
+               [(ngModel)]="password"
+               type="password"
+               placeholder="Password"
+               (keyup.enter)="confirm()">
+        <button mat-button
+                *ngIf="password"
+                matSuffix
+                mat-icon-button
+                aria-label="Clear"
+                (click)="password=''">
             <mat-icon>close</mat-icon>
         </button>
     </mat-form-field>
 </div>
 <div mat-dialog-actions>
-    <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-button [mat-dialog-close]="{ username: username, password: password }">
+    <button mat-button
+            mat-dialog-close>Cancel</button>
+    <button mat-button
+            [mat-dialog-close]="{ username: username, password: password }">
         Confirm
     </button>
 </div>
