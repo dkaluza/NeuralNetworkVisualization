@@ -4,7 +4,7 @@ import { Restangular } from 'ngx-restangular';
 
 import { VisArchComponent } from '../vis-arch/vis-arch.component';
 
-import { ArchNode, ArchLink } from '../selected-architecture/architecture';
+import { Architecture, ArchNode, ArchLink } from '../selected-architecture/architecture';
 
 import { Layer } from '../vis-arch/layers/layer/layer';
 import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
@@ -156,8 +156,19 @@ export class BuildComponent implements OnInit {
 
         this.restangular.all('upload_arch')
             .post(data).subscribe(
-                () => { this.genericDialogs.createSuccess('Save successful!'); },
-                () => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
+                arch => {
+                    const newArch = new Architecture(
+                        arch.id, arch.name,
+                        arch.description,
+                        arch.architecture.nodes,
+                        arch.architecture.links,
+                        arch.last_used,
+                        arch.last_modified
+                    );
+                    this.selArchService.architecture = newArch;
+                    this.genericDialogs.createSuccess('Save successful!');
+                },
+                e => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
             );
     }
 }
