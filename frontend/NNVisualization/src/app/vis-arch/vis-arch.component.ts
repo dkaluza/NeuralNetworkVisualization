@@ -7,7 +7,7 @@ import { ArchNode, ArchLink } from '../selected-architecture/architecture';
 import { ToolboxLayer, layerTemplates } from './toolbox-layers';
 import { Graph } from './graph';
 
-import { Layer, Activation } from './layers/layer/layer';
+import { Layer } from './layers/layer/layer';
 import { FullyConnectedLayer } from './layers/fully-connected/fully-connected';
 import { ConvLayer } from './layers/conv/conv';
 import { InputLayer } from './layers/input/input';

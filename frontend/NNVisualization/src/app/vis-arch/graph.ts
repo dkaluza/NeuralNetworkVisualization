@@ -5,7 +5,6 @@ export interface Link {
 
 export class Graph {
     private _nodes: number[];
-    // private _links: number[][];
     private _links: Map<number, number[]>;
 
     constructor() {
@@ -34,9 +33,6 @@ export class Graph {
                 this._links.set(key, arr.filter(n => (n !== id)));
             }
         );
-        // this._links = this._links.map(
-        //     arr => (arr.filter(n => (n !== id)))
-        // );
     }
 
     addLink(source: number,  target: number): void {

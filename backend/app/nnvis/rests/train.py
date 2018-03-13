@@ -1,11 +1,12 @@
 from flask import request
 from flask_restful import abort, Resource
 
+from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Architecture, Model
 from app.nnvis.build_model import TrainThread
 
 
-class TrainNewModel(Resource):
+class TrainNewModel(ProtectedResource):
     def post(self, arch_id, dataset_id):
         arch = Architecture.query.get(arch_id)
         if arch is None:
@@ -37,7 +38,7 @@ class TrainNewModel(Resource):
         return {'ok': 'ok'}, 200
 
 
-class TrainModel(Resource):
+class TrainModel(ProtectedResource):
     def get(self, model_id, dataset_id):
         # TODO: train_model REST
         pass
