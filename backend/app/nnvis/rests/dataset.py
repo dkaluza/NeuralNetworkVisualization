@@ -1,8 +1,8 @@
 from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
+from flask import current_app as app
 
-import app
 from app.nnvis.models import Dataset, Model, Image
 from app.nnvis.rests.protected_resource import ProtectedResource
 
@@ -18,17 +18,17 @@ def dataset_to_dict(dataset):
         'description': dataset.description
     }
 
-def add_image(fname, labelsdict):
+def add_image(fname, labelsdict, dataset_id):
     assert fname.endswith('.jpg')
     strippedname = fname.rstrip[:-4]
     new_image = Image(imageName=strippedname,
                       relPath=fname,
                       label=labelsdict.get(fname, labelsdict[strippedname]),
-                      user_id=get_current_user())
+                      dataset_id=dataset_id)
 
     new_image.add()
 
-def unzip_validate_archive(path, file):
+def unzip_validate_archive(path, file, dataset_id):
     labels_filename = app.config['LABELS_FILENAME']
 
     try:
@@ -44,7 +44,7 @@ def unzip_validate_archive(path, file):
             for entry in pathit:
                 assert entry.is_file()
                 if entry.name.endswith('.jpg'):
-                    add_image(entry.name, labelsdict)
+                    add_image(entry.name, labelsdict, dataset_id)
                 elif entry.name != labels_filename:
                     raise AssertionError("Fockin' hell!")
     except:
@@ -104,7 +104,7 @@ class UploadNewDataset(ProtectedResource):
         if postfile.filename == '':
             self.__abort_400('No dataset file selected')
 
-        postdata = request.get_json(force=True)
+        postdata = request.form
         self.__verify_postdata(postdata)
 
         dataset_path = os.path.join(app.config['DATASET_FOLDER'], postdata['name'])
@@ -115,10 +115,12 @@ class UploadNewDataset(ProtectedResource):
                               user_id=get_current_user())
 
         try:
-            unzip_validate_archive(dataset_path, postfile.stream)
+            unzip_validate_archive(dataset_path, postfile.stream, new_dataset.id)
             new_dataset.add()
         except Exception as e:
-            abort(500, message=e.message)
+            abort(500, message=str(e))
+
+        return '', 201
 
 class ListAllDatasets(ProtectedResource):
     def get(self):

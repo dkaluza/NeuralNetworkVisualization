@@ -1,5 +1,6 @@
 frontend/NNVisualization/package-lock.json
 backend/app/models.db
+backend/app/test_models.db
 ./UltiSnips/
 
 **/__pycache__/

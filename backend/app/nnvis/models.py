@@ -95,11 +95,11 @@ class Image(db.Model, CRUD):
     label = db.Column(db.Text(256))
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
-    def __init__(self, imageName, relPath, label, user_id):
+    def __init__(self, imageName, relPath, label, dataset_id):
         self.imageName = imageName
         self.relative_path = relPath
         self.label = label
-        self.user_id = user_id
+        self.dataset_id = dataset_id
 
     def json(self):
         return {'imageName': self.imageName, 'imagePath': self.imagePath}
@@ -113,8 +113,6 @@ class User(db.Model, CRUD):
                             cascade="all, delete-orphan")
     datasets = db.relationship('Dataset', backref='user', lazy=True,
                                cascade="all, delete-orphan")
-    images = db.relationship('Image', backref='user', lazy=True,
-                             cascade="all, delete-orphan")
 
     def __init__(self, username, password):
         self.username = username
