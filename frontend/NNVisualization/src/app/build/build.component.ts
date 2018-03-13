@@ -75,6 +75,7 @@ export class BuildComponent implements OnInit {
     }
 
     resetArch(): void {
+        // this line sets currentNodes and currentLinks to those in selected architecture
         this.selArchService.architecture = this.selArchService.architecture;
         this.nodes = this.selArchService.currentNodes;
         this.links = this.selArchService.currentLinks;
