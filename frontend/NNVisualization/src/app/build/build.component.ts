@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
-import { MatDialog, MatDialogRef } from '@angular/material';
 
 import { VisArchComponent } from '../vis-arch/vis-arch.component';
 
-import { ArchNode, ArchLink } from '../selected-architecture/architecture';
+import { Architecture, ArchNode, ArchLink } from '../selected-architecture/architecture';
 
 import { Layer } from '../vis-arch/layers/layer/layer';
 import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
 import { ConvLayer } from '../vis-arch/layers/conv/conv';
 import { InputLayer } from '../vis-arch/layers/input/input';
+import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 
 @Component({
     selector: 'app-build',
@@ -18,9 +18,6 @@ import { InputLayer } from '../vis-arch/layers/input/input';
     styleUrls: ['./build.component.css']
 })
 export class BuildComponent implements OnInit {
-
-    private _saveCurrentMessage: string;
-    private _saveNewMessage: string;
 
     nodes: Map<number, Layer>;
     links: ArchLink[];
@@ -30,46 +27,17 @@ export class BuildComponent implements OnInit {
     private selectedID: number;
 
     constructor(private selArchService: SelectedArchitectureService,
-                private restangular: Restangular,
-                public dialog: MatDialog) {
-        this._saveCurrentMessage = 'Save';
-        this._saveNewMessage = 'Save as new';
+        private restangular: Restangular,
+        private genericDialogs: GenericDialogsService) {
     }
 
     ngOnInit() {
-        if (this.selArchService.currentNodes) {
-            this.nodes = this.selArchService.currentNodes;
-            this.links = this.selArchService.currentLinks;
-        } else if (this.selArchService.architecture) {
-            this.nodes = new Map;
-            this.selArchService.architecture.nodes.forEach(
-                node => {
-                    return this.nodes.set(
-                                Number(node.id),
-                                this._archNodeToLayer(node));
-                }
-            );
-            this.links = this.selArchService.architecture.links;
-
-            this.selArchService.currentNodes = this.nodes;
-            this.selArchService.currentLinks = this.links;
-        } else {
-            this.nodes = new Map;
-            this.links = [];
+        if (!this.selArchService.architecture) {
+            this.selArchService.currentNodes = new Map;
+            this.selArchService.currentLinks = [];
         }
-    }
-
-    private _archNodeToLayer(node: ArchNode): Layer {
-        switch (node.layerType) {
-            case 'fc':
-                return FullyConnectedLayer.fromDict(node);
-            case 'conv':
-                return ConvLayer.fromDict(node);
-            case 'input':
-                return InputLayer.fromDict(node);
-            default:
-                return undefined;
-        }
+        this.nodes = this.selArchService.currentNodes;
+        this.links = this.selArchService.currentLinks;
     }
 
     private _unselectNode(): void {
@@ -80,6 +48,9 @@ export class BuildComponent implements OnInit {
     onGraphModified(data): void {
         this.selArchService.currentNodes = data.nodes;
         this.selArchService.currentLinks = data.links;
+
+        this.nodes = data.nodes;
+        this.links = data.links;
     }
 
     onNodeSelected(id): void {
@@ -102,18 +73,10 @@ export class BuildComponent implements OnInit {
     }
 
     resetArch(): void {
-        this.nodes = new Map;
-        this.selArchService.architecture.nodes.forEach(
-            node => {
-                return this.nodes.set(
-                    Number(node.id),
-                    this._archNodeToLayer(node));
-            }
-        );
-        this.links = this.selArchService.architecture.links;
-
-        this.selArchService.currentNodes = this.nodes;
-        this.selArchService.currentLinks = this.links;
+        // this line sets currentNodes and currentLinks to those in selected architecture
+        this.selArchService.architecture = this.selArchService.architecture;
+        this.nodes = this.selArchService.currentNodes;
+        this.links = this.selArchService.currentLinks;
 
         this._unselectNode();
     }
@@ -130,32 +93,23 @@ export class BuildComponent implements OnInit {
             };
             this.restangular.all('arch').all(arch.id)
                 .post(data).subscribe(
-                    (nArch) => {},
-                    () => { alert('Error :('); }
+                    (nArch) => { this.genericDialogs.createSuccess('Save successful!'); },
+                    () => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
                 );
         }
     }
 
     saveAsNewArch() {
-        // TODO use MatDialog
-        // let dialogRef = this.dialog.open(DescDialog);
+        this.genericDialogs.createInputs(['Name', 'Description']).afterClosed().subscribe(
+            result => {
+                if (result && result['Name']) {
+                    this._saveAsNewArchWithNameAndDesc(result['Name'], result['Description']);
+                }
+            }
+        );
+    }
 
-        // dialogRef
-        //     .afterClosed()
-        //     .filter(result => result)
-        //     .subscribe(result => {
-        //         this.saveArch(name, result, undefined)
-        //         this._saveNewMessage = 'Saved successfully!'
-        //         setTimeout(() => {
-        //             this._saveNewMessage = 'Save as new'
-        //         }, this._msgTimeout)
-        //     });
-
-        const name = prompt('Enter a name:');
-        if (name === null || name === '') { return; }
-        const desc = prompt('Enter a short description:');
-        if (desc === null) { return; }
-
+    private _saveAsNewArchWithNameAndDesc(name: string, desc: string) {
         const data = {
             name: name,
             description: desc,
@@ -164,39 +118,22 @@ export class BuildComponent implements OnInit {
                 links: this.selArchService.currentLinks
             }
         };
+
         this.restangular.all('upload_arch')
             .post(data).subscribe(
-                () => { alert('Save successful!'); },
-                () => { alert('Something fucked up while saving'); }
+                arch => {
+                    const newArch = new Architecture(
+                        arch.id, arch.name,
+                        arch.description,
+                        arch.architecture.nodes,
+                        arch.architecture.links,
+                        arch.last_used,
+                        arch.last_modified
+                    );
+                    this.selArchService.architecture = newArch;
+                    this.genericDialogs.createSuccess('Save successful!');
+                },
+                e => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
             );
-    }
-
-    get saveCurrentMsg(): string {
-        return this._saveCurrentMessage;
-    }
-
-    get saveNewMsg(): string {
-        return this._saveNewMessage;
-    }
-}
-
-@Component({
-    selector: 'desc-dialog',
-    templateUrl: 'desc-dialog.component.html'
-})
-export class DescDialog {
-
-    private _text: string;
-
-    constructor(
-        private dialogRef: MatDialogRef<DescDialog>
-    ) {}
-
-    save() {
-        this.dialogRef.close(this._text);
-    }
-
-    cancel() {
-        this.dialogRef.close();
     }
 }
