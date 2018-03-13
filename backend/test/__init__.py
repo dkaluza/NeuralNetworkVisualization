@@ -1,0 +1,1 @@
+# running tests: "python -m unittest discover" in the backend folder

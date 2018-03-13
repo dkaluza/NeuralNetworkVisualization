@@ -95,9 +95,10 @@ class Image(db.Model, CRUD):
     label = db.Column(db.Text(256))
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
 
-    def __init__(self, imageName, relPath, user_id):
+    def __init__(self, imageName, relPath, label, user_id):
         self.imageName = imageName
         self.relative_path = relPath
+        self.label = label
         self.user_id = user_id
 
     def json(self):

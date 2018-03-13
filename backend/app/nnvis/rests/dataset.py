@@ -18,29 +18,35 @@ def dataset_to_dict(dataset):
         'description': dataset.description
     }
 
+def add_image(fname, labelsdict):
+    assert fname.endswith('.jpg')
+    strippedname = fname.rstrip[:-4]
+    new_image = Image(imageName=strippedname,
+                      relPath=fname,
+                      label=labelsdict.get(fname, labelsdict[strippedname]),
+                      user_id=get_current_user())
+
+    new_image.add()
+
 def unzip_validate_archive(path, file):
     labels_filename = app.config['LABELS_FILENAME']
-    def process_validate_split(splitname):
-        # Read labels file
-        labelsdf = pd.read_csv(os.path.join(path, splitname, labels_filename))
 
-        with os.scandir(os.path.join(path, splitname)) as pathit:
+    try:
+        os.makedirs(path, exist_ok=True)
+        archive = ZipFile(file)
+        archive.extractall(path)
+
+        labelsdf = pd.read_csv(os.path.join(path, labels_filename))
+        cols = labelsdf.columns
+        labelsdict = pd.Series(labelsdf[cols[0]].values, index=labelsdf[cols[1]]).to_dict()
+
+        with os.scandir(path) as pathit:
             for entry in pathit:
                 assert entry.is_file()
                 if entry.name.endswith('.jpg'):
-                    # Add image to db
-                    pass
+                    add_image(entry.name, labelsdict)
                 elif entry.name != labels_filename:
-                    raise AssertionError('Fockin hell')
-
-    try:
-        os.makedirs(path)
-        archive = ZipFile(file)
-        assert archive.namelist() == ['train/', 'validate/']
-        archive.extractall(path)
-
-        process_validate_split('train')
-        process_validate_split('validate')
+                    raise AssertionError("Fockin' hell!")
     except:
         shutil.rmtree(path, ignore_errors=True)
         raise
