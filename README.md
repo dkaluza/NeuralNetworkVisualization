@@ -23,10 +23,10 @@ todo - no tests yet
 
 ### Backend
 
-To run backend tests, while inside the container and in the folder `backend/` do
+To run backend tests, while inside the container run
 
 ```
-python3 -m unittest discover
+backend/test.sh
 ```
 
 ## Random stuff here
