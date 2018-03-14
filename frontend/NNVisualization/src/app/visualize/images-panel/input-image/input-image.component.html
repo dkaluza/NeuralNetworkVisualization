@@ -4,9 +4,22 @@
 
 <div class="container">
     <div class="col-lg-2">
-        <button class="btn btn-primary" (click)="onGetPreviousImage()"> << </button>
+        <button mat-icon-button (click)="onGetPreviousImage()">
+            <mat-icon>skip_previous</mat-icon>
+        </button>
     </div>
     <div class="col-lg-2">
-        <button class="btn btn-primary" (click)="onGetNextImage()"> >> </button>
+        <mat-form-field>
+            <mat-select placeholder="Choose image">
+                <mat-option *ngFor="let image of visualizeService.imagesList" [value]="image.imageId">
+                    {{ image.imageName}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div class="col-lg-2">
+        <button mat-icon-button (click)="onGetNextImage()">
+            <mat-icon>skip_next</mat-icon>
+        </button>
     </div>
 </div>
