@@ -21,7 +21,7 @@ def create_labels(colnames, *rows):
     return labelfile.getvalue()
 
 def bad_zipfile():
-    return (BytesIO(b'dupa'), 'bad.zip')
+    return (BytesIO(b'test'), 'bad.zip')
 
 def good_zipfile_noimgs():
     retfile = BytesIO()
@@ -51,9 +51,9 @@ def good_zipfile_imgs():
     retfile.seek(0)
     return (retfile, 'imgs.zip')
 
-DATASET_NAME = 'dupa'
-DATASET_LABELS = 'dupa'
-DATASET_DESCRIPTION = 'dupa'
+DATASET_NAME = 'testname'
+DATASET_LABELS = 'testlabel'
+DATASET_DESCRIPTION = 'testdesc'
 
 class UploadNewDatasetTest(unittest.TestCase):
 

@@ -19,7 +19,7 @@ From inside the container, start the frontend or backend with their respective s
 
 ### Frontend
 
-idk lol
+todo - no tests yet
 
 ### Backend
 
