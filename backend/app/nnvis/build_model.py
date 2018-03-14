@@ -6,7 +6,7 @@ import json
 
 from tensorflow.examples.tutorials.mnist import input_data
 
-from app.nnvis.models import Architecture
+from app.nnvis.models import session, Architecture
 
 
 def get_activation(node):
@@ -166,7 +166,7 @@ class TrainThread(threading.Thread):
         self._arch_id = arch_id
         self._model_id = model_id
         self._dataset_id = dataset_id
-        arch = Architecture.query.get(arch_id)
+        arch = session.query(Architecture).get(arch_id)
         graph = json.loads(arch.graph)
         self._nodes = graph['nodes']
         self._links = graph['links']

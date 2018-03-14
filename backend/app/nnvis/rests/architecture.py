@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import abort, Resource
 
-from app.nnvis.models import Architecture, Model
+from app.nnvis.models import session, Architecture, Model
 from datetime import datetime
 import json
 
@@ -24,36 +24,36 @@ def arch_to_dict(arch):
 
 class ArchitectureTask(Resource):
     def __abort_if_arch_doesnt_exist(self, arch_id):
-        if Architecture.query.get(arch_id) is None:
+        if session.query(Architecture).get(arch_id) is None:
             message = 'Architecture {id} doesn\'t exist'.format(id=arch_id)
             abort(403, message=message)
 
     def get(self, arch_id):
         self.__abort_if_arch_doesnt_exist(arch_id)
-        arch = Architecture.query.get(arch_id)
+        arch = session.query(Architecture).get(arch_id)
         return arch_to_dict(arch)
 
     def delete(self, arch_id):
         self.__abort_if_arch_doesnt_exist(arch_id)
-        models = Model.query.filter_by(arch_id=arch_id).all()
+        models = session.query(Model).filter_by(arch_id=arch_id).all()
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
                       .format(id=arch_id)
             abort(403, message=message)
 
-        arch = Architecture.query.get(arch_id)
+        arch = session.query(Architecture).get(arch_id)
         arch.delete()
         return '', 204
 
     def post(self, arch_id):
         self.__abort_if_arch_doesnt_exist(arch_id)
-        models = Model.query.filter_by(arch_id=arch_id).all()
+        models = session.query(Model).filter_by(arch_id=arch_id).all()
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
                       .format(id=arch_id)
             abort(403, message=message)
 
-        arch = Architecture.query.get(arch_id)
+        arch = session.query(Architecture).get(arch_id)
 
         args = request.get_json(force=True)
         if 'name' in args:
@@ -86,5 +86,5 @@ class UploadNewArchitecture(Resource):
 
 class ListAllArchitectures(Resource):
     def get(self):
-        archs = Architecture.query.all()
+        archs = session.query(Architecture).all()
         return [arch_to_dict(arch) for arch in archs]

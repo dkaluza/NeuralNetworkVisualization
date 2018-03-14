@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import abort, Resource
 
-from app.nnvis.models import Model
+from app.nnvis.models import session, Model
 
 
 def model_to_dict(model):
@@ -21,18 +21,18 @@ class ModelTask(Resource):
 
     def get(self, model_id):
         self.__abort_if_model_doesnt_exist(model_id)
-        model = Model.query.get(model_id)
+        model = session.query(Model).get(model_id)
         return model_to_dict(model)
 
     def delete(self, model_id):
         self.__abort_if_model_doesnt_exist(model_id)
-        model = Model.query.get(model_id)
+        model = session.query(Model).get(model_id)
         model.delete()
         return '', 204
 
     def post(self, model_id):
         self.__abort_if_model_doesnt_exist(model_id)
-        model = Model.query.get(model_id)
+        model = session.query(Model).get(model_id)
 
         args = request.get_json(force=True)
         if 'name' in args:
@@ -52,5 +52,5 @@ class UploadNewModel(Resource):
 
 class ListAllModels(Resource):
     def get(self, arch_id):
-        models = Model.query.filter_by(arch_id=arch_id)
+        models = session.query(Model).filter_by(arch_id=arch_id)
         return [model_to_dict(model) for model in models]

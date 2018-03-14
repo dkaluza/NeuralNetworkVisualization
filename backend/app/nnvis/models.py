@@ -4,20 +4,21 @@ import os
 from werkzeug.security import generate_password_hash
 
 db = SQLAlchemy()
+session = db.create_scoped_session()
 
 
 class CRUD():
 
     def add(self):
-        db.session.add(self)
-        return db.session.commit()
+        session.add(self)
+        return session.commit()
 
     def update(self):
-        return db.session.commit()
+        return session.commit()
 
     def delete(self):
-        db.session.delete(self)
-        return db.session.commit()
+        session.delete(self)
+        return session.commit()
 
 
 class Architecture(db.Model, CRUD):

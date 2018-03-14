@@ -1,13 +1,13 @@
 from flask import request
 from flask_restful import abort, Resource
 
-from app.nnvis.models import Architecture, Model
+from app.nnvis.models import session, Architecture, Model
 from app.nnvis.build_model import TrainThread
 
 
 class TrainNewModel(Resource):
     def post(self, arch_id, dataset_id):
-        arch = Architecture.query.get(arch_id)
+        arch = session.query(Architecture).get(arch_id)
         if arch is None:
             abort(403, message='This Architecture doesn\'t exists')
 
@@ -15,7 +15,8 @@ class TrainNewModel(Resource):
         name = args['name']
         desc = args['description']
 
-        if len(Model.query.filter_by(arch_id=arch_id, name=name).all()) > 0:
+        if len(session.query(Model).
+                filter_by(arch_id=arch_id, name=name).all()) > 0:
             abort(403, message='Model with this name already exists')
         model = Model(name=name, description=desc, weights_path='',
                       arch_id=arch_id, dataset_id=dataset_id)
@@ -31,8 +32,7 @@ class TrainNewModel(Resource):
             thread1.start()
             # thread1.join()
         except Exception as e:
-            print(e)
-            print('Error: unable to start thread')
+            print('Unable to start thread: {}'.format(e))
 
         return {'ok': 'ok'}, 200
 

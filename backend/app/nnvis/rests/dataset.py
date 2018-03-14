@@ -1,6 +1,6 @@
 from flask_restful import abort, Resource
 
-from app.nnvis.models import Dataset, Model
+from app.nnvis.models import session, Dataset, Model
 
 
 def dataset_to_dict(dataset):
@@ -13,23 +13,23 @@ def dataset_to_dict(dataset):
 
 class DatasetTask(Resource):
     def __abort_if_dataset_doesnt_exist(self, dataset_id):
-        if Dataset.query.get(dataset_id) is None:
+        if session.query(Dataset).get(dataset_id) is None:
             message = 'Dataset {id} doesn\'t exist' \
                       .format(id=dataset_id)
             abort(403, message=message)
 
     def get(self, dataset_id):
         self.__abort_if_dataset_doesnt_exist(dataset_id)
-        dataset = Dataset.query.get(dataset_id)
+        dataset = session.query(Dataset).get(dataset_id)
         return dataset_to_dict(dataset)
 
     def delete(self, dataset_id):
         self.__abort_if_dataset_doesnt_exist(dataset_id)
-        models = Model.query.filter_by(dataset_id=dataset_id).all()
+        models = session.query(Model).filter_by(dataset_id=dataset_id).all()
         for model in models:
             model.dataset_id = None
             model.update()
-        dataset = Dataset.query.get(dataset_id)
+        dataset = session.query(Dataset).get(dataset_id)
         dataset.delete()
         return '', 204
 
@@ -42,6 +42,6 @@ class UploadNewDataset(Resource):
 
 class ListAllDatasets(Resource):
     def get(self):
-        datasets = Dataset.query.all()
+        datasets = session.query(Dataset).all()
         return [dataset_to_dict(dataset)
                 for dataset in datasets]
