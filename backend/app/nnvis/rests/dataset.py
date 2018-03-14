@@ -11,6 +11,11 @@ import shutil
 import pandas as pd
 from zipfile import ZipFile
 
+SUPPORTED_EXTENSIONS = [
+    'jpg',
+    'png'
+]
+
 def dataset_to_dict(dataset):
     return {
         'id': dataset.id,
@@ -18,9 +23,12 @@ def dataset_to_dict(dataset):
         'description': dataset.description
     }
 
+def check_supported_extension(fname):
+    return fname.rsplit('.', 1)[1] in SUPPORTED_EXTENSIONS
+
 def add_image(fname, labelsdict, dataset_id):
-    assert fname.endswith('.jpg')
-    new_image = Image(imageName=fname[:-4],
+    assert check_supported_extension(fname)
+    new_image = Image(imageName=fname.rsplit('.', 1)[0],
                       relPath=fname,
                       label=labelsdict[fname],
                       dataset_id=dataset_id)
@@ -42,7 +50,7 @@ def unzip_validate_archive(path, file, dataset_id):
 
         for entry in os.scandir(path):
             assert entry.is_file()
-            if entry.name.endswith('.jpg'):
+            if check_supported_extension(entry.name):
                 add_image(entry.name, labelsdict, dataset_id)
             elif entry.name != labels_filename:
                 raise AssertionError('Unexpected file found in archive')
