@@ -89,7 +89,7 @@ class UploadNewArchitecture(ProtectedResource):
         try:
             new_arch.add()
         except Exception as e:
-            abort(500, message=e.message)
+            abort(500, message=str(e))
 
         return arch_to_dict(new_arch), 201
 

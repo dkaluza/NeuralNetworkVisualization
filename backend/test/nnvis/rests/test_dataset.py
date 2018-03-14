@@ -66,12 +66,6 @@ class UploadNewDatasetTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_true_is_true(self):
-        self.assertTrue(True)
-
-    def test_false_is_false(self):
-        self.assertFalse(False)
-
     def test_nofile(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
             name=DATASET_NAME,

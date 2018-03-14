@@ -45,7 +45,7 @@ def unzip_validate_archive(path, file, dataset_id):
             if entry.name.endswith('.jpg'):
                 add_image(entry.name, labelsdict, dataset_id)
             elif entry.name != labels_filename:
-                raise AssertionError("Fockin' hell!")
+                raise AssertionError('Unexpected file found in archive')
 
     except:
         shutil.rmtree(path, ignore_errors=True)
