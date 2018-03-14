@@ -1,21 +1,45 @@
-from flask_restful import Resource
+from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
+from app.nnvis.models import Model
+
+from app.vis_tools.utils import algorithms_register
+from app.vis_tools.utils import visualize_saliency
+from app.vis_tools.utils import inference
+from app.vis_tools.utils import NumpyEncoder
+
+import json
+
+class Inference(ProtectedResource):
+    def get(self, model_id, image_id):
+        model = Model.query.get(model_id)
+        arch = model.arch_id
+        image_path = Image.query.get(image_id).path
+
+        # TODO: get tensorflow graph/weights from above db entries
+        graph, weights = convert_tf(arch, model)
+        prediction = inference(graph, weights, image_path)
+        
+        # TODO: convert int class to class name?
+
+        return {'class': prediction}
 
 
-class Inference(Resource):
-    def get(self, model_id):
-        # TODO: inference REST
-        pass
+class Visualize(ProtectedResource):
+    def get(self, model_id, alg_id, image_id):
+        model = Model.query.get(model_id)
+        arch = model.arch_id
+        image_path = Image.query.get(image_id).path
 
+        # TODO: get tensorflow graph/weights from above db entries
+        graph, weights = convert_tf(arch, model)
 
-class Visualize(Resource):
-    def get(self, model_id, alg_id):
-        # TODO: visualize REST
-        pass
+        saliency_img = visualize_saliency(graph, weights, alg_id, image_path)
+
+        return json.dumps({'result_image': saliency_img}, cls=NumpyEncoder)
 
 
 # /visualize/<string:algorithm>/<string:image_id>
-class Images(Resource):
+class Images(ProtectedResource):
     def get(self, algorithm, image_id):
         print('in get images')
         if algorithm == 'GBP':
@@ -40,4 +64,9 @@ class Images(Resource):
                                image2.json()]}
 
         print('returning error')
-        return {'error message': algorithm + ' alogrithm is not handled yet'}, 202
+        return {'error message': algorithm + ' algorithm is not handled yet'}, 202
+
+class Algorithms(ProtectedResource):
+
+    def get(self):
+        return {alg_class.__name__: alg_id for alg_id, alg_class in algorithms_register}

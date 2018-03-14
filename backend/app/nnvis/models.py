@@ -29,17 +29,22 @@ class Architecture(db.Model, CRUD):
     last_used = db.Column(db.Date)
     last_modified = db.Column(db.Date)
     models = db.relationship('Model', backref='architecture', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
-    def __init__(self, name, description, graph):
+    def __init__(self, name, description, graph, user_id):
         self.name = name
         self.description = description
+        self.user_id = user_id
 
         self.graph = graph
         self.last_used = None
         self.last_modified = datetime.utcnow()
 
     def __repr__(self):
-        return '<Archtecture {id} {name}>'.format(id=self.id, name=self.name)
+        return '<Archtecture {id} {name} of user {user_id}>'.format(id=self.id,
+                                                                    name=self.name,
+                                                                    user_id=self.user_id)
 
     def add(self):
         super().add()
@@ -95,15 +100,19 @@ class Dataset(db.Model, CRUD):
     trainset_path = db.Column(db.Text(256), nullable=False)
     split_path = db.Column(db.Text(256))
     models = db.relationship('Model', backref='dataset', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
-    def __init__(self, name, description, trainset_path, split_path):
+    def __init__(self, name, description, trainset_path, split_path, user_id):
         self.name = name
         self.description = description
         self.trainset_path = trainset_path
         self.split_path = split_path
+        self.user_id = user_id
 
     def __repr__(self):
-        return '<Dataset {id} {name}>'.format(id=self.id, name=self.name)
+        return '<Dataset {id} {name} of user {user_id}>'.format(id=self.id, name=self.name,
+                                                                user_id=self.user_id)
 
 
 # todo
@@ -111,10 +120,13 @@ class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=64, nullable=False)
     path = db.Column(db.Text(256), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
-    def __init__(self, imageName, imagePath):
+    def __init__(self, imageName, imagePath, user_id):
         self.imageName = imageName
         self.imagePath = imagePath
+        self.user_id = user_id
 
     def json(self):
         return {'imageName': self.imageName, 'imagePath': self.imagePath}
@@ -124,10 +136,16 @@ class User(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(64), nullable=False)
+    archs = db.relationship('Architecture', backref='user', lazy=True,
+                            cascade="all, delete-orphan")
+    datasets = db.relationship('Dataset', backref='user', lazy=True,
+                               cascade="all, delete-orphan")
+    images = db.relationship('Image', backref='user', lazy=True,
+                             cascade="all, delete-orphan")
 
     def __init__(self, username, password):
         self.username = username
         self.password = generate_password_hash(password)
 
     def __repr__(self):
-        return '<User {username}>'.format(username=self.username)
+        return '<User {id} {username}>'.format(id=self.id, username=self.username)

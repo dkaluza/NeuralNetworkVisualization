@@ -3,9 +3,10 @@ from flask_restful import abort, Resource
 
 from app.nnvis.models import session, Architecture, Model
 from app.nnvis.build_model import TrainThread
+from app.nnvis.rests.protected_resource import ProtectedResource
 
 
-class TrainNewModel(Resource):
+class TrainNewModel(ProtectedResource):
     def post(self, arch_id, dataset_id):
         arch = session.query(Architecture).get(arch_id)
         if arch is None:
@@ -33,11 +34,12 @@ class TrainNewModel(Resource):
             # thread1.join()
         except Exception as e:
             print('Unable to start thread: {}'.format(e))
+            abort(500, message=e)
 
-        return {'ok': 'ok'}, 200
+        return {'message': 'Training started succesfully'}, 200
 
 
-class TrainModel(Resource):
+class TrainModel(ProtectedResource):
     def get(self, model_id, dataset_id):
         # TODO: train_model REST
         pass

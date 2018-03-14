@@ -1,2 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
+
 @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+.warning-dialog .mat-dialog-container {
+    background-color: #f44336;
+    color: white;
+    opacity: 0.9 !important;
+}
+
+.success-dialog .mat-dialog-container {
+    background-color: #69f0ae;
+    color: rgba(0, 0, 0, 0.87);
+    opacity: 0.9 !important;
+}
+
+.inputs-dialog .mat-dialog-container {
+    padding: 35px;
+}
