@@ -73,6 +73,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-alert.component';
 import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service';
 import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
+import { InferenceComponent } from './visualize/images-panel/inference/inference.component';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full' },
@@ -180,7 +181,8 @@ export class MaterialImportsModule { }
         LogInDialogComponent,
         UnauthorizedComponent,
         TimeoutAlertComponent,
-        InputsDialogComponent
+        InputsDialogComponent,
+        InferenceComponent,
     ],
     entryComponents: [
         LogInDialogComponent,
