@@ -67,7 +67,7 @@ import { NgxDnDModule } from '@swimlane/ngx-dnd';
 import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
 import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service';
 import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service';
-import { JwtHelper } from 'angular2-jwt';
+import { JwtModule, JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-alert.component';
@@ -199,7 +199,14 @@ export class MaterialImportsModule { }
         NgxChartsModule,
         NgxGraphModule,
         NgxDnDModule,
-        FlexLayoutModule
+        FlexLayoutModule,
+        JwtModule.forRoot({
+            config: {
+                tokenGetter: () => {
+                    return localStorage.getItem('token');
+                }
+            }
+        })
     ],
     providers: [SelectedArchitectureService, AuthenticationService,
         AuthenticationWithoutLoginService, AuthGuard, JwtHelper,
