@@ -49,7 +49,7 @@ class ArchitectureTask(ProtectedResource):
         return arch_to_dict(arch)
 
     def delete(self, arch_id):
-        arch = Architecture.query.get(arch_id)
+        arch = session.query(Architecture).get(arch_id)
         self.__abort_if_arch_doesnt_exist(arch, arch_id)
         self.__abort_if_arch_isnt_owned_by_user(arch)
         models = session.query(Model).filter_by(arch_id=arch_id).all()
