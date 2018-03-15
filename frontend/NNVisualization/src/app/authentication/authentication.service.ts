@@ -3,11 +3,14 @@ import { JwtHelper } from 'angular2-jwt';
 import { Restangular } from 'ngx-restangular';
 import { Observable } from 'rxjs/Observable';
 
+import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
+
 @Injectable()
 export class AuthenticationWithoutLoginService {
     protected _tokenPath = 'token';
 
-    constructor(protected jwtHelper: JwtHelper) {
+    constructor(protected jwtHelper: JwtHelper,
+            private selArchService: SelectedArchitectureService) {
 
     }
 
@@ -33,6 +36,8 @@ export class AuthenticationWithoutLoginService {
     }
     public logOut() {
         localStorage.removeItem(this._tokenPath);
+        // unselect current architecture and model
+        this.selArchService.architecture = undefined;
     }
 
 }
@@ -41,8 +46,9 @@ export class AuthenticationWithoutLoginService {
 export class AuthenticationService extends AuthenticationWithoutLoginService {
 
 
-    constructor(jwtHelper: JwtHelper, private restangular: Restangular) {
-        super(jwtHelper);
+    constructor(jwtHelper: JwtHelper, private restangular: Restangular,
+            selArchService: SelectedArchitectureService) {
+        super(jwtHelper, selArchService);
     }
 
     public logIn(username: string, password: string): Observable<void> {
