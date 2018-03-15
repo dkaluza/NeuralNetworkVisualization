@@ -1,19 +1,27 @@
-<div class="row">
-    <div class="col-md-3 col-md-offset-3 centered">
-        <h2>Select architecture</h2>
+<div fxLayout="row"
+     fxLayoutAlign="center start">
+    <div fxFlex="30%"
+         fxLayout="column"
+         fxLayoutAlign="center stretch">
+        <h2 fxLayout="column"
+            fxLayoutAlign="start center">Select architecture</h2>
         <div class="filter-header">
             <mat-form-field>
-                <input matInput (keyup)="applyFilter(archDataSource, $event.target.value)" placeholder="Filter">
+                <input matInput
+                       (keyup)="applyFilter(archDataSource, $event.target.value)"
+                       placeholder="Filter">
             </mat-form-field>
         </div>
         <div>
-            <mat-table #archs [dataSource]="archDataSource">
+            <mat-table #archs
+                       [dataSource]="archDataSource">
                 <ng-container matColumnDef="position">
                     <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="name">
                     <mat-cell *matCellDef="let elem">
-                        <button mat-button (click)="selectArchitecture(elem.position)">{{elem.name}}</button>
+                        <button mat-button
+                                (click)="selectArchitecture(elem.position)">{{elem.name}}</button>
                     </mat-cell>
                 </ng-container>
 
@@ -22,21 +30,28 @@
             </mat-table>
         </div>
     </div>
-    <div class="col-md-3 centered">
-        <h2>Select model</h2>
+    <div fxFlex="30%"
+         fxLayout="column"
+         fxLayoutAlign="center stretch">
+        <h2 fxLayout="column"
+            fxLayoutAlign="start center">Select model</h2>
         <div class="filter-header">
             <mat-form-field>
-                <input matInput (keyup)="applyFilter(modelDataSource, $event.target.value)" placeholder="Filter">
+                <input matInput
+                       (keyup)="applyFilter(modelDataSource, $event.target.value)"
+                       placeholder="Filter">
             </mat-form-field>
         </div>
         <div>
-            <mat-table #models [dataSource]="modelDataSource">
+            <mat-table #models
+                       [dataSource]="modelDataSource">
                 <ng-container matColumnDef="position">
                     <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="name">
                     <mat-cell *matCellDef="let elem">
-                        <button mat-button (click)="selectModel(elem.position)">{{elem.name}}</button>
+                        <button mat-button
+                                (click)="selectModel(elem.position)">{{elem.name}}</button>
                     </mat-cell>
                 </ng-container>
 
@@ -46,9 +61,12 @@
         </div>
     </div>
 </div>
-<hr>
-<div class="row">
-    <div class="col-md-3 col-md-offset-3 centered">
+<mat-divider></mat-divider>
+<div fxLayout="row"
+     fxLayoutAlign="center start">
+    <div fxFlex="30%"
+         fxLayout="column"
+         fxLayoutAlign="start center">
         <ng-container *ngIf="!add_new_arch_mode; else addArch">
             <ng-container *ngIf="selectedArchitectureService.architecture; else noArch">
                 <h2>Current architecture</h2>
@@ -58,23 +76,29 @@
                 <h4>Last used: {{ selectedArchitectureService.architecture.last_used }}</h4>
                 <h4>Last modified: {{ selectedArchitectureService.architecture.last_modified }}</h4>
 
-                <button mat-button (click)="editCurrentArchitecture()">Edit</button>
-                <button mat-button (click)="deleteCurrentArchitecture()">Delete</button>
+                <button mat-button
+                        (click)="editCurrentArchitecture()">Edit</button>
+                <button mat-button
+                        (click)="deleteCurrentArchitecture()">Delete</button>
             </ng-container>
             <ng-template #noArch>
                 No architecture selected
             </ng-template>
         </ng-container>
     </div>
-    <div class="col-md-3 centered">
+    <div fxFlex="30%"
+         fxLayout="column"
+         fxLayoutAlign="start center">
         <ng-container *ngIf="selectedArchitectureService.model; else noModel">
             <h2>Current model</h2>
             <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
             <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
             <h4>Description: {{ selectedArchitectureService.model.description }}</h4>
 
-            <button mat-button (click)="editCurrentModel()">Edit</button>
-            <button mat-button (click)="deleteCurrentModel()">Delete</button>
+            <button mat-button
+                    (click)="editCurrentModel()">Edit</button>
+            <button mat-button
+                    (click)="deleteCurrentModel()">Delete</button>
         </ng-container>
         <ng-template #noModel>
             No model selected

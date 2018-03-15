@@ -11,8 +11,8 @@ interface AlertData {
 @Injectable()
 export class GenericDialogsService {
 
-    private readonly _initialAlertTopMargin = '8rem';
-    private readonly _initialAlertRightMargin = '5rem';
+    private readonly _initialAlertTopMargin = '6rem';
+    private readonly _initialAlertRightMargin = '3rem';
     private readonly _alertConfig: MatDialogConfig<AlertData> = {
         position: {
             right: this._initialAlertRightMargin,

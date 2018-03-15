@@ -11,15 +11,22 @@
     background-color: lightblue;
 }
 
+.vis-arch-cont-layer-info {
+    height: auto;
+}
+
 .vis-arch-container {
-    height: 100%;
+    height: auto;
     margin-top: 2%;
 }
 
-.selected-layer {
-}
+.selected-layer {}
 
 .not-selected-message {
     text-align: center;
     padding-top: 50%;
+}
+
+app-vis-arch {
+    height: inherit;
 }
