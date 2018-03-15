@@ -1,14 +1,16 @@
-<h3>
-    <ng-container *ngIf="selectedArchitectureService.architecture; else noArch">
-        Architecture: {{ selectedArchitectureService.architecture.name }},
-        <ng-container *ngIf="selectedArchitectureService.model; else noModel">
-            Model: {{ selectedArchitectureService.model.name }}
+<mat-toolbar class="mat-toolbar mat-accent mat-elevation-z3">
+    <h3>
+        <ng-container *ngIf="selectedArchitectureService.architecture; else noArch">
+            Architecture: {{ selectedArchitectureService.architecture.name }},
+            <ng-container *ngIf="selectedArchitectureService.model; else noModel">
+                Model: {{ selectedArchitectureService.model.name }}
+            </ng-container>
+            <ng-template #noModel>
+                Please select a model
+            </ng-template>
         </ng-container>
-        <ng-template #noModel>
-            Please select a model
+        <ng-template #noArch>
+            Please select an architecture and a model
         </ng-template>
-    </ng-container>
-    <ng-template #noArch>
-        Please select an architecture and a model
-    </ng-template>
-</h3>
+    </h3>
+</mat-toolbar>
