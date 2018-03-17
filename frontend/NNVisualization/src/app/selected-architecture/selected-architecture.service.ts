@@ -40,6 +40,9 @@ export class SelectedArchitectureService {
                 }
             );
             this._currentLinks = this._architecture.links;
+        } else {
+            this._currentNodes = new Map;
+            this._currentLinks = [];
         }
     }
 
