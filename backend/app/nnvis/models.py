@@ -73,8 +73,8 @@ class Dataset(db.Model, CRUD):
     path = db.Column(db.Text(256), nullable=False)
     labels = db.Column(db.Text(256), nullable=False)
     models = db.relationship('Model', backref='dataset', lazy=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
-                        nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    images = db.relationship('Image', backref='dataset', lazy=True)
 
     def __init__(self, name, description, path, labels, user_id):
         self.name = name
@@ -92,8 +92,8 @@ class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=64, nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
-    label = db.Column(db.Text(256))
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
+    label = db.Column(db.Text(256), nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'), nullable=False)
 
     def __init__(self, imageName, relPath, label, dataset_id):
         self.name = imageName

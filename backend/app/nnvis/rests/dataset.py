@@ -5,6 +5,7 @@ from flask import current_app as app
 
 from app.nnvis.models import Dataset, Model, Image
 from app.nnvis.rests.protected_resource import ProtectedResource
+from app.utils import NnvisException
 
 import os
 import shutil
@@ -23,11 +24,15 @@ def dataset_to_dict(dataset):
         'description': dataset.description
     }
 
+def _assert(b, msg):
+    if not b:
+        raise NnvisException(msg)
+
 def check_supported_extension(fname):
     return fname.rsplit('.', 1)[1] in SUPPORTED_EXTENSIONS
 
 def add_image(fname, labelsdict, dataset_id):
-    assert check_supported_extension(fname)
+    _assert(check_supported_extension(fname), "Unsupported extension found")
     new_image = Image(imageName=fname.rsplit('.', 1)[0],
                       relPath=fname,
                       label=labelsdict[fname],
@@ -49,7 +54,7 @@ def unzip_validate_archive(path, file, dataset_id):
         labelsdict = pd.Series(labelsdf[cols[1]].values, index=labelsdf[cols[0]]).to_dict()
 
         for entry in os.scandir(path):
-            assert entry.is_file()
+            _assert(entry.is_file(), "Unexpected directory found in archive")
             if check_supported_extension(entry.name):
                 add_image(entry.name, labelsdict, dataset_id)
             elif entry.name != labels_filename:
