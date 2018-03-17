@@ -6,3 +6,4 @@ Flask-RESTful==0.3.6
 Flask-Cors==3.0.3
 flask-jwt-extended==3.7.1
 tensorflow
+pandas

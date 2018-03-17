@@ -1,14 +1,12 @@
-# NeuralNetworkVisualization
-
-## Getting Started
+# Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-### Prerequisites
+## Prerequisites
 
 * docker
 
-### Running the container
+## Running the container
 
 In order to start the development environment, run the env.sh script from anywhere inside the repo:
 ```
@@ -17,7 +15,21 @@ In order to start the development environment, run the env.sh script from anywhe
 
 From inside the container, start the frontend or backend with their respective start.sh scripts or run both with utils/run.sh
 
-### Random stuff here
+## Running tests
+
+### Frontend
+
+todo - no tests yet
+
+### Backend
+
+To run backend tests, while inside the container run
+
+```
+backend/test.sh
+```
+
+## Random stuff here
 
 Work in progress
 
