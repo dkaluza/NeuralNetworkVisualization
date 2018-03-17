@@ -16,7 +16,7 @@ export class TrainComponent implements OnInit {
 
     constructor(private restangular: Restangular,
         private selArchService: SelectedArchitectureService,
-        private genericDialog : GenericDialogsService) { }
+        private genericDialog: GenericDialogsService) { }
 
     ngOnInit() {
     }
@@ -34,10 +34,18 @@ export class TrainComponent implements OnInit {
                         description: result['Description'],
                         nepochs: Number(this.nepochs),
                         batch_size: Number(this.batchSize),
-                        learning_rate: Number(this.learningRate)
+                        loss: 'logloss',
+                        optimizer: 'adam',
+                        optimizer_params: {
+                            lr: Number(this.learningRate),
+                            beta1: 0.9,
+                            beta2: 0.999,
+                            epsilon: 0.000001
+                        },
+                        dataset_id: 1
                     };
                     const id = this.selArchService.architecture.id;
-                    this.restangular.all('train_new_model/' + String(id) + '/' + String(1))
+                    this.restangular.all('train_new_model/' + String(id))
                         .post(data).subscribe(
                             (ans) => { this.genericDialog.createSuccess('Training started successfully'); },
                             () => { this.genericDialog.createWarning('Couldn\'t start training'); }

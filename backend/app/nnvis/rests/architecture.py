@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
-from app.nnvis.models import session, Architecture, Model
+from app.nnvis.models import Architecture, Model
 from app.nnvis.rests.protected_resource import ProtectedResource
 from datetime import datetime
 import json
@@ -43,25 +43,25 @@ class ArchitectureTask(ProtectedResource):
             abort(403, message=message)
 
     def get(self, arch_id):
-        arch = session.query(Architecture).get(arch_id)
+        arch = Architecture.query.get(arch_id)
         self.__abort_if_arch_doesnt_exist(arch, arch_id)
         self.__abort_if_arch_isnt_owned_by_user(arch)
         return arch_to_dict(arch)
 
     def delete(self, arch_id):
-        arch = session.query(Architecture).get(arch_id)
+        arch = Architecture.query.get(arch_id)
         self.__abort_if_arch_doesnt_exist(arch, arch_id)
         self.__abort_if_arch_isnt_owned_by_user(arch)
-        models = session.query(Model).filter_by(arch_id=arch_id).all()
+        models = Model.query.filter_by(arch_id=arch_id).all()
         self.__abort_if_models_list_isnt_empty(models, arch_id)
         arch.delete()
         return '', 204
 
     def post(self, arch_id):
-        arch = session.query(Architecture).get(arch_id)
+        arch = Architecture.query.get(arch_id)
         self.__abort_if_arch_doesnt_exist(arch, arch_id)
         self.__abort_if_arch_isnt_owned_by_user(arch)
-        models = session.query(Model).filter_by(arch_id=arch_id).all()
+        models = Model.query.filter_by(arch_id=arch_id).all()
         self.__abort_if_models_list_isnt_empty(models, arch_id)
 
         args = request.get_json(force=True)
@@ -104,5 +104,5 @@ class UploadNewArchitecture(ProtectedResource):
 
 class ListAllArchitectures(ProtectedResource):
     def get(self):
-        archs = session.query(Architecture).filter_by(user_id=get_current_user())
+        archs = Architecture.query.filter_by(user_id=get_current_user())
         return [arch_to_dict(arch) for arch in archs]

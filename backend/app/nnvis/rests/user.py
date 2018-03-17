@@ -3,7 +3,7 @@ from flask_restful import abort, Resource
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 
-from app.nnvis.models import session, User
+from app.nnvis.models import User
 
 
 class AuthenticationTask(Resource):
@@ -12,8 +12,9 @@ class AuthenticationTask(Resource):
             self.__abort(username)
 
     def __abort(self, username):
-        message = 'User {username} doesn\'t exist or the password is incorrect'.format(
-            username=username)
+        message = 'User {username} doesn\'t exist \
+                    or the password is incorrect'\
+                    .format(username=username)
         abort(401, message=message)
 
     def __abort_if_password_doesnt_match(self, user, username, password):
@@ -24,7 +25,7 @@ class AuthenticationTask(Resource):
         args = request.get_json(force=True)
         username = args['username']
         password = args['password']
-        user = session.query(User).filter_by(username=username).first()
+        user = User.query.filter_by(username=username).first()
         self.__abort_if_user_doesnt_exist(user, username)
         self.__abort_if_password_doesnt_match(user, username, password)
 

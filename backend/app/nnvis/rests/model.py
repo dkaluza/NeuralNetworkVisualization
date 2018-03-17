@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
-from app.nnvis.models import session, Model, Architecture
+from app.nnvis.models import Model, Architecture
 from app.nnvis.rests.protected_resource import ProtectedResource
 
 
@@ -28,20 +28,20 @@ class ModelTask(ProtectedResource):
             abort(401, message=message)
 
     def get(self, model_id):
-        model = session.query(Model).get(model_id)
+        model = Model.query.get(model_id)
         self.__abort_if_model_doesnt_exist(model, model_id)
         self.__abort_if_model_isnt_owned_by_user(model)
         return model_to_dict(model)
 
     def delete(self, model_id):
-        model = session.query(Model).get(model_id)
+        model = Model.query.get(model_id)
         self.__abort_if_model_doesnt_exist(model, model_id)
         self.__abort_if_model_isnt_owned_by_user(model)
         model.delete()
         return '', 204
 
     def post(self, model_id):
-        model = session.query(Model).get(model_id)
+        model = Model.query.get(model_id)
         self.__abort_if_model_doesnt_exist(model, model_id)
         self.__abort_if_model_isnt_owned_by_user(model)
 
@@ -63,7 +63,7 @@ class UploadNewModel(ProtectedResource):
 
 class ListAllModels(ProtectedResource):
     def get(self, arch_id):
-        arch = session.query(Architecture).get(arch_id)
+        arch = Architecture.query.get(arch_id)
         if arch is None:
             return []
         if arch.user_id != get_current_user():

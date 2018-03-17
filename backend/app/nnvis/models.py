@@ -4,21 +4,20 @@ import os
 from werkzeug.security import generate_password_hash
 
 db = SQLAlchemy()
-session = db.create_scoped_session()
 
 
 class CRUD():
 
     def add(self):
-        session.add(self)
-        return session.commit()
+        db.session.add(self)
+        return db.session.commit()
 
     def update(self):
-        return session.commit()
+        return db.session.commit()
 
     def delete(self):
-        session.delete(self)
-        return session.commit()
+        db.session.delete(self)
+        return db.session.commit()
 
 
 class Architecture(db.Model, CRUD):
@@ -42,9 +41,8 @@ class Architecture(db.Model, CRUD):
         self.last_modified = datetime.utcnow()
 
     def __repr__(self):
-        return '<Archtecture {id} {name} of user {user_id}>'.format(id=self.id,
-                                                                    name=self.name,
-                                                                    user_id=self.user_id)
+        return '<Archtecture {id} {name} of user {user_id}>'.format(
+                id=self.id, name=self.name, user_id=self.user_id)
 
     def add(self):
         super().add()
@@ -111,8 +109,8 @@ class Dataset(db.Model, CRUD):
         self.user_id = user_id
 
     def __repr__(self):
-        return '<Dataset {id} {name} of user {user_id}>'.format(id=self.id, name=self.name,
-                                                                user_id=self.user_id)
+        return '<Dataset {id} {name} of user {user_id}>'.format(
+                id=self.id, name=self.name, user_id=self.user_id)
 
 
 class Image(db.Model, CRUD):
@@ -120,7 +118,8 @@ class Image(db.Model, CRUD):
     name = db.Column(db.String(64), unique=64, nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
     label = db.Column(db.Text(256), nullable=False)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'), nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
+                           nullable=False)
 
     def __init__(self, imageName, relPath, label, dataset_id):
         self.name = imageName
@@ -146,4 +145,5 @@ class User(db.Model, CRUD):
         self.password = generate_password_hash(password)
 
     def __repr__(self):
-        return '<User {id} {username}>'.format(id=self.id, username=self.username)
+        return '<User {id} {username}>'.format(
+                id=self.id, username=self.username)

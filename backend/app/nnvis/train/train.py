@@ -1,8 +1,9 @@
 import tensorflow as tf
+import numpy as np
 import threading
 import json
 
-from app.nnvis.models import session, Architecture
+from app.nnvis.models import Architecture
 
 from app.nnvis.train.build_model import (build_model,
                                          get_input_ids,
@@ -11,9 +12,9 @@ from app.nnvis.train.losses import calculate_loss
 from app.nnvis.train.optimizers import optimize
 from app.nnvis.train.read_dataset import (read_data,
                                           get_train_ids,
-                                          get_valid_ids,
                                           shuffle,
-                                          split_into_batches)
+                                          split_into_batches,
+                                          split_into_train_and_valid)
 
 
 class TrainThread(threading.Thread):
@@ -22,7 +23,7 @@ class TrainThread(threading.Thread):
         self._arch_id = arch_id
         self._model_id = model_id
         self._dataset_id = dataset_id
-        arch = session.query(Architecture).get(arch_id)
+        arch = Architecture.query.get(arch_id)
         graph = json.loads(arch.graph)
         self._nodes = graph['nodes']
         self._links = graph['links']
@@ -37,23 +38,33 @@ class TrainThread(threading.Thread):
         print('building graph...')
         self._ops, self._graph = build_model(self._nodes, self._links)
         self._X = self._ops[get_input_ids(self._nodes, self._links)[0]]
-        self._y = tf.placeholder(tf.float32, shape=(None, 10))
         self._pred = self._ops[get_output_ids(self._nodes, self._links)[0]]
 
-        self._loss = calculate_loss(self._loss_function, self._y, self._pred)
-        self._opt = optimize(self._optimizer, self._loss, self._opt_params)
+        with self._graph.as_default():
+            self._y = tf.placeholder(tf.float32, shape=(None, 10))
+            self._loss = calculate_loss(self._loss_function, self._y,
+                                        self._pred)
+            self._opt = optimize(self._optimizer, self._loss, self._opt_params)
+
+    def __get_shape(self, op):
+        l = op.get_shape().as_list()
+        return [i if i is not None else -1 for i in l]
 
     def run(self):
 
         train_ids = get_train_ids(self._dataset_id)
-        valid_ids = get_valid_ids(self._dataset_id)
+        train_ids, valid_ids = split_into_train_and_valid(train_ids, 0.7)
         self.__build_model()
-        saver = tf.train.Saver()
 
         print('starting training')
-        with self._graph.as_default() as g:
+        with self._graph.as_default():
+            saver = tf.train.Saver()
+
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
+
+                x_shape = self.__get_shape(self._X)
+                y_shape = self.__get_shape(self._y)
 
                 rounds = int(len(train_ids) / self._batch_size)
                 for e in range(self._nepochs):
@@ -63,7 +74,10 @@ class TrainThread(threading.Thread):
                     avarage_loss = 0.
                     batches = split_into_batches(train_ids, self._batch_size)
                     for batch_ids in batches:
-                        batch_xs, batch_ys = read_data(self._dataset_id, batch_ids)
+                        batch_xs, batch_ys = read_data(self._dataset_id,
+                                                       batch_ids)
+                        batch_xs = np.reshape(batch_xs, x_shape)
+                        batch_ys = np.reshape(batch_ys, y_shape)
                         _, l = sess.run(
                                 [self._opt, self._loss],
                                 feed_dict={
@@ -90,6 +104,8 @@ class TrainThread(threading.Thread):
                 batches = split_into_batches(valid_ids, self._batch_size)
                 for batch_ids in batches:
                     batch_xs, batch_ys = read_data(self._dataset_id, batch_ids)
+                    batch_xs = np.reshape(batch_xs, x_shape)
+                    batch_ys = np.reshape(batch_ys, y_shape)
                     _, l = sess.run(
                             [self._opt, self._loss],
                             feed_dict={self._X: batch_xs, self._y: batch_ys}

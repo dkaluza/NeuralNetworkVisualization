@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
-from app.nnvis.models import session, Architecture, Model
+from app.nnvis.models import Architecture, Model
 from app.nnvis.train.train import TrainThread
 from app.nnvis.rests.protected_resource import ProtectedResource
 
@@ -19,10 +19,9 @@ ARGS_LIST = [
 
 class TrainNewModel(ProtectedResource):
 
-    def post(self, arch_id, dataset_id):
-        arch = session.query(Architecture) \
-                .filter_by(user_id=get_current_user()) \
-                .get(arch_id)
+    def post(self, arch_id):
+        arch = Architecture.query \
+                .filter_by(user_id=get_current_user(), id=arch_id)
         if arch is None:
             abort(403, message='This Architecture doesn\'t exists')
 
@@ -40,8 +39,7 @@ class TrainNewModel(ProtectedResource):
         desc = args['description']
         dataset_id = args['dataset_id']
 
-        if len(session.query(Model).
-                filter_by(arch_id=arch_id, name=name).all()) > 0:
+        if len(Model.query.filter_by(arch_id=arch_id, name=name).all()) > 0:
             abort(403, message='Model with this name already exists')
         model = Model(name=name, description=desc, weights_path='',
                       arch_id=arch_id, dataset_id=dataset_id)
@@ -52,7 +50,7 @@ class TrainNewModel(ProtectedResource):
                     'batch_size': int(args['batch_size']),
                     'loss': args['loss'],
                     'optimizer': args['optimizer'],
-                    'optmizer_params': args['optimizer_params']
+                    'optimizer_params': args['optimizer_params']
                     }
             thread1 = TrainThread(model.arch_id, model.id,
                                   model.dataset_id, params)
@@ -65,6 +63,6 @@ class TrainNewModel(ProtectedResource):
 
 
 class TrainModel(ProtectedResource):
-    def get(self, model_id, dataset_id):
+    def get(self, model_id):
         # TODO: train_model REST
         pass

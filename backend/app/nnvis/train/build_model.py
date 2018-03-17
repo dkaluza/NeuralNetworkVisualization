@@ -2,7 +2,7 @@ import tensorflow as tf
 from app.nnvis.train.layers import build_op
 
 
-def build_model(name_scope, nodes, links):
+def build_model(nodes, links):
     ids = [int(node['id']) for node in nodes]
     nodes = {int(node['id']): node for node in nodes}
 
@@ -15,7 +15,7 @@ def build_model(name_scope, nodes, links):
         num_inputs[int(link['target'])] += 1
 
     graph = tf.Graph()
-    with graph.as_default() as g:
+    with graph.as_default():
         map_op = {}
         for id in ids:
             if num_inputs[id] == 0 and id not in map_op:
