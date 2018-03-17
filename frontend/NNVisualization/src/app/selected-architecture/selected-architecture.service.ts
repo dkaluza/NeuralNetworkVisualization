@@ -17,7 +17,10 @@ export class SelectedArchitectureService {
     private _currentNodes: Map<number, Layer>;
     private _currentLinks: ArchLink[];
 
-    constructor() { }
+    constructor() {
+        this._currentNodes = new Map;
+        this._currentLinks = [];
+    }
 
     get architecture(): Architecture {
         return this._architecture;
@@ -37,6 +40,9 @@ export class SelectedArchitectureService {
                 }
             );
             this._currentLinks = this._architecture.links;
+        } else {
+            this._currentNodes = new Map;
+            this._currentLinks = [];
         }
     }
 
