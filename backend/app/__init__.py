@@ -27,4 +27,10 @@ def create_app(config_filename):
             raise RuntimeError('Weights folder exists but is not a folder')
         os.makedirs(app.config['WEIGHTS_DIR'])
 
+    if not os.path.isdir(app.config['DATASET_FOLDER']):
+        if os.path.exists(app.config['DATASET_FOLDER']):
+            raise RuntimeError('Dataset folder exists but is not a folder')
+
+        os.makedirs(app.config['DATASET_FOLDER'])
+
     return app

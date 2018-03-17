@@ -3,7 +3,7 @@ from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
 from app.nnvis.models import session, Architecture, Model
-from app.nnvis.build_model import TrainThread
+from app.nnvis.train.train import TrainThread
 from app.nnvis.rests.protected_resource import ProtectedResource
 
 
