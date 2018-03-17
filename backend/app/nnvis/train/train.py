@@ -10,6 +10,11 @@ from app.nnvis.train.build_model import (build_model,
                                          get_output_ids)
 from app.nnvis.train.losses import calculate_loss
 from app.nnvis.train.optimizers import optimize
+from app.nnvis.train.read_dataset import (read_data,
+                                          get_train_ids,
+                                          get_valid_ids,
+                                          shuffle,
+                                          split_into_batches)
 
 
 class TrainThread(threading.Thread):
@@ -31,7 +36,7 @@ class TrainThread(threading.Thread):
 
     def __build_model(self):
         print('building graph...')
-        self._ops = build_model(self._nodes, self._links)
+        self._ops, self._graph = build_model(self._nodes, self._links)
         self._X = self._ops[get_input_ids(self._nodes, self._links)[0]]
         self._y = tf.placeholder(tf.float32, shape=(None, 10))
         self._pred = self._ops[get_output_ids(self._nodes, self._links)[0]]
@@ -40,49 +45,58 @@ class TrainThread(threading.Thread):
         self._opt = optimize(self._optimizer, self._loss, self._opt_params)
 
     def run(self):
-        print('starting train_mnist')
-        mnist = input_data.read_data_sets(
-                    '../../mnist/', one_hot=True, reshape=False)
-        train = mnist.train
-        test = mnist.test
-        self.__build_model()
 
+        train_ids = get_train_ids(self._dataset_id)
+        valid_ids = get_valid_ids(self._dataset_id)
+        self.__build_model()
         saver = tf.train.Saver()
 
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
+        print('starting training')
+        with self._graph.as_default() as g:
+            with tf.Session() as sess:
+                sess.run(tf.global_variables_initializer())
 
-            for e in range(self._nepochs):
-                print('---- Epoch {e} ----'.format(e=e))
-                rounds = int(mnist.train.num_examples / self._batch_size)
+                rounds = int(len(train_ids) / self._batch_size)
+                for e in range(self._nepochs):
+                    print('---- Epoch {e} ----'.format(e=e))
+                    train_ids = shuffle(train_ids)
 
+                    avarage_loss = 0.
+                    batches = split_into_batches(train_ids, self._batch_size)
+                    for batch_ids in batches:
+                        batch_xs, batch_ys = read_data(self._dataset_id, batch_ids)
+                        _, l = sess.run(
+                                [self._opt, self._loss],
+                                feed_dict={
+                                    self._X: batch_xs,
+                                    self._y: batch_ys
+                                    }
+                                )
+
+                        avarage_loss += l
+
+                    avarage_loss /= float(rounds)
+                    print('Avg. loss = {l}'.format(l=avarage_loss))
+                    avarage_loss = 0.
+                print('finished training')
+
+                print('saving model')
+                path = './app/nnvis/weights/{arch_id}/{model_id}/model.ckpt' \
+                    .format(arch_id=self._arch_id, model_id=self._model_id)
+                saver.save(sess, path)
+
+                print('staring validation')
+                rounds = int(len(valid_ids) / self._batch_size)
                 avarage_loss = 0.
-                for i in range(rounds):
-                    batch_xs, batch_ys = train.next_batch(self._batch_size)
+                batches = split_into_batches(valid_ids, self._batch_size)
+                for batch_ids in batches:
+                    batch_xs, batch_ys = read_data(self._dataset_id, batch_ids)
                     _, l = sess.run(
                             [self._opt, self._loss],
-                            feed_dict={self._X: batch_xs, self._y: batch_ys})
+                            feed_dict={self._X: batch_xs, self._y: batch_ys}
+                            )
 
                     avarage_loss += l
 
-                avarage_loss /= float(rounds)
-                print('Avg. loss = {l}, Avg. accuracy = {a}'.format(
-                    l=avarage_loss))
-                avarage_loss = 0.
-
-            path = './app/nnvis/weights/{arch_id}/{model_id}/model.ckpt' \
-                .format(arch_id=self._arch_id, model_id=self._model_id)
-            saver.save(sess, path)
-
-            rounds = int(mnist.test.num_examples / self._batch_size)
-            avarage_loss = 0.
-            for i in range(rounds):
-                batch_xs, batch_ys = test.next_batch(self._batch_size)
-                _, l = sess.run(
-                        [self._opt, self._loss],
-                        feed_dict={self._X: batch_xs, self._y: batch_ys})
-
-                avarage_loss += l
-
-            print(avarage_loss / float(rounds))
-        print('end train_mnist')
+                print(avarage_loss / float(rounds))
+                print('finished validation')

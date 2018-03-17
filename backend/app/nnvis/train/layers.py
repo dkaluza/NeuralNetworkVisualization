@@ -74,13 +74,14 @@ def build_pool_op(node, input_ops):
 def build_op(node, map_op, inputs):
     input_ops = [map_op[v] for v in inputs]
 
-    if node['layerType'] == 'input':
-        return build_input_op(node, input_ops)
-    elif node['layerType'] == 'fc':
-        return build_fc_op(node, input_ops)
-    elif node['layerType'] == 'conv':
-        return build_conv_op(node, input_ops)
-    elif node['layerType'] == 'pool':
-        return build_pool_op(node, input_ops)
-    else:
-        raise Exception('Unknown type of layer')
+    with tf.name_scope(node['id']):
+        if node['layerType'] == 'input':
+            return build_input_op(node, input_ops)
+        elif node['layerType'] == 'fc':
+            return build_fc_op(node, input_ops)
+        elif node['layerType'] == 'conv':
+            return build_conv_op(node, input_ops)
+        elif node['layerType'] == 'pool':
+            return build_pool_op(node, input_ops)
+        else:
+            raise Exception('Unknown type of layer')
