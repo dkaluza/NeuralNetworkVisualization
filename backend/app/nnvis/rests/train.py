@@ -2,9 +2,9 @@ from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
+from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Architecture, Model
 from app.nnvis.train.train import TrainThread
-from app.nnvis.rests.protected_resource import ProtectedResource
 
 
 ARGS_LIST = [
