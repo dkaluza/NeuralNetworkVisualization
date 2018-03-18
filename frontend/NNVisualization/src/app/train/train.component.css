@@ -1,0 +1,33 @@
+.mat-table {
+    overflow: auto;
+    max-height: 200px;
+}
+
+.mat-row {
+    cursor: pointer;
+}
+
+.selected-dataset {
+    background-color: #dddddd;
+}
+
+.train-button {
+    background-color: #bbffbb;
+    font-size: 30px;
+    width: 150px;
+    height: 65px;
+}
+
+.filter-header {
+    min-height: 64px;
+    padding: 8px 24px 0;
+}
+
+.mat-form-field {
+    font-size: 14px;
+    width: 100%;
+}
+
+.centered {
+    text-align: center;
+}

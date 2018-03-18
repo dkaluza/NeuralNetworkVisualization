@@ -1,11 +1,83 @@
-<p>train works!</p>
-<mat-form-field>
-    <input matInput placeholder="Number of epochs" [(ngModel)]="nepochs">
-</mat-form-field>
-<mat-form-field>
-    <input matInput placeholder="Batch size" [(ngModel)]="batchSize">
-</mat-form-field>
-<mat-form-field>
-    <input matInput placeholder="Learning rate" [(ngModel)]="learningRate">
-</mat-form-field>
-<button mat-button (click)="onTrain()"><h4>Train MNIST!</h4></button>
+<div class="centered" fxLayout fxLayoutGap="10px">
+    <div fxFlex>
+        <div fxLayout="column" fxLayoutGap="20px">
+            <div fxFlex>
+                <mat-form-field>
+                    <input matInput
+                           type="number" min="1"
+                           placeholder="Number of epochs"
+                           [(ngModel)]="nepochs">
+                </mat-form-field>
+            </div>
+            <div fxFlex>
+                <mat-form-field>
+                    <input matInput
+                           type="number" min="1"
+                           placeholder="Batch size"
+                           [(ngModel)]="batchSize">
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+    <div fxFlex>
+        <h4>Select loss function</h4>
+        <mat-form-field>
+            <mat-select placeholder="Loss function" [(value)]="loss">
+                <mat-option *ngFor="let l of losses" [value]="l.value">
+                    {{ l.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div fxFlex>
+        <h4>Select optimizer</h4>
+        <mat-form-field>
+            <mat-select placeholder="Optimizer" [(value)]="optimizer"
+                        (selectionChange)="onOptimizerChange($event.value)">
+                <mat-option *ngFor="let o of optimizers" [value]="o.value">
+                    {{ o.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <div *ngIf="optimizer">
+            <h5>Set optimizer params</h5>
+            <mat-form-field *ngFor="let param of optimizerParamsSets[optimizer]">
+                <input matInput
+                        type="number" step="any" min="0"
+                        [placeholder]="param.name"
+                        [value]="param.default"
+                        (input)="onParamChange(param.value, $event.target.value)">
+            </mat-form-field>
+        </div>
+    </div>
+    <div fxFlex>
+        <h4>Select dataset</h4>
+        <div class="filter-header">
+            <mat-form-field>
+                <input matInput (keyup)="applyFilter(datasetDataSource, $event.target.value)" placeholder="Filter">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-table #archs [dataSource]="datasetDataSource">
+                <ng-container matColumnDef="position">
+                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                    <mat-cell *matCellDef="let elem"> {{elem.name}} </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef=""></mat-header-row>
+                <mat-row mat-button *matRowDef="let row; columns: displayedColumns;"
+                        (click)="selectDataset(row)"
+                        [class.selected-dataset]="row.id === selectedDatasetId">
+                </mat-row>
+            </mat-table>
+        </div>
+    </div>
+</div>
+<div fxLayout class="centered">
+    <div fxFlex>
+        <button class="train-button" mat-button (click)="onTrain()">Train!</button>
+    </div>
+</div>
+

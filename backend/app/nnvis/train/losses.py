@@ -12,7 +12,7 @@ def calculate_mean_squared_error(y, pred):
 def calculate_loss(loss, y, pred):
     if loss == 'logloss':
         return calculate_logloss(y, pred)
-    elif loss == 'mean_squared_error':
+    elif loss == 'mse':
         return calculate_mean_squared_error(y, pred)
     else:
         raise Exception('Unknow loss: {}'.format(loss))
