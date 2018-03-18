@@ -58,7 +58,7 @@ def unzip_validate_archive(path, file, dataset_id):
             if check_supported_extension(entry.name):
                 add_image(entry.name, labelsdict, dataset_id)
             elif entry.name != labels_filename:
-                raise AssertionError('Unexpected file found in archive')
+                raise NnvisException('Unexpected file found in archive')
 
     except:
         shutil.rmtree(path, ignore_errors=True)
