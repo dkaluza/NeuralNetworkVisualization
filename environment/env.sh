@@ -21,7 +21,7 @@ usage()
 
 do-build()
 {
-    "$DOCKER_COMMAND" build -t "$IMGTAG" -f "$DOCKERFILE" "$ROOTDIR/environment"
+    "$DOCKER_COMMAND" build -t "$IMGTAG" -f "$ROOTDIR/environment/$DOCKERFILE" "$ROOTDIR/environment"
 }
 
 do-run()
@@ -60,12 +60,13 @@ do-clean()
 
 main()
 {
-    if [ "$#" -ne 1 -a "$1" != "start"]; then
+    if [ "$#" -ne 1 -a "$1" != "start" ]; then
         usage
         exit 1
     fi
 
-    if [ "$#" -eq 2 -a "$2" != "-gpu"]; then
+    if [ "$#" -eq 2 -a "$2" != "-gpu" ]; then
+        echo "Unrecognized option $2"
         usage
         exit 1
     fi
@@ -80,14 +81,14 @@ main()
         ;;
         start)
         if [ "$2" == "-gpu" ]; then
-            if ! type "nvidia-docker"; then
+            if ! type "nvidia-docker" 2>/dev/null; then
                 echo "nvidia-docker is required for gpu usage - please refer to the documentation for installation guides"
                 exit 1
             fi
             DOCKER_COMMAND="nvidia-docker"
             DOCKERFILE=$DOCKERFILE_GPU
             IMGTAG=$IMGTAG_GPU
-        else
+        elif [ ! -z "$2" ]; then
             echo "Unrecognized option $2"
             usage
             exit 1
