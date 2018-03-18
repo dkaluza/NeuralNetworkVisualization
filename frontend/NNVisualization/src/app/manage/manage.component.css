@@ -23,7 +23,7 @@
 }
 
 .selected-row {
-    background-color: #dddddd;
+    background-color: rgba(255, 215, 64, 0.7);
 }
 
 .centered {
