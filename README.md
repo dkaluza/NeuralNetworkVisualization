@@ -20,7 +20,25 @@ In order to start the development environment, run the env.sh script from anywhe
 ./environment/env.sh start
 ```
 
+To build the gpu-enabled environment, do
+
+```
+./environment/env.sh start -gpu
+```
+
 From inside the container, start the frontend or backend with their respective start.sh scripts or run both with utils/run.sh
+
+## Other environment utilities
+
+* Connect to an already running container
+```
+./environment/env.sh connect
+```
+
+* Remove nnvis images (both cpu and gpu)
+```
+./environment/env.sh clean
+```
 
 ## Running tests
 
