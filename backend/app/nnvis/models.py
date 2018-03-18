@@ -63,14 +63,21 @@ class Model(db.Model, CRUD):
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
                         nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
+    training_params = db.Column(db.Text)
+    validation_loss = db.Column(db.Float)
+    training_loss = db.Column(db.Float)
 
     def __init__(self, name, description, weights_path,
-                 arch_id, dataset_id=None):
+                 arch_id, dataset_id=None, params=None,
+                 valid_loss=None, train_loss=None):
         self.name = name
         self.description = description
         self.weights_path = weights_path
         self.arch_id = arch_id
         self.dataset_id = dataset_id
+        self.training_params = params
+        self.validation_loss = valid_loss
+        self.training_loss = train_loss
 
     def __repr__(self):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)

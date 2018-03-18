@@ -75,6 +75,15 @@
             <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
             <h4>Description: {{ selectedArchitectureService.model.description }}</h4>
 
+            <h4>Optimizer: {{ selectedArchitectureService.model.optimizer }}</h4>
+
+            <h4>Batch size: {{ selectedArchitectureService.model.batch_size }}</h4>
+            <h4>Num. of epochs: {{ selectedArchitectureService.model.nepochs }}</h4>
+
+            <h4>Loss: {{ selectedArchitectureService.model.loss }}</h4>
+            <h4>Training loss: {{ selectedArchitectureService.model.training_loss }}</h4>
+            <h4>Validation loss: {{ selectedArchitectureService.model.validation_loss }}</h4>
+
             <button mat-button (click)="editCurrentModel()">Edit</button>
             <button mat-button (click)="deleteCurrentModel()">Delete</button>
         </ng-container>

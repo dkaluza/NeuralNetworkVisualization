@@ -1,16 +1,48 @@
 from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
+import json
 
 from app.nnvis.models import Model, Architecture
 from app.nnvis.rests.protected_resource import ProtectedResource
 
 
+LOSS_NAMES = {
+        'none': None,
+        'logloss': 'Logloss',
+        'mse': 'Mean Squared Error'
+        }
+
+OPTIMIZER_NAMES = {
+        'none': None,
+        'adam': 'Adam',
+        'sgd': 'Gradient Descent'
+        }
+
+
 def model_to_dict(model):
+    if model.training_params is not None:
+        params = json.loads(model.training_params)
+    else:
+        params = {
+                'loss': 'none',
+                'optimizer': 'none',
+                'optimizer_params': None,
+                'batch_size': None,
+                'nepochs': None,
+                }
+
     return {
         'id': model.id,
         'name': model.name,
-        'description': model.description
+        'description': model.description,
+        'valid_loss': model.validation_loss,
+        'train_loss': model.training_loss,
+        'loss': LOSS_NAMES[params['loss']],
+        'optimizer': OPTIMIZER_NAMES[params['optimizer']],
+        'optimizer_params': params['optimizer_params'],
+        'batch_size': params['batch_size'],
+        'nepochs': params['nepochs']
     }
 
 

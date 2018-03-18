@@ -3,7 +3,7 @@ import numpy as np
 import threading
 import json
 
-from app.nnvis.models import Architecture
+from app.nnvis.models import Architecture, Model
 
 from app.nnvis.train.build_model import (build_model,
                                          get_input_ids,
@@ -33,6 +33,9 @@ class TrainThread(threading.Thread):
         self._loss_function = params['loss']
         self._optimizer = params['optimizer']
         self._opt_params = params['optimizer_params']
+        self._params = params
+        self._validation_loss = 0.
+        self._training_loss = 0.
 
     def __build_model(self):
         print('building graph...')
@@ -49,6 +52,22 @@ class TrainThread(threading.Thread):
     def __get_shape(self, op):
         l = op.get_shape().as_list()
         return [i if i is not None else -1 for i in l]
+
+    def __save_model(self, session, saver):
+        model = Model.query.get(self._model_id)
+        if model is None:
+            return
+
+        path = './app/nnvis/weights/{arch_id}/{model_id}/' \
+            .format(arch_id=self._arch_id, model_id=self._model_id)
+        model.weights_path = path
+        model.training_params = json.dumps(self._params)
+        model.validation_loss = self._validation_loss
+        model.training_loss = self._training_loss
+        model.update()
+
+        print('saving model')
+        saver.save(session, path + 'model.ckpt')
 
     def run(self):
 
@@ -89,14 +108,12 @@ class TrainThread(threading.Thread):
                         avarage_loss += l
 
                     avarage_loss /= float(rounds)
-                    print('Avg. loss = {l}'.format(l=avarage_loss))
+                    self._training_loss += avarage_loss
+                    print('[Epoch {e}] Avg. loss = {l}'
+                          .format(e=e, l=avarage_loss))
                     avarage_loss = 0.
                 print('finished training')
-
-                print('saving model')
-                path = './app/nnvis/weights/{arch_id}/{model_id}/model.ckpt' \
-                    .format(arch_id=self._arch_id, model_id=self._model_id)
-                saver.save(sess, path)
+                self._training_loss /= float(self._nepochs)
 
                 print('staring validation')
                 rounds = int(len(valid_ids) / self._batch_size)
@@ -112,6 +129,8 @@ class TrainThread(threading.Thread):
                             )
 
                     avarage_loss += l
-
-                print(avarage_loss / float(rounds))
+                avarage_loss /= float(rounds)
+                self._validation_loss = avarage_loss
+                print('Validation loss = {l}'.format(l=avarage_loss))
                 print('finished validation')
+                self.__save_model(sess, saver)
