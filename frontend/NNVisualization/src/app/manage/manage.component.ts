@@ -19,20 +19,20 @@ interface Element {
     styleUrls: ['./manage.component.css']
 })
 export class ManageComponent implements OnInit {
-    private _architectures: Element[];
-    private _models: Element[];
-
     displayedColumns = ['position', 'name'];
     archDataSource;
     modelDataSource;
 
+    selectedArchId: number;
+    selectedModelId: number;
+
     constructor(private selectedArchitectureService: SelectedArchitectureService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
-        this._architectures = [];
-        this._models = [];
         this.archDataSource = new MatTableDataSource<Element>([]);
         this.modelDataSource = new MatTableDataSource<Element>([]);
+        this.selectedArchId = undefined;
+        this.selectedModelId = undefined;
     }
 
     ngOnInit() {
@@ -43,14 +43,12 @@ export class ManageComponent implements OnInit {
     private _updateArchitectureList(): void {
         this.restangular.all('list_archs')
             .getList().subscribe(_architectures => {
-                this._architectures = _architectures;
-
                 const archElems = [];
-                for (let i = 0; i < this._architectures.length; i += 1) {
+                for (let i = 0; i < _architectures.length; i += 1) {
                     archElems.push({
                         position: i + 1,
-                        name: this._architectures[i].name,
-                        id: this._architectures[i].id,
+                        name: _architectures[i].name,
+                        id: _architectures[i].id,
                     });
                 }
                 this.archDataSource = new MatTableDataSource<Element>(archElems);
@@ -65,14 +63,12 @@ export class ManageComponent implements OnInit {
         const arch_id = this.selectedArchitectureService.architecture.id;
         this.restangular.one('list_models', arch_id)
             .getList().subscribe(_models => {
-                this._models = _models;
-
                 const modelElems = [];
-                for (let i = 0; i < this._models.length; i += 1) {
+                for (let i = 0; i < _models.length; i += 1) {
                     modelElems.push({
                         position: i + 1,
-                        name: this._models[i].name,
-                        id: this._models[i].id,
+                        name: _models[i].name,
+                        id: _models[i].id,
                     });
                 }
                 this.modelDataSource = new MatTableDataSource<Element>(modelElems);
@@ -85,9 +81,9 @@ export class ManageComponent implements OnInit {
         dataSource.filter = filterValue;
     }
 
-    selectArchitecture(pos: number) {
-        pos -= 1;
-        this.restangular.one('arch', this._architectures[pos].id)
+    selectArchitecture(archElem: Element) {
+        this.selectedArchId = archElem.id;
+        this.restangular.one('arch', archElem.id)
             .get().subscribe(
                 (arch) => {
                     const newArch = new Architecture(
@@ -105,9 +101,9 @@ export class ManageComponent implements OnInit {
             );
     }
 
-    selectModel(pos: number) {
-        pos -= 1;
-        this.restangular.one('model', this._models[pos].id)
+    selectModel(modelElem: Element) {
+        this.selectedModelId = modelElem.id;
+        this.restangular.one('model', modelElem.id)
             .get().subscribe(
                 (model) => {
                     const newModel = new Model(
@@ -167,6 +163,8 @@ export class ManageComponent implements OnInit {
                 () => {
                     this._updateArchitectureList();
                     this.selectedArchitectureService.architecture = undefined;
+                    this.selectedArchId = undefined;
+                    this.selectedModelId = undefined;
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
             );
@@ -208,6 +206,7 @@ export class ManageComponent implements OnInit {
                 () => {
                     this._updateModelList();
                     this.selectedArchitectureService.model = undefined;
+                    this.selectedModelId = undefined;
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
             );
