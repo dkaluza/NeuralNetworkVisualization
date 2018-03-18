@@ -81,6 +81,14 @@ class UploadNewArchitecture(ProtectedResource):
     def post(self):
         user_id = get_current_user()
         args = request.get_json(force=True)
+
+        if 'name' not in args:
+            abort(404, message='No architecure name provided')
+        if 'graph' not in args:
+            abort(404, message='No graph provided')
+        if 'description' not in args:
+            args['description'] = None
+
         new_arch = Architecture(name=args['name'],
                                 description=args['description'],
                                 graph=json.dumps(args['graph']),
@@ -89,7 +97,7 @@ class UploadNewArchitecture(ProtectedResource):
         try:
             new_arch.add()
         except Exception as e:
-            abort(403, message=e)
+            abort(500, message=str(e))
 
         return arch_to_dict(new_arch), 201
 

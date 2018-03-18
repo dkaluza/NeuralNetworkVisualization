@@ -1,0 +1,2 @@
+class NnvisException(Exception):
+    pass
