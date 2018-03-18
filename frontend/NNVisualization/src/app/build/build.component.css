@@ -11,11 +11,12 @@
     background-color: lightblue;
 }
 
-.vis-arch-cont-layer-info {
+.vis-arch-with-layer-info-container {
     height: auto;
 }
 
 .vis-arch-container {
+    margin-right: 0.5rem;
     height: auto;
     margin-top: 2%;
 }
