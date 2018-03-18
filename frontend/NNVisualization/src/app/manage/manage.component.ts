@@ -31,8 +31,6 @@ export class ManageComponent implements OnInit {
         private genericDialogs: GenericDialogsService) {
         this.archDataSource = new MatTableDataSource<Element>([]);
         this.modelDataSource = new MatTableDataSource<Element>([]);
-        this.selectedArchId = undefined;
-        this.selectedModelId = undefined;
     }
 
     ngOnInit() {
