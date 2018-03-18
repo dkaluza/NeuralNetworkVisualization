@@ -4,7 +4,7 @@ ROOTDIR=$(git rev-parse --show-toplevel)
 
 DOCKER_COMMAND="docker"
 DOCKERFILE_CPU="Dockerfile.cpu"
-DOCKERFILE_GPU="Dockerfile.cpu"
+DOCKERFILE_GPU="Dockerfile.gpu"
 IMGTAG_CPU="nnvis-cpu"
 IMGTAG_GPU="nnvis-gpu"
 
