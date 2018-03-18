@@ -66,7 +66,7 @@ def unzip_validate_archive(path, file, dataset_id):
                 image = create_image(entry.name, labelsdict, dataset_id)
                 images.append(image)
             elif entry.name != labels_filename:
-                raise AssertionError('Unexpected file found in archive')
+                raise NnvisException('Unexpected file found in archive')
 
         db.session.bulk_save_objects(images)
         db.session.commit()
