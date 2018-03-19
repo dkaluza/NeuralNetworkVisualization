@@ -1,3 +1,32 @@
-<p>
-  datasets works!
-</p>
+<div class="filter-header">
+    <mat-form-field>
+        <input matInput
+               (keyup)="applyFilter(datasetsDataSource, $event.target.value)"
+               placeholder="Filter">
+    </mat-form-field>
+</div>
+<div>
+    <mat-table #datasets
+               [dataSource]="datasetsDataSource">
+        <ng-container matColumnDef="position">
+            <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="name">
+            <mat-cell *matCellDef="let elem"> {{elem.name}} </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef=""></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"
+                 (click)="selectDataset(row)"
+                 [class.selected-row]="row.id === selectedDatasetId">
+        </mat-row>
+    </mat-table>
+</div>
+
+<input type="file"
+       (change)="onDatasetFileChange($event)"
+       accept=".zip">
+<button mat-button
+        (click)="addDataset()">
+        Add zip as dataset
+</button>
