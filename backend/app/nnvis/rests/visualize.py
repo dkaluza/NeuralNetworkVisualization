@@ -7,66 +7,68 @@ from app.vis_tools.utils import visualize_saliency
 from app.vis_tools.utils import inference
 from app.vis_tools.utils import NumpyEncoder
 
+from app.vis_tools import visualize_utils
+
 import json
+import shutil
+
 
 class Inference(ProtectedResource):
     def get(self, model_id, image_id):
-        model = Model.query.get(model_id)
-        arch = model.arch_id
-        image_path = Image.query.get(image_id).path
+        dataset_id = 0  # mocked
 
-        # TODO: get tensorflow graph/weights from above db entries
-        graph, weights = convert_tf(arch, model)
-        prediction = inference(graph, weights, image_path)
-        
-        # TODO: convert int class to class name?
+        image = Image.query.get(image_id, dataset_id)
+        image_path, image_label = image.path, image.label
+        image_input = visualize_utils.load_image(image_path, proc=True)
 
-        return {'class': prediction}
+        # mocked model query
+        model = 0  # = Model.query.get(model_id)
+        graph, sess, x, _, _, logits = visualize_utils.load_model(model)
+
+        predictions = visualize_utils.inference(sess, logits, x, image_input)
+        return {'class_scores': {class_idx: score for class_idx, score in enumerate(predictions)}}
 
 
+# visualize/<int:model_id>/<int:alg_id>/<int:image_id>
 class Visualize(ProtectedResource):
     def get(self, model_id, alg_id, image_id):
-        model = Model.query.get(model_id)
-        arch = model.arch_id
-        image_path = Image.query.get(image_id).path
+        dataset_id = 0  # mocked
 
-        # TODO: get tensorflow graph/weights from above db entries
-        graph, weights = convert_tf(arch, model)
+        image = Image.query.get(image_id, dataset_id)
+        image_path, image_label = image.path, image.label
+        image_input = visualize_utils.load_image(image_path, proc=True)
 
-        saliency_img = visualize_saliency(graph, weights, alg_id, image_path)
+        # mocked model query
+        model = 0  # = Model.query.get(model_id)
+        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
 
-        return json.dumps({'result_image': saliency_img}, cls=NumpyEncoder)
+        alg_class = visualize_utils.mocked_alg_hooks[alg_id]
+
+        vis_algorithm = alg_class(graph, sess, x, y)
+        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: image_label})
+
+        image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
+        visualize_utils.save_image(image_output, image_output_path)
+
+        return {'image_path': image_output_path}
 
 
-# /visualize/<string:algorithm>/<string:image_id>
+# /visualize/<string:image_id>
 class Images(ProtectedResource):
-    def get(self, algorithm, image_id):
-        print('in get images')
-        if algorithm == 'GBP':
-            EXAMPLE_LIST = [['img1.jpg', 56],
-                            ['img2.jpg', 243],
-                            ['img3.jpg', 72]]
+    def get(self, image_id):
+        dataset_id = 0
+        image = Image.query.get(image_id, dataset_id)
+        image_path_statis = 'api/static/images/' + image.name
+        shutil.copyfile(image.relative_path, image_path_statis)
+        return {'image_path': image_path_statis}
 
-            img_name, class_number = EXAMPLE_LIST[int(image_id)]
-            img_proc_name, ext = img_name.rsplit('.')
-            img_proc_name += '_GBP.jpg'
 
-            # compute here
+class ImageList(ProtectedResource):
+    def get(self, dataset_id):
+        images = Image.query.get(dataset_id)
+        return {'items': [image.json() for image in Image.query.filter(dataset_id=dataset_id)]}
 
-            prefix = 'api/static/'
-            img_path = prefix + 'original/' + img_name
-            img_proc_path = prefix + 'GBP/' + img_proc_name
-
-            image1 = Image(img_name, img_path)
-            image2 = Image(img_proc_name, img_proc_path)
-            print('returning  images')
-            return {'images': [image1.json(),
-                               image2.json()]}
-
-        print('returning error')
-        return {'error message': algorithm + ' algorithm is not handled yet'}, 202
 
 class Algorithms(ProtectedResource):
-
     def get(self):
         return {alg_class.__name__: alg_id for alg_id, alg_class in algorithms_register}

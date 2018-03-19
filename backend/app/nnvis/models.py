@@ -115,6 +115,7 @@ class Dataset(db.Model, CRUD):
     images = db.relationship('Image', cascade='all, delete-orphan',
                              backref='dataset', lazy=True)
 
+
     def __init__(self, name, description, path, labels, user_id):
         self.name = name
         self.description = description
@@ -135,6 +136,7 @@ class Image(db.Model, CRUD):
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
                            nullable=False)
 
+
     def __init__(self, imageName, relPath, label, dataset_id):
         self.name = imageName
         self.relative_path = relPath
@@ -142,7 +144,8 @@ class Image(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def json(self):
-        return {'imageName': self.imageName, 'imagePath': self.imagePath}
+        return {'name': self.name, 'relative_path': self.relative_path,
+                'label': self.label, 'dataset_id': self.dataset_id}
 
 
 class User(db.Model, CRUD):
