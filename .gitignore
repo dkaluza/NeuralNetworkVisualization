@@ -1,6 +1,8 @@
 frontend/NNVisualization/package-lock.json
 backend/app/models.db
 backend/app/test_models.db
+backend/datasets
+backend/nnvis_test_tmp
 ./UltiSnips/
 .idea
 
