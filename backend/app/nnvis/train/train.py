@@ -2,7 +2,9 @@ import tensorflow as tf
 import numpy as np
 import threading
 import json
+import os
 
+from flask import current_app as app
 from app.nnvis.models import Architecture, Model
 
 from app.nnvis.train.build_model import (build_model,
@@ -50,16 +52,18 @@ class TrainThread(threading.Thread):
             self._opt = optimize(self._optimizer, self._loss, self._opt_params)
 
     def __get_shape(self, op):
-        l = op.get_shape().as_list()
-        return [i if i is not None else -1 for i in l]
+        shape_list = op.get_shape().as_list()
+        return [i if i is not None else -1 for i in shape_list]
 
     def __save_model(self, session, saver):
         model = Model.query.get(self._model_id)
         if model is None:
             return
 
-        path = './app/nnvis/weights/{arch_id}/{model_id}/' \
+        weights_dir = app.config['WEIGHTS_DIR']
+        model_dir = '/{arch_id}/{model_id}/' \
             .format(arch_id=self._arch_id, model_id=self._model_id)
+        path = os.path.join(weights_dir, model_dir)
         model.weights_path = path
         model.training_params = json.dumps(self._params)
         model.validation_loss = self._validation_loss
@@ -97,7 +101,7 @@ class TrainThread(threading.Thread):
                                                        batch_ids)
                         batch_xs = np.reshape(batch_xs, x_shape)
                         batch_ys = np.reshape(batch_ys, y_shape)
-                        _, l = sess.run(
+                        _, loss = sess.run(
                                 [self._opt, self._loss],
                                 feed_dict={
                                     self._X: batch_xs,
@@ -105,12 +109,12 @@ class TrainThread(threading.Thread):
                                     }
                                 )
 
-                        average_loss += l
+                        average_loss += loss
 
                     average_loss /= float(rounds)
                     self._training_loss += average_loss
-                    print('[Epoch {e}] Avg. loss = {l}'
-                          .format(e=e, l=average_loss))
+                    print('[Epoch {e}] Avg. loss = {loss}'
+                          .format(e=e, loss=average_loss))
                     average_loss = 0.
                 print('finished training')
                 self._training_loss /= float(self._nepochs)
@@ -123,14 +127,14 @@ class TrainThread(threading.Thread):
                     batch_xs, batch_ys = read_data(self._dataset_id, batch_ids)
                     batch_xs = np.reshape(batch_xs, x_shape)
                     batch_ys = np.reshape(batch_ys, y_shape)
-                    _, l = sess.run(
+                    _, loss = sess.run(
                             [self._opt, self._loss],
                             feed_dict={self._X: batch_xs, self._y: batch_ys}
                             )
 
-                    average_loss += l
+                    average_loss += loss
                 average_loss /= float(rounds)
                 self._validation_loss = average_loss
-                print('Validation loss = {l}'.format(l=average_loss))
+                print('Validation loss = {loss}'.format(loss=average_loss))
                 print('finished validation')
                 self.__save_model(sess, saver)
