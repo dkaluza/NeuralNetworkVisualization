@@ -48,12 +48,12 @@ class Architecture(db.Model, CRUD):
     def add(self):
         super().add()
         path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}/'.format(id=self.id))
+                            '{id}'.format(id=self.id))
         os.makedirs(path)
 
     def delete(self):
         path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}/'.format(id=self.id))
+                            '{id}'.format(id=self.id))
         if os.path.isdir(path):
             os.rmdir(path)
         super().delete()
