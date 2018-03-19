@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash
 
-
 db = SQLAlchemy()
 
 
@@ -102,7 +101,8 @@ class Image(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def json(self):
-        return {'imageName': self.imageName, 'imagePath': self.imagePath}
+        return {'name': self.name, 'relative_path': self.relative_path,
+                'label': self.label, 'dataset_id': self.dataset_id}
 
 
 class User(db.Model, CRUD):
