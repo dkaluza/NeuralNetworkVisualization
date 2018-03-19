@@ -82,3 +82,6 @@ class GradientSaliency(SaliencyMask):
     """
     feed_dict[self.x] = [x_value]
     return self.session.run(self.gradients_node, feed_dict=feed_dict)[0]
+
+  def __str__(self):
+    return '_gradient_saliency'
