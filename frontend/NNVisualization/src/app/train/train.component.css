@@ -7,11 +7,17 @@
     cursor: pointer;
 }
 
+.training-params {
+    margin-top: 5%;
+}
+
 .selected-dataset {
-    background-color: #dddddd;
+    background-color: rgba(255, 215, 64, 0.7);
 }
 
 .train-button {
+    margin-top: 5%;
+
     background-color: #bbffbb;
     font-size: 30px;
     width: 150px;

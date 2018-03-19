@@ -90,7 +90,7 @@ class TrainThread(threading.Thread):
                     print('---- Epoch {e} ----'.format(e=e))
                     train_ids = shuffle(train_ids)
 
-                    avarage_loss = 0.
+                    average_loss = 0.
                     batches = split_into_batches(train_ids, self._batch_size)
                     for batch_ids in batches:
                         batch_xs, batch_ys = read_data(self._dataset_id,
@@ -105,19 +105,19 @@ class TrainThread(threading.Thread):
                                     }
                                 )
 
-                        avarage_loss += l
+                        average_loss += l
 
-                    avarage_loss /= float(rounds)
-                    self._training_loss += avarage_loss
+                    average_loss /= float(rounds)
+                    self._training_loss += average_loss
                     print('[Epoch {e}] Avg. loss = {l}'
-                          .format(e=e, l=avarage_loss))
-                    avarage_loss = 0.
+                          .format(e=e, l=average_loss))
+                    average_loss = 0.
                 print('finished training')
                 self._training_loss /= float(self._nepochs)
 
                 print('staring validation')
                 rounds = int(len(valid_ids) / self._batch_size)
-                avarage_loss = 0.
+                average_loss = 0.
                 batches = split_into_batches(valid_ids, self._batch_size)
                 for batch_ids in batches:
                     batch_xs, batch_ys = read_data(self._dataset_id, batch_ids)
@@ -128,9 +128,9 @@ class TrainThread(threading.Thread):
                             feed_dict={self._X: batch_xs, self._y: batch_ys}
                             )
 
-                    avarage_loss += l
-                avarage_loss /= float(rounds)
-                self._validation_loss = avarage_loss
-                print('Validation loss = {l}'.format(l=avarage_loss))
+                    average_loss += l
+                average_loss /= float(rounds)
+                self._validation_loss = average_loss
+                print('Validation loss = {l}'.format(l=average_loss))
                 print('finished validation')
                 self.__save_model(sess, saver)
