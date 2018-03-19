@@ -61,6 +61,6 @@ class GuidedBackprop(SaliencyMask):
     return self.guided_sess.run(
         self.guided_grads_node, feed_dict = guided_feed_dict)[0]
 
-
   def __str__(self):
     return '_guided_backpropagation'
+

@@ -85,3 +85,4 @@ class GradientSaliency(SaliencyMask):
 
   def __str__(self):
     return '_gradient_saliency'
+
