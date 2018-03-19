@@ -89,7 +89,7 @@ def crudDataset(args):
         if args.desc is not None:
             dataset.description = args.desc
         if args.user_id is not None:
-            datasets.user_id = args.user_id
+            dataset.user_id = args.user_id
         dataset.update()
     elif args.method == 'delete':
         dataset = Dataset.query.get(args.id)
