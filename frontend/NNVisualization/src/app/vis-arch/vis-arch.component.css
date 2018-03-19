@@ -12,9 +12,9 @@
 /* drag and drop hack do not touch or be careful */
 
 .graph {
-    width: 100%;
+    margin-left: 1rem;
+    width: inherit;
     height: 500px;
-
     border-style: solid;
 }
 
@@ -28,15 +28,15 @@
 }
 
 .toolbox {
-    margin-top: 2%;
-    display: flex;
-    justify-content: space-around;
+    width: 100%;
+    height: 8vh;
 }
 
 .layer {
-    margin: auto;
     padding: 10px;
     display: inline-block;
+    width: auto !important;
+    height: auto !important;
 }
 
 /* drag and drop hacks do not touch */

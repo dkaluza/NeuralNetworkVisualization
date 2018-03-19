@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JwtHelper } from 'angular2-jwt';
+import { JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
 import { Restangular } from 'ngx-restangular';
 import { Observable } from 'rxjs/Observable';
 

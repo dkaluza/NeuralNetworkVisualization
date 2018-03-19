@@ -1,26 +1,26 @@
 <div #toolbar>
-    <mat-toolbar class="mat-toolbar mat-primary">
-        <span>
-            <a mat-button routerLink="/">
-                Neural Network Visualization ZPP project for the win!
-            </a>
-        </span>
-        <span class="fill-space"></span>
+    <mat-toolbar class="mat-toolbar mat-primary mat-elevation-z6"
+                 fxLayout="row"
+                 fxLayoutAlign="space-around center">
+        <app-navbar fxFlex="100%"></app-navbar>
         <div *ngIf="auth.isAuthenticated(); then options; else login"></div>
 
         <ng-template #options>
             <span>
-                <mat-menu #optionsMenu="matMenu" [overlapTrigger]="false">
+                <mat-menu #optionsMenu="matMenu"
+                          [overlapTrigger]="false">
                     <button mat-menu-item>
                         <mat-icon>help_outline</mat-icon>
                         <span>About</span>
                     </button>
-                    <button mat-menu-item (click)="logOut()">
+                    <button mat-menu-item
+                            (click)="logOut()">
                         <mat-icon>power_settings_new</mat-icon>
                         <span>Logout</span>
                     </button>
                 </mat-menu>
-                <button mat-button [matMenuTriggerFor]="optionsMenu">
+                <button mat-button
+                        [matMenuTriggerFor]="optionsMenu">
                     <mat-icon>more_vert</mat-icon>
                     <span>Account</span>
                 </button>
@@ -28,7 +28,8 @@
         </ng-template>
         <ng-template #login>
             <span>
-                <button mat-button (click)="logIn()">
+                <button mat-button
+                        (click)="logIn()">
                     <mat-icon>exit_to_app</mat-icon>
                     <span>Log in</span>
                 </button>
