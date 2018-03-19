@@ -3,7 +3,8 @@ from flask_restful import abort
 from flask_jwt_extended import get_current_user
 from flask import current_app as app
 
-from app.nnvis.models import db, Dataset, Model, Image
+from app import db
+from app.nnvis.models import Dataset, Model, Image
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.utils import NnvisException
 

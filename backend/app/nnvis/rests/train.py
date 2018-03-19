@@ -27,16 +27,14 @@ class TrainNewModel(ProtectedResource):
 
         args = request.get_json(force=True)
         if 'name' not in args:
-            abort(404, message='No name provided')
-        if 'description' not in args:
-            args['description'] = None
+            abort(403, message='No name provided')
 
         for name in ARGS_LIST:
             if name not in args:
-                abort(404, message='No {} selected'.format(name))
+                abort(403, message='No {} selected'.format(name))
 
         name = args['name']
-        desc = args['description']
+        desc = args.get('description')
         dataset_id = args['dataset_id']
 
         if len(Model.query.filter_by(arch_id=arch_id, name=name).all()) > 0:
@@ -45,12 +43,16 @@ class TrainNewModel(ProtectedResource):
                       arch_id=arch_id, dataset_id=dataset_id)
         model.add()
         try:
+            optparams = {}
+            for k, v in args['optimizer_params'].items():
+                optparams[k] = float(v)
+
             params = {
                     'nepochs': int(args['nepochs']),
                     'batch_size': int(args['batch_size']),
                     'loss': args['loss'],
                     'optimizer': args['optimizer'],
-                    'optimizer_params': args['optimizer_params']
+                    'optimizer_params': optparams
                     }
             thread1 = TrainThread(model.arch_id, model.id,
                                   model.dataset_id, params)

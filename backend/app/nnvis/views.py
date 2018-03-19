@@ -1,6 +1,6 @@
-from flask import Blueprint
 from flask_restful import Api
 
+from app import nnvis
 from app.nnvis.rests.architecture import (ArchitectureTask,
                                           UploadNewArchitecture,
                                           ListAllArchitectures)
@@ -15,7 +15,6 @@ from app.nnvis.rests.visualize import (Inference, Visualize, Images,
 from app.nnvis.rests.train import (TrainNewModel, TrainModel)
 from app.nnvis.rests.user import AuthenticationTask
 
-nnvis = Blueprint('nnvis', __name__)
 api = Api(nnvis)
 
 api.add_resource(ArchitectureTask, 'arch/<int:arch_id>')

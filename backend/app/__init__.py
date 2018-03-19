@@ -1,11 +1,13 @@
-from flask import Flask
-from app.nnvis.models import db
-from app.nnvis.views import nnvis
+from flask import Flask, Blueprint
+from flask_sqlalchemy import SQLAlchemy
 from app.nnvis.auth_init import auth_init
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
 import os
+
+db = SQLAlchemy()
+nnvis = Blueprint('nnvis', __name__)
 
 
 def create_app(config_filename):

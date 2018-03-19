@@ -1,9 +1,10 @@
-from flask_sqlalchemy import SQLAlchemy
+from app import db
+
+from flask import current_app as app
 from datetime import datetime
+from shutil import rmtree
 import os
 from werkzeug.security import generate_password_hash
-
-db = SQLAlchemy()
 
 
 class CRUD():
@@ -46,10 +47,13 @@ class Architecture(db.Model, CRUD):
 
     def add(self):
         super().add()
-        os.makedirs('./app/nnvis/weights/{id}/'.format(id=self.id))
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{id}/'.format(id=self.id))
+        os.makedirs(path)
 
     def delete(self):
-        path = './app/nnvis/weights/{id}/'.format(id=self.id)
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{id}/'.format(id=self.id))
         if os.path.isdir(path):
             os.rmdir(path)
         super().delete()
@@ -83,18 +87,20 @@ class Model(db.Model, CRUD):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
-        path = './app/nnvis/weights/{arch_id}/{model_id}/'.format(
-                arch_id=self.arch_id, model_id=self.id)
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{arch}/{model}/'.format(
+                                arch=self.arch_id, model=self.id)
+                            )
         self.weights_path = path
         super().add()
 
     def delete(self):
-        path = './app/nnvis/weights/{arch_id}/{model_id}'.format(
-                  arch_id=self.arch_id, model_id=self.id)
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{arch}/{model}/'.format(
+                                arch=self.arch_id, model=self.id)
+                            )
         if os.path.isdir(path):
-            for f in os.listdir(path):
-                os.remove(os.path.join(path, f))
-            os.rmdir(path)
+            rmtree(path, True)
         super().delete()
 
 
