@@ -21,6 +21,7 @@ export class TrainComponent implements OnInit {
     batchSize = '32';
     learningRate = '0.1';
     selectedDatasetId: number = undefined;
+    selectedDatasetName: string = undefined;
 
     losses = [
         {
@@ -31,7 +32,8 @@ export class TrainComponent implements OnInit {
             'name': 'Mean squared error'
         }
     ];
-    loss = undefined;
+    loss: string = undefined;
+    lossName: string = undefined;
 
     optimizers = [
         {
@@ -42,7 +44,8 @@ export class TrainComponent implements OnInit {
             'name': 'Gradient Descent'
         }
     ];
-    optimizer = undefined;
+    optimizer: string = undefined;
+    optimizerName: string = undefined;
 
     optimizerParamsSets = {
         'sgd': [ {
@@ -96,6 +99,7 @@ export class TrainComponent implements OnInit {
 
     selectDataset(dataset: Element) {
         this.selectedDatasetId = dataset.id;
+        this.selectedDatasetName = dataset.name;
     }
 
     applyFilter(dataSource, filterValue: string) {
@@ -104,13 +108,30 @@ export class TrainComponent implements OnInit {
         dataSource.filter = filterValue;
     }
 
+    onLossChange(value) {
+        this.loss = value;
+        for (let i = 0; i < this.losses.length; i += 1) {
+            if (this.losses[i].value === value) {
+                this.lossName = this.losses[i].name;
+                break;
+            }
+        }
+    }
+
     onOptimizerChange(value) {
         this.optimizerParams = new Map;
+        for (let i = 0; i < this.optimizers.length; i += 1) {
+            if (this.optimizers[i].value === value) {
+                this.optimizerName = this.optimizers[i].name;
+                break;
+            }
+        }
         this.optimizerParamsSets[value].forEach(
             val => {
                 this.optimizerParams.set(val.value, val.default);
             }
         );
+        this.optimizer = value;
     }
 
     onParamChange(param, value) {

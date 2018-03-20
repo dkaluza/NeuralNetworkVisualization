@@ -1,59 +1,6 @@
-<div class="centered training-params"
-     fxLayout
-     fxLayoutGap="10px">
-    <div fxFlex>
-        <div fxLayout="column" fxLayoutGap="20px">
-            <div fxFlex>
-                <mat-form-field>
-                    <input matInput
-                           type="number" min="1"
-                           placeholder="Number of epochs"
-                           [(ngModel)]="nepochs">
-                </mat-form-field>
-            </div>
-            <div fxFlex>
-                <mat-form-field>
-                    <input matInput
-                           type="number" min="1"
-                           placeholder="Batch size"
-                           [(ngModel)]="batchSize">
-                </mat-form-field>
-            </div>
-        </div>
-    </div>
-    <div fxFlex>
-        <h4>Select loss function</h4>
-        <mat-form-field>
-            <mat-select placeholder="Loss function" [(value)]="loss">
-                <mat-option *ngFor="let l of losses" [value]="l.value">
-                    {{ l.name }}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-    </div>
-    <div fxFlex>
-        <h4>Select optimizer</h4>
-        <mat-form-field>
-            <mat-select placeholder="Optimizer" [(value)]="optimizer"
-                        (selectionChange)="onOptimizerChange($event.value)">
-                <mat-option *ngFor="let o of optimizers" [value]="o.value">
-                    {{ o.name }}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-        <div *ngIf="optimizer">
-            <h5>Set optimizer params</h5>
-            <mat-form-field *ngFor="let param of optimizerParamsSets[optimizer]">
-                <input matInput
-                        type="number" step="any" min="0"
-                        [placeholder]="param.name"
-                        [value]="param.default"
-                        (input)="onParamChange(param.value, $event.target.value)">
-            </mat-form-field>
-        </div>
-    </div>
-    <div fxFlex>
-        <h4>Select dataset</h4>
+<mat-horizontal-stepper linear class="training-params">
+    <mat-step>
+        <ng-template matStepLabel>Select dataset</ng-template>
         <div class="filter-header">
             <mat-form-field>
                 <input matInput (keyup)="applyFilter(datasetDataSource, $event.target.value)" placeholder="Filter">
@@ -75,11 +22,86 @@
                 </mat-row>
             </mat-table>
         </div>
-    </div>
-</div>
-<div fxLayout class="centered">
-    <div fxFlex>
-        <button class="train-button" mat-button (click)="onTrain()">Train!</button>
-    </div>
-</div>
-
+        <div class="centered step-buttons">
+            <button mat-button matStepperNext>Next</button>
+        </div>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>Select parameters</ng-template>
+        <div fxLayout="column" fxLayoutGap="20px">
+            <div fxFlex>
+                <mat-form-field>
+                    <input matInput
+                           type="number" min="1"
+                           placeholder="Number of epochs"
+                           [(ngModel)]="nepochs">
+                </mat-form-field>
+            </div>
+            <div fxFlex>
+                <mat-form-field>
+                    <input matInput
+                           type="number" min="1"
+                           placeholder="Batch size"
+                           [(ngModel)]="batchSize">
+                </mat-form-field>
+            </div>
+            <div fxFlex>
+                <mat-form-field>
+                    <mat-select placeholder="Loss function"
+                        (selectionChange)="onLossChange($event.value)">
+                        <mat-option *ngFor="let l of losses" [value]="l.value">
+                            {{ l.name }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="centered step-buttons">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button matStepperNext>Next</button>
+        </div>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>Select optimizer</ng-template>
+        <mat-form-field>
+            <mat-select placeholder="Optimizer"
+                (selectionChange)="onOptimizerChange($event.value)">
+                <mat-option *ngFor="let o of optimizers" [value]="o.value">
+                    {{ o.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <div *ngIf="optimizer">
+            <h5>Set optimizer params</h5>
+            <mat-form-field *ngFor="let param of optimizerParamsSets[optimizer]">
+                <input matInput
+                type="number" step="any" min="0"
+                [placeholder]="param.name"
+                [value]="param.default"
+                (input)="onParamChange(param.value, $event.target.value)">
+            </mat-form-field>
+        </div>
+        <div class="centered step-buttons">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button matStepperNext>Next</button>
+        </div>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>Train!</ng-template>
+        <div>
+            <div class="centered params-container">
+                <div>Selected dataset: {{ selectedDatasetName }}</div>
+                <div>Selected batch size: {{ batchSize }}</div>
+                <div>Selected num. of epochs: {{ nepochs }}</div>
+                <div>Selected optimizer: {{ optimizerName }}</div>
+                <div>Selected loss function: {{ lossName }}</div>
+            </div>
+        </div>
+        <div class="centered">
+            <button class="train-button" mat-button (click)="onTrain()">Train!</button>
+        </div>
+        <div class="centered step-buttons">
+            <button mat-button matStepperPrevious>Back</button>
+        </div>
+    </mat-step>
+</mat-horizontal-stepper>

@@ -15,13 +15,27 @@
     background-color: rgba(255, 215, 64, 0.7);
 }
 
+.step-buttons {
+    margin: 20px;
+}
+
+.step-buttons button {
+    font-size: 30px;
+    padding: 10px;
+    background-color: rgba(255, 215, 64);
+    margin: 0px 25px;
+}
+
+.params-container {
+    font-size: large;
+}
+
 .train-button {
     margin-top: 5%;
 
     background-color: #bbffbb;
-    font-size: 30px;
-    width: 150px;
-    height: 65px;
+    font-size: 50px;
+    padding: 20px;
 }
 
 .filter-header {
