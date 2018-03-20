@@ -4,6 +4,7 @@ export class Image {
     public imageName: string;
     public imagePath: string;
     public label: number;
+    public display_path: string;
 
     constructor(imageId: number, datasetId: number, imageName: string, imagePath: string, label: number) {
         this.imageId = imageId;
@@ -11,5 +12,6 @@ export class Image {
         this.imageName = imageName;
         this.imagePath = imagePath;
         this.label = label;
+        this.display_path = '';
     }
 }
