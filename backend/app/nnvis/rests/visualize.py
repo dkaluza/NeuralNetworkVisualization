@@ -37,12 +37,13 @@ class Inference(ProtectedResource):
 # visualize/<int:model_id>/<int:alg_id>/<int:image_id>
 class Visualize(ProtectedResource):
     def get(self, model_id, alg_id, image_id):
-        alg_id = 0 # mocked
+        if alg_id not in visualize_utils.algorithms_register.keys():
+            return {'errormsg': "Bad algorithm id"}, 400
 
         image = Image.query.get(image_id)
         image_path = os.path.join(STATIC_FOLDER, image.relative_path)
 
-        image_input = visualize_utils.load_image(image_path, proc=True)
+        image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
 
         # mocked model query
         model = 0  # = Model.query.get(model_id)
@@ -54,7 +55,7 @@ class Visualize(ProtectedResource):
         image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: image.label})
 
         image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        visualize_utils.save_image(image_output, image_output_path, proc=True)
+        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_gray)
         image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
         return {'image_path': image_path}
 

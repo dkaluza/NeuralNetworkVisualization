@@ -10,35 +10,41 @@ algorithms_register = {
     1: GuidedBackprop
 }
 
+
 def preprocess(img):
     img = img / 255.0
     return img
 
-def postprocess(img):
-    print(img)
-    print(img.min())
-    print(img.max())
 
+def normalize_rgb(img):
     img -= img.min()
-    print(img)
     img /= img.max()
-    print(img)
     img *= 255
-    print(img)
     img = img.astype(np.uint8)
-    print(img)
     return img
 
-def load_image(image_path, proc=False):
+
+def normalize_gray(img):
+    img -= img.min()
+    img = np.dot(img[..., :3], [0.299, 0.587, 0.144])
+    img /= img.max()
+    img *= 255
+    img = img.astype(np.uint8)
+    return img
+
+
+def load_image(image_path, proc=None):
     image = cv2.imread(image_path)
     if proc:
-        image = preprocess(image)
+        image = proc(image)
     return image
 
-def save_image(image, image_path, proc=False):
+
+def save_image(image, image_path, proc=None):
     if proc:
-        image = postprocess(image)
+        image = proc(image)
     cv2.imwrite(image_path, image)
+
 
 # mocked for now
 def load_model(model):
@@ -66,9 +72,8 @@ def softmax(x):
     e_x = np.exp(x - np.max(x))
     return e_x / e_x.sum()
 
+
 def inference(sess, logits, x, image_input):
     logits_score = logits.eval(feed_dict={x: [image_input]}, session=sess)
     predictions = softmax(logits_score[0])
     return predictions
-
-
