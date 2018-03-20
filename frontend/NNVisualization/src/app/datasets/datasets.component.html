@@ -39,17 +39,6 @@
             <h4>ID: {{ selectedDatasetId }}</h4>
             <h4>Name: {{ selectedDatasetName }}</h4>
             <h4>Description: {{ selectedDatasetDesc }}</h4>
-
-            <div>
-                <input type="file"
-                       (change)="onDatasetFileChange($event)"
-                       accept=".zip">
-                <button mat-button
-                        (click)="addDataset()"
-                        [disabled]="!newDatasetFile">
-                    Add as dataset
-                </button>
-            </div>
             <button mat-button
                     (click)="deleteDataset()"
                     [disabled]="!selectedDatasetId">
@@ -59,5 +48,15 @@
         <ng-template #noDataset>
             No dataset selected
         </ng-template>
+        <div>
+            <input type="file"
+                   (change)="onDatasetFileChange($event)"
+                   accept=".zip">
+            <button mat-button
+                    (click)="addDataset()"
+                    [disabled]="!newDatasetFile">
+                Add as dataset
+            </button>
+        </div>
     </div>
 </div>
