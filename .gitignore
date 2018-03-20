@@ -1,5 +1,7 @@
 frontend/NNVisualization/package-lock.json
 backend/app/models.db
+backend/app/weights/
+backend/app/datasets/
 backend/app/test_models.db
 backend/app/datasets
 backend/app/nnvis_test_tmp

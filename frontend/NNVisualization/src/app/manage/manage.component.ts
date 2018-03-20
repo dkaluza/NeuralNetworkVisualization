@@ -107,7 +107,14 @@ export class ManageComponent implements OnInit {
                     const newModel = new Model(
                         model.id,
                         model.name,
-                        model.description
+                        model.description,
+                        model.loss,
+                        model.optimizer,
+                        model.optimizer_params,
+                        model.batch_size,
+                        model.nepochs,
+                        model.train_loss,
+                        model.valid_loss
                     );
                     this.selectedArchitectureService.model = newModel;
                 },
@@ -188,7 +195,14 @@ export class ManageComponent implements OnInit {
                     const newModel = new Model(
                         nModel.id,
                         nModel.name,
-                        nModel.description
+                        nModel.description,
+                        nModel.loss,
+                        nModel.optimizer,
+                        nModel.optimizer_params,
+                        nModel.batch_size,
+                        nModel.nepochs,
+                        nModel.train_loss,
+                        nModel.valid_loss
                     );
                     this.selectedArchitectureService.model = newModel;
                 },

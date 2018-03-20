@@ -7,6 +7,7 @@ import { Layer } from '../vis-arch/layers/layer/layer';
 import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
 import { ConvLayer } from '../vis-arch/layers/conv/conv';
 import { InputLayer } from '../vis-arch/layers/input/input';
+import { PoolLayer } from '../vis-arch/layers/pool/pool';
 
 @Injectable()
 export class SelectedArchitectureService {
@@ -54,6 +55,8 @@ export class SelectedArchitectureService {
                 return ConvLayer.fromDict(node);
             case 'input':
                 return InputLayer.fromDict(node);
+            case 'pool':
+                return PoolLayer.fromDict(node);
             default:
                 return undefined;
         }

@@ -3,6 +3,7 @@ from flask_restful import abort
 from flask_jwt_extended import get_current_user
 from flask import current_app as app
 
+from app import db
 from app.nnvis.models import Dataset, Model, Image
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.utils import NnvisException
@@ -35,14 +36,14 @@ def check_supported_extension(fname):
     return fname.rsplit('.', 1)[1] in SUPPORTED_EXTENSIONS
 
 
-def add_image(fname, labelsdict, dataset_id):
+def create_image(fname, labelsdict, dataset_id):
     _assert(check_supported_extension(fname), "Unsupported extension found")
     new_image = Image(imageName=fname.rsplit('.', 1)[0],
                       relPath=fname,
                       label=labelsdict[fname],
                       dataset_id=dataset_id)
+    return new_image
 
-    new_image.add()
 
 # TODO: Label validation against labels passed to db
 
@@ -57,15 +58,21 @@ def unzip_validate_archive(path, file, dataset_id):
 
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
         cols = labelsdf.columns
-        labelsdict = pd.Series(
-            labelsdf[cols[1]].values, index=labelsdf[cols[0]]).to_dict()
+        labelsdict = pd.Series(labelsdf[cols[1]].values,
+                               index=labelsdf[cols[0]]).to_dict()
+
+        images = []
 
         for entry in os.scandir(path):
             _assert(entry.is_file(), "Unexpected directory found in archive")
             if check_supported_extension(entry.name):
-                add_image(entry.name, labelsdict, dataset_id)
+                image = create_image(entry.name, labelsdict, dataset_id)
+                images.append(image)
             elif entry.name != labels_filename:
                 raise NnvisException('Unexpected file found in archive')
+
+        db.session.bulk_save_objects(images)
+        db.session.commit()
 
     except:
         shutil.rmtree(path, ignore_errors=True)
@@ -115,7 +122,8 @@ class UploadNewDataset(ProtectedResource):
         if 'labels' not in postdata:
             self.__abort_400('Labels for new dataset required')
 
-        # TODO: verify labels format, probably something like "[class1, class2, ...]" using a Regex or something
+        # TODO: verify labels format, probably something like
+        #   "[class1, class2, ...]" using a Regex or something
 
     def post(self):
         print("BLeh")
@@ -129,8 +137,8 @@ class UploadNewDataset(ProtectedResource):
         postdata = request.form
         self.__verify_postdata(postdata)
 
-        dataset_path = os.path.join(
-            app.config['DATASET_FOLDER'], postdata['name'])
+        dataset_path = os.path.join(app.config['DATASET_FOLDER'],
+                                    postdata['name'])
         new_dataset = Dataset(name=postdata['name'],
                               # None if isn't given, TODO: check this works
                               description=postdata.get('description'),
@@ -140,8 +148,8 @@ class UploadNewDataset(ProtectedResource):
 
         try:
             new_dataset.add()
-            unzip_validate_archive(
-                dataset_path, postfile.stream, new_dataset.id)
+            unzip_validate_archive(dataset_path, postfile.stream,
+                                   new_dataset.id)
         except Exception as e:
             new_dataset.delete()
             abort(500, message=str(e))
