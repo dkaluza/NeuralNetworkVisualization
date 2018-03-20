@@ -126,7 +126,6 @@ class UploadNewDataset(ProtectedResource):
         #   "[class1, class2, ...]" using a Regex or something
 
     def post(self):
-        print("BLeh")
         if 'file' not in request.files:
             self.__abort_400('No dataset file attached')
 
