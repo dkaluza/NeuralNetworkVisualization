@@ -70,7 +70,7 @@ class GradientSaliency(SaliencyMask):
   r"""A SaliencyMask class that computes saliency masks with a gradient."""
 
   def __init__(self, graph, session, y, x):
-    super(GradientSaliency, self).__init__(graph, session, y, x)
+    super().__init__(graph, session, y, x)
     self.gradients_node = tf.gradients(y, x)[0]
 
   def GetMask(self, x_value, feed_dict={}):
