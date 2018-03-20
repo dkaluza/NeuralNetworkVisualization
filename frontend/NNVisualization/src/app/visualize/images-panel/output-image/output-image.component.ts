@@ -8,11 +8,9 @@ import {Image} from "../../image.model";
     styleUrls: ['./output-image.component.css']
 })
 export class OutputImageComponent implements OnInit {
-    image: Image;
     constructor(private visualizeService: VisualizeService) { }
 
     ngOnInit() {
-        this.image = this.visualizeService.image2;
     }
 
 }

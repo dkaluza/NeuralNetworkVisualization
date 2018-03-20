@@ -1,25 +1,76 @@
-<img [src]="image.imagePath"
-     alt="{{ image.imageName }}"
-     class="img-responsive">
+<div fxLayout="row" fxLayoutAlign="center">
 
-<div class="container">
-    <div class="col-lg-2">
-        <button mat-icon-button (click)="onGetPreviousImage()">
-            <mat-icon>skip_previous</mat-icon>
-        </button>
+    <div fxLayout="column" class="infernece">
+        <div fxLayout="column"
+             fxLayoutAlign="center">
+            <button mat-button (click)="onGetDataset()">load dataset</button>
+        </div>
     </div>
-    <div class="col-lg-2">
-        <mat-form-field>
-            <mat-select placeholder="Choose image">
-                <mat-option *ngFor="let image of visualizeService.imagesList" [value]="image.imageId">
-                    {{ image.imageName}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
+
+    <div fxLayout="column" class="input-image">
+        <div fxLayout="row"
+             fxLayoutAlign="center">
+
+            <div *ngIf="currentImage; else placeholder">
+                <img [src]="currentImage.display_path"
+                     alt="wybierz obrazek"
+                     class="img-responsive">
+            </div>
+            <ng-template #placeholder>
+                <img [src]="placeholder_img"
+                     alt="zrob infernecje"
+                     class="img-responsive">
+            </ng-template>
+        </div>
+        <div fxLayout="row"
+             fxLayoutAlign="center">
+            <div fxLayoutAlign="left">
+                <button mat-icon-button class="icon-button" (click)="onGetPreviousImage()">
+                    <mat-icon>skip_previous</mat-icon>
+                </button>
+            </div>
+
+            <div fxLayoutAlign="center">
+                <mat-form-field>
+                    <mat-select placeholder="Choose image" (change)="onSelectorSelect($event)">
+                        <mat-option *ngFor="let image of imagesList" [value]="image">
+                            {{ image.imageName }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div fxLayoutAlign="right">
+                <button mat-icon-button class="icon-button" (click)="onGetNextImage()">
+                    <mat-icon>skip_next</mat-icon>
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="col-lg-2">
-        <button mat-icon-button (click)="onGetNextImage()">
-            <mat-icon>skip_next</mat-icon>
-        </button>
+
+    <div fxLayout="column" class="output-image">
+        <div fxLayout="row"
+             fxLayoutAlign="center">
+            <div *ngIf="currentImageVis; else placeholder">
+                <img [src]="currentImageVis"
+                     alt="zrob infernecje"
+                     class="img-responsive">
+            </div>
+            <ng-template #placeholder>
+                <img [src]="placeholder_img"
+                     alt="zrob infernecje"
+                     class="img-responsive">
+            </ng-template>
+        </div>
+
+        <div fxLayout="row"
+             fxLayoutAlign="center">
+
+            <div fxLayout="column"
+                 fxLayoutAlign="center">
+                <button mat-button (click)="onVisualize()">visualize</button>
+            </div>
+
+        </div>
     </div>
 </div>

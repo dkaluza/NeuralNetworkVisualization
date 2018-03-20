@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {Image} from "../../image.model";
-import {VisualizeService} from "../../visualize.service";
-import {ActivatedRoute, Params, Router} from "@angular/router";
+import {Image} from '../../image.model';
+import {VisualizeService} from '../../visualize.service';
+import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ImgSrcDirective} from "@angular/flex-layout";
 
 @Component({
     selector: 'app-input-image',
@@ -9,20 +10,21 @@ import {ActivatedRoute, Params, Router} from "@angular/router";
     styleUrls: ['./input-image.component.css'],
 })
 export class InputImageComponent implements OnInit {
-    image: Image;
-    currentAlgorithm: string;
-    currentImageId: number;
+    placeholder_img = 'api/static/placeholder2.jpg';
+    currentImage: Image;
+    currentImageVis = '';
+    currentAlgorithm = 0;
+    currentImageId = 0;
     imagesList: Image[] = [];
     // image1: Image;
     // image2: Image;
 
-    constructor(public visualizeService: VisualizeService,
+    constructor(private visualizeService: VisualizeService,
                 private route: ActivatedRoute,
                 private router: Router) {
     }
 
     ngOnInit() {
-        this.image = this.visualizeService.image1;
         this.currentAlgorithm = this.route.snapshot.params['algorithm'];
         this.currentImageId = this.route.snapshot.params['image_id'];
         this.route.params
@@ -32,23 +34,60 @@ export class InputImageComponent implements OnInit {
                     this.currentImageId = params['image_id'];
                 }
             );
-
-        // this.imagesList.push(new Image(0, 'img1', '/api/static/original/img2.jpg'));
-        // this.imagesList.push(new Image(0, 'img1', '/api/static/original/img2.jpg'));
-        // console.log(this.imagesList);
     }
 
     onGetNextImage() {
-        this.currentImageId++;
-        this.currentImageId %= 3; // temporary workaround
-        this.router.navigate(['/visualize', this.currentAlgorithm, this.currentImageId]);
-        this.visualizeService.getImages(this.currentAlgorithm, this.currentImageId);
+        let index = this.imagesList.findIndex((img) => {
+            return img.imageId === this.currentImage.imageId;
+        });
+        index++;
+        if (index >= this.imagesList.length) {
+            index %= this.imagesList.length;
+        }
+        this.currentImage = this.imagesList[index];
+        this.onGetImage(this.currentImage);
+        this.router.navigate(['/visualize', this.currentAlgorithm, index]);
     }
 
     onGetPreviousImage() {
-        this.currentImageId += 2; // same as -= 1 in mod 3
-        this.currentImageId %= 3; // temporary workaround
-        this.router.navigate(['/visualize', this.currentAlgorithm, this.currentImageId]);
-        this.visualizeService.getImages(this.currentAlgorithm, this.currentImageId);
+        let index = this.imagesList.findIndex((img) => {
+            return img.imageId === this.currentImage.imageId;
+        });
+        index--;
+        if (index < 0) {
+            index += this.imagesList.length;
+        }
+        this.currentImage = this.imagesList[index];
+        this.onGetImage(this.currentImage);
+        this.router.navigate(['/visualize', this.currentAlgorithm, index]);
+    }
+
+    onGetDataset() {
+        this.imagesList = [];
+        this.visualizeService.getDataset(3).subscribe(response => {
+            for (let i = 0; i < response['images'].length; i++) {
+                const im = response['images'][i];
+                const image = new Image(im.id, im.dataset_id, im.name, im.relative_path, im.label);
+                this.imagesList.push(image);
+            }
+        });
+    }
+
+    onSelectorSelect(image) {
+        this.currentImage = image.value;
+        this.onGetImage(this.currentImage);
+    }
+
+    onGetImage(image: Image) {
+        this.visualizeService.getImage(image.imageId).subscribe(response => {
+            this.currentImage.display_path = response['image_path'];
+        });
+        this.currentImageVis = '';
+    }
+
+    onVisualize() {
+        this.visualizeService.getImageVis(0, 0, this.currentImage.imageId).subscribe(response => {
+            this.currentImageVis = response['image_path'];
+        });
     }
 }

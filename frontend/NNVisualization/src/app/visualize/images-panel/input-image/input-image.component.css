@@ -1,3 +1,20 @@
 button {
     background-color: lightblue;
 }
+
+img {
+    width: 400px;
+    height: auto;
+}
+
+.input-image {
+    margin: 30px;
+}
+
+.output-image {
+    margin: 30px;
+}
+
+.icon-button {
+    margin: 30px;
+}
