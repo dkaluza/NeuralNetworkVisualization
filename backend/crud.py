@@ -1,14 +1,21 @@
 from app import create_app
-from app.nnvis.models import Architecture, Model, Dataset, User
+from app.nnvis.models import Architecture, Model, Dataset, User, Image
 import argparse
 from werkzeug.security import generate_password_hash
 
+TABLES = [
+        'Architecture',
+        'Model',
+        'Dataset',
+        'Image',
+        'User'
+        ]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--method', '-m', type=str, required=True,
                     choices=['create', 'update', 'delete', 'list'])
 parser.add_argument('--table', '-t', type=str, required=True,
-                    choices=['Architecture', 'Model', 'Dataset', 'User'])
+                    choices=TABLES)
 parser.add_argument('--id', type=int, default=None)
 parser.add_argument('--name', '-n', type=str, default=None)
 parser.add_argument('--desc', '-d', type=str, default=None)
@@ -20,6 +27,8 @@ parser.add_argument('--split', type=str, default=None)
 parser.add_argument('--user_id', '-uid', type=int, default=None)
 parser.add_argument('--username', type=str, default=None)
 parser.add_argument('--password', type=str, default=None)
+parser.add_argument('--path', type=str, default=None)
+parser.add_argument('--labels', type=str, default=None)
 
 
 app = create_app('config')
@@ -78,8 +87,8 @@ def crudDataset(args):
     if args.method == 'create':
         dataset = Dataset(name=args.name,
                           description=args.desc,
-                          trainset_path=args.dataset,
-                          split_path=args.split,
+                          path=args.path,
+                          labels=args.labels,
                           user_id=args.user_id)
         dataset.add()
     elif args.method == 'update':
@@ -89,7 +98,7 @@ def crudDataset(args):
         if args.desc is not None:
             dataset.description = args.desc
         if args.user_id is not None:
-            datasets.user_id = args.user_id
+            dataset.user_id = args.user_id
         dataset.update()
     elif args.method == 'delete':
         dataset = Dataset.query.get(args.id)
@@ -118,6 +127,11 @@ def crudUser(args):
         print(User.query.all())
 
 
+def crudImage(args):
+    if args.method == 'list':
+        print(Image.query.all())
+
+
 if __name__ == '__main__':
     args = parser.parse_args()
 
@@ -132,5 +146,7 @@ if __name__ == '__main__':
         crudDataset(args)
     elif args.table == 'User':
         crudUser(args)
+    elif args.table == 'Image':
+        crudImage(args)
 
     ctx.pop()

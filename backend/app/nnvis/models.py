@@ -1,9 +1,10 @@
-from flask_sqlalchemy import SQLAlchemy
+from app import db
+
+from flask import current_app as app
 from datetime import datetime
+from shutil import rmtree
+import os
 from werkzeug.security import generate_password_hash
-
-
-db = SQLAlchemy()
 
 
 class CRUD():
@@ -41,9 +42,21 @@ class Architecture(db.Model, CRUD):
         self.last_modified = datetime.utcnow()
 
     def __repr__(self):
-        return '<Archtecture {id} {name} of user {user_id}>'.format(id=self.id,
-                                                                    name=self.name,
-                                                                    user_id=self.user_id)
+        return '<Archtecture {id} {name} of user {user_id}>'.format(
+                id=self.id, name=self.name, user_id=self.user_id)
+
+    def add(self):
+        super().add()
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{id}'.format(id=self.id))
+        os.makedirs(path)
+
+    def delete(self):
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{id}'.format(id=self.id))
+        if os.path.isdir(path):
+            os.rmdir(path)
+        super().delete()
 
 
 class Model(db.Model, CRUD):
@@ -54,16 +67,41 @@ class Model(db.Model, CRUD):
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
                         nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
+    training_params = db.Column(db.Text)
+    validation_loss = db.Column(db.Float)
+    training_loss = db.Column(db.Float)
 
-    def __init__(self, name, description, weights_path, arch_id, dataset_id=None):
+    def __init__(self, name, description, weights_path,
+                 arch_id, dataset_id=None, params=None,
+                 valid_loss=None, train_loss=None):
         self.name = name
         self.description = description
         self.weights_path = weights_path
         self.arch_id = arch_id
         self.dataset_id = dataset_id
+        self.training_params = params
+        self.validation_loss = valid_loss
+        self.training_loss = train_loss
 
     def __repr__(self):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
+
+    def add(self):
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{arch}/{model}/'.format(
+                                arch=self.arch_id, model=self.id)
+                            )
+        self.weights_path = path
+        super().add()
+
+    def delete(self):
+        path = os.path.join(app.config['WEIGHTS_DIR'],
+                            '{arch}/{model}/'.format(
+                                arch=self.arch_id, model=self.id)
+                            )
+        if os.path.isdir(path):
+            rmtree(path, True)
+        super().delete()
 
 
 class Dataset(db.Model, CRUD):
@@ -84,8 +122,8 @@ class Dataset(db.Model, CRUD):
         self.user_id = user_id
 
     def __repr__(self):
-        return '<Dataset {id} {name} of user {user_id}>'.format(id=self.id, name=self.name,
-                                                                user_id=self.user_id)
+        return '<Dataset {id} {name} of user {user_id}>'.format(
+                id=self.id, name=self.name, user_id=self.user_id)
 
 
 class Image(db.Model, CRUD):
@@ -93,7 +131,8 @@ class Image(db.Model, CRUD):
     name = db.Column(db.String(64), unique=64, nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
     label = db.Column(db.Text(256), nullable=False)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'), nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
+                           nullable=False)
 
     def __init__(self, imageName, relPath, label, dataset_id):
         self.name = imageName
@@ -119,4 +158,5 @@ class User(db.Model, CRUD):
         self.password = generate_password_hash(password)
 
     def __repr__(self):
-        return '<User {id} {username}>'.format(id=self.id, username=self.username)
+        return '<User {id} {username}>'.format(
+                id=self.id, username=self.username)

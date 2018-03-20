@@ -2,8 +2,8 @@ from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
-from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Architecture, Model
+from app.nnvis.rests.protected_resource import ProtectedResource
 from datetime import datetime
 import json
 
@@ -15,13 +15,13 @@ def arch_to_dict(arch):
         last_used = 'None'
 
     return {
-        'id': arch.id,
-        'name': arch.name,
-        'description': arch.description,
-        'architecture': json.loads(arch.graph),
-        'last_used': last_used,
-        'last_modified': arch.last_modified.strftime('%Y-%m-%d')
-    }
+            'id': arch.id,
+            'name': arch.name,
+            'description': arch.description,
+            'architecture': json.loads(arch.graph),
+            'last_used': last_used,
+            'last_modified': arch.last_modified.strftime('%Y-%m-%d')
+            }
 
 
 class ArchitectureTask(ProtectedResource):
@@ -97,7 +97,7 @@ class UploadNewArchitecture(ProtectedResource):
         try:
             new_arch.add()
         except Exception as e:
-            abort(500, message=str(e))
+            abort(403, message=e)
 
         return arch_to_dict(new_arch), 201
 
