@@ -17,6 +17,7 @@ SUPPORTED_EXTENSIONS = [
     'png'
 ]
 
+
 def dataset_to_dict(dataset):
     return {
         'id': dataset.id,
@@ -24,12 +25,15 @@ def dataset_to_dict(dataset):
         'description': dataset.description
     }
 
+
 def _assert(b, msg):
     if not b:
         raise NnvisException(msg)
 
+
 def check_supported_extension(fname):
     return fname.rsplit('.', 1)[1] in SUPPORTED_EXTENSIONS
+
 
 def add_image(fname, labelsdict, dataset_id):
     _assert(check_supported_extension(fname), "Unsupported extension found")
@@ -41,6 +45,8 @@ def add_image(fname, labelsdict, dataset_id):
     new_image.add()
 
 # TODO: Label validation against labels passed to db
+
+
 def unzip_validate_archive(path, file, dataset_id):
     labels_filename = app.config['LABELS_FILENAME']
 
@@ -51,7 +57,8 @@ def unzip_validate_archive(path, file, dataset_id):
 
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
         cols = labelsdf.columns
-        labelsdict = pd.Series(labelsdf[cols[1]].values, index=labelsdf[cols[0]]).to_dict()
+        labelsdict = pd.Series(
+            labelsdf[cols[1]].values, index=labelsdf[cols[0]]).to_dict()
 
         for entry in os.scandir(path):
             _assert(entry.is_file(), "Unexpected directory found in archive")
@@ -63,6 +70,7 @@ def unzip_validate_archive(path, file, dataset_id):
     except:
         shutil.rmtree(path, ignore_errors=True)
         raise
+
 
 class DatasetTask(ProtectedResource):
     def __abort_if_dataset_doesnt_exist(self, dataset, dataset_id):
@@ -110,6 +118,7 @@ class UploadNewDataset(ProtectedResource):
         # TODO: verify labels format, probably something like "[class1, class2, ...]" using a Regex or something
 
     def post(self):
+        print("BLeh")
         if 'file' not in request.files:
             self.__abort_400('No dataset file attached')
 
@@ -120,21 +129,25 @@ class UploadNewDataset(ProtectedResource):
         postdata = request.form
         self.__verify_postdata(postdata)
 
-        dataset_path = os.path.join(app.config['DATASET_FOLDER'], postdata['name'])
+        dataset_path = os.path.join(
+            app.config['DATASET_FOLDER'], postdata['name'])
         new_dataset = Dataset(name=postdata['name'],
-                              description=postdata.get('description'), # None if isn't given, TODO: check this works
+                              # None if isn't given, TODO: check this works
+                              description=postdata.get('description'),
                               path=dataset_path,
                               labels=postdata['labels'],
                               user_id=get_current_user())
 
         try:
             new_dataset.add()
-            unzip_validate_archive(dataset_path, postfile.stream, new_dataset.id)
+            unzip_validate_archive(
+                dataset_path, postfile.stream, new_dataset.id)
         except Exception as e:
             new_dataset.delete()
             abort(500, message=str(e))
 
         return '', 201
+
 
 class ListAllDatasets(ProtectedResource):
     def get(self):
