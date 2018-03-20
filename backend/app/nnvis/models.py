@@ -99,9 +99,10 @@ class Image(db.Model, CRUD):
         self.relative_path = relPath
         self.label = label
         self.dataset_id = dataset_id
+        print(imageName, relPath, label, dataset_id)
 
     def json(self):
-        return {'name': self.name, 'relative_path': self.relative_path,
+        return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
                 'label': self.label, 'dataset_id': self.dataset_id}
 
 

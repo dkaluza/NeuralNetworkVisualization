@@ -43,13 +43,12 @@ def add_image(fname, labelsdict, dataset_id):
 # TODO: Label validation against labels passed to db
 def unzip_validate_archive(path, file, dataset_id):
     labels_filename = app.config['LABELS_FILENAME']
-
     try:
         os.makedirs(path, exist_ok=True)
         archive = ZipFile(file)
         archive.extractall(path)
-
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
+
         cols = labelsdf.columns
         labelsdict = pd.Series(labelsdf[cols[1]].values, index=labelsdf[cols[0]]).to_dict()
 

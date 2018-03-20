@@ -2,20 +2,31 @@ import tensorflow as tf
 import numpy as np
 import cv2
 
-mocked_alg_hooks = {
+from .entropygradient import GradientSaliency
+from .guidedbackpropagation import GuidedBackprop
+
+algorithms_register = {
     0: GradientSaliency,
     1: GuidedBackprop
 }
 
 def preprocess(img):
-    img /= 255.0
+    img = img / 255.0
     return img
 
 def postprocess(img):
+    print(img)
+    print(img.min())
+    print(img.max())
+
     img -= img.min()
+    print(img)
     img /= img.max()
+    print(img)
     img *= 255
+    print(img)
     img = img.astype(np.uint8)
+    print(img)
     return img
 
 def load_image(image_path, proc=False):

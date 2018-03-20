@@ -1,11 +1,16 @@
+import os
+
+from config import DATASET_FOLDER, STATIC_FOLDER
+
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
 from app.nnvis.models import Model
+from app.nnvis.models import Dataset
 
-from app.vis_tools.utils import algorithms_register
-from app.vis_tools.utils import visualize_saliency
-from app.vis_tools.utils import inference
-from app.vis_tools.utils import NumpyEncoder
+# from app.vis_tools.utils import algorithms_register
+# from app.vis_tools.utils import visualize_saliency
+# from app.vis_tools.utils import inference
+# from app.vis_tools.utils import NumpyEncoder
 
 from app.vis_tools import visualize_utils
 
@@ -32,41 +37,46 @@ class Inference(ProtectedResource):
 # visualize/<int:model_id>/<int:alg_id>/<int:image_id>
 class Visualize(ProtectedResource):
     def get(self, model_id, alg_id, image_id):
-        dataset_id = 0  # mocked
+        alg_id = 0 # mocked
 
-        image = Image.query.get(image_id, dataset_id)
-        image_path, image_label = image.path, image.label
+        image = Image.query.get(image_id)
+        image_path = os.path.join(STATIC_FOLDER, image.relative_path)
+
         image_input = visualize_utils.load_image(image_path, proc=True)
 
         # mocked model query
         model = 0  # = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
 
-        alg_class = visualize_utils.mocked_alg_hooks[alg_id]
+        alg_class = visualize_utils.algorithms_register[alg_id]
 
-        vis_algorithm = alg_class(graph, sess, x, y)
-        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: image_label})
+        vis_algorithm = alg_class(graph, sess, y, x)
+        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: image.label})
 
         image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        visualize_utils.save_image(image_output, image_output_path)
+        visualize_utils.save_image(image_output, image_output_path, proc=True)
+        image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
+        return {'image_path': image_path}
 
-        return {'image_path': image_output_path}
 
-
-# /visualize/<string:image_id>
+# /image/<string:image_id>
 class Images(ProtectedResource):
     def get(self, image_id):
-        dataset_id = 0
-        image = Image.query.get(image_id, dataset_id)
-        image_path_statis = 'api/static/images/' + image.name
-        shutil.copyfile(image.relative_path, image_path_statis)
-        return {'image_path': image_path_statis}
+        print(os.curdir)
+        image = Image.query.get(image_id)
+        image_path = os.path.join(STATIC_FOLDER, image.relative_path)
+        image_db_path = os.path.join(DATASET_FOLDER, 'cifar10_small_30', image.relative_path)
+        if not os.path.isfile(image_path):
+            shutil.copyfile(image_db_path, image_path)
+        image_path = 'api/static/' + image.relative_path
+        return {'image_path': image_path}
 
-
+# /images/<int:dataset_id>
 class ImageList(ProtectedResource):
     def get(self, dataset_id):
-        images = Image.query.get(dataset_id)
-        return {'items': [image.json() for image in Image.query.filter(dataset_id=dataset_id)]}
+        dataset = Dataset.query.get(dataset_id)
+        images = dataset.images
+        return {'images': [image.json() for image in images]}
 
 
 class Algorithms(ProtectedResource):
