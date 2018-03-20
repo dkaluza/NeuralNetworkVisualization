@@ -22,7 +22,6 @@
 .step-buttons button {
     font-size: 30px;
     padding: 10px;
-    background-color: rgba(255, 215, 64);
     margin: 0px 25px;
 }
 
@@ -34,8 +33,8 @@
     margin-top: 5%;
 
     background-color: #bbffbb;
-    font-size: 50px;
-    padding: 20px;
+    font-size: 5rem;
+    padding: 2rem;
 }
 
 .filter-header {

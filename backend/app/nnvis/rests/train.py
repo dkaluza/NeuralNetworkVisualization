@@ -3,7 +3,7 @@ from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
 from app.nnvis.rests.protected_resource import ProtectedResource
-from app.nnvis.models import Architecture, Model
+from app.nnvis.models import Dataset, Architecture, Model
 from app.nnvis.train.train import TrainThread
 
 
@@ -36,6 +36,9 @@ class TrainNewModel(ProtectedResource):
         name = args['name']
         desc = args.get('description')
         dataset_id = args['dataset_id']
+        if Dataset.query.filter_by(
+                user_id=get_current_user(), id=dataset_id) is None:
+            abort(403, message='Selected dataset doesn\'t exists')
 
         if len(Model.query.filter_by(arch_id=arch_id, name=name).all()) > 0:
             abort(403, message='Model with this name already exists')
