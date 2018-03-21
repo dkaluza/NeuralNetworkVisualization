@@ -112,7 +112,7 @@ class Dataset(db.Model, CRUD):
     labels = db.Column(db.Text(256), nullable=False)
     models = db.relationship('Model', backref='dataset', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    images = db.relationship('Image', cascade='all, delete',
+    images = db.relationship('Image', cascade='all, delete-orphan',
                              backref='dataset', lazy=True)
 
     def __init__(self, name, description, path, labels, user_id):
