@@ -31,10 +31,10 @@ class Inference(ProtectedResource):
         predictions = visualize_utils.inference(sess, logits, x, image_input)
         sess.close()
 
-        # mocked
-        # class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        dataset = Dataset.query.get(model.dataset_id)
+        class_names = dataset.labels
         scores = [{'class_number': class_number,
-                   'class_name': 'todo',  # class_names[class_number],
+                   'class_name': class_names[class_number],
                    'score': score}
                   for class_number, score in enumerate(predictions)]
         return {'class_scores': scores}
@@ -83,7 +83,6 @@ class Images(ProtectedResource):
 class ImageList(ProtectedResource):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        print(model.weights_path)
         dataset = Dataset.query.get(model.dataset_id)
         images = dataset.images
         return {'images': [image.json() for image in images]}
