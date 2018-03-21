@@ -32,7 +32,7 @@ class Inference(ProtectedResource):
         sess.close()
 
         dataset = Dataset.query.get(model.dataset_id)
-        class_names = dataset.labels
+        class_names = dataset.labels[1:-1].split(',')
         scores = [{'class_number': class_number,
                    'class_name': class_names[class_number],
                    'score': score}
@@ -83,8 +83,7 @@ class Images(ProtectedResource):
 class ImageList(ProtectedResource):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        dataset = Dataset.query.get(model.dataset_id)
-        images = dataset.images
+        images = model.dataset.images
         return {'images': [image.json() for image in images]}
 
 
