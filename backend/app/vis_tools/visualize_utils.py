@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import cv2
+import os
 
 from .vanillasaliency import GradientSaliency
 from .guidedbackpropagation import GuidedBackprop
@@ -61,14 +62,18 @@ def save_image(image, image_path, proc=None):
 # mocked for now
 def load_model(model):
     model_folder = model.weights_path
-    ckpt_filepath = model.we
+    model_files = os.listdir(model_folder)
+    meta_file = list(filter(lambda x: '.meta' in x, model_files))
+    if len(meta_file) != 1:
+        raise Exception("Something wrong with either weight_path={} or folder contents".format(model_folder))
+    meta_file = os.path.join(model_folder, meta_file[0])
 
     graph = tf.Graph()
     with graph.as_default():
         # mocked model
-        saver = tf.train.import_meta_graph('mockup/models/mock_cnn_cifar10.ckpt.meta')
+        saver = tf.train.import_meta_graph(meta_file)
         sess = tf.Session(graph=graph)
-        saver.restore(sess, tf.train.latest_checkpoint('mockup/models/'))
+        saver.restore(sess, tf.train.latest_checkpoint(model_folder))
 
         # important !!! - logits tensor and image placeholder need to be named with agreed convention
         logits = graph.get_tensor_by_name('mock_cnn/fc5/logits:0')

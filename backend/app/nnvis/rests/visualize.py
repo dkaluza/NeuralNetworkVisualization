@@ -26,15 +26,16 @@ class Inference(ProtectedResource):
 
         image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
 
-        # mocked model query
-        model = 0  # = Model.query.get(model_id)
+        model = Model.query.get(model_id)
         graph, sess, x, _, _, logits = visualize_utils.load_model(model)
         predictions = visualize_utils.inference(sess, logits, x, image_input)
         sess.close()
 
-        #mocked
-        class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-        scores = [{'class_number': class_number, 'class_name': class_names[class_number], 'score': score}
+        # mocked
+        # class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        scores = [{'class_number': class_number,
+                   'class_name': 'todo',  # class_names[class_number],
+                   'score': score}
                   for class_number, score in enumerate(predictions)]
         return {'class_scores': scores}
 
@@ -50,7 +51,6 @@ class Visualize(ProtectedResource):
 
         image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
 
-        # mocked model query
         model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
 
