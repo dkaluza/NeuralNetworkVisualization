@@ -60,6 +60,9 @@ def save_image(image, image_path, proc=None):
 
 # mocked for now
 def load_model(model):
+    model_folder = model.weights_path
+    ckpt_filepath = model.we
+
     graph = tf.Graph()
     with graph.as_default():
         # mocked model

@@ -51,7 +51,7 @@ class Visualize(ProtectedResource):
         image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
 
         # mocked model query
-        model = 0  # = Model.query.get(model_id)
+        model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
 
         alg_class = visualize_utils.algorithms_register[alg_id]
@@ -79,10 +79,12 @@ class Images(ProtectedResource):
         return {'image_path': image_url}
 
 
-# /images/<int:dataset_id>
+# /images/<int:model_id>
 class ImageList(ProtectedResource):
-    def get(self, dataset_id):
-        dataset = Dataset.query.get(dataset_id)
+    def get(self, model_id):
+        model = Model.query.get(model_id)
+        print(model.weights_path)
+        dataset = Dataset.query.get(model.dataset_id)
         images = dataset.images
         return {'images': [image.json() for image in images]}
 
