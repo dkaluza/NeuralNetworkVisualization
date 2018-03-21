@@ -57,7 +57,7 @@ class Visualize(ProtectedResource):
         sess.close()
 
         image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_gray)
+        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_gray_pos)
         image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
         return {'image_path': image_path}
 

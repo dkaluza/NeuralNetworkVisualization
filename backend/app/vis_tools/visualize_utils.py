@@ -23,12 +23,24 @@ def normalize_rgb(img):
     img = img.astype(np.uint8)
     return img
 
+def rgb2gray(img):
+    return np.dot(img[..., :3], [0.299, 0.587, 0.144])
 
 def normalize_gray(img):
     img -= img.min()
-    img = np.dot(img[..., :3], [0.299, 0.587, 0.144])
+    img = rgb2gray(img)
     img /= img.max()
     img *= 255
+    img = img.astype(np.uint8)
+    return img
+
+
+def normalize_gray_pos(img):
+    img = rgb2gray(img)
+    img[img < 0] = 0
+    img /= img.max()
+    img *= 255
+    img.clip(0.0, 255.0)
     img = img.astype(np.uint8)
     return img
 
