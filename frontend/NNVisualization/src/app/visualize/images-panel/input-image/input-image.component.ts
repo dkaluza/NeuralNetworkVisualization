@@ -1,8 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {Image} from '../../image.model';
+import {Score} from '../../score.model';
 import {VisualizeService} from '../../visualize.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {ImgSrcDirective} from "@angular/flex-layout";
+import {ImgSrcDirective} from '@angular/flex-layout';
+import {MatTableDataSource} from '@angular/material';
 
 @Component({
     selector: 'app-input-image',
@@ -18,6 +20,8 @@ export class InputImageComponent implements OnInit {
     imagesList: Image[] = [];
     // image1: Image;
     // image2: Image;
+    displayedColumns = ['class_number', 'class_name', 'score'];
+    dataSource = new MatTableDataSource();
 
     constructor(private visualizeService: VisualizeService,
                 private route: ActivatedRoute,
@@ -79,15 +83,34 @@ export class InputImageComponent implements OnInit {
     }
 
     onGetImage(image: Image) {
-        this.visualizeService.getImage(image.imageId).subscribe(response => {
-            this.currentImage.display_path = response['image_path'];
-        });
+        this.visualizeService.getImage(image.imageId)
+            .subscribe(response => {
+                this.currentImage.display_path = response['image_path'];
+            });
         this.currentImageVis = '';
     }
 
     onVisualize() {
-        this.visualizeService.getImageVis(0, 0, this.currentImage.imageId).subscribe(response => {
-            this.currentImageVis = response['image_path'];
-        });
+        this.visualizeService.getImageVis(0, 0, this.currentImage.imageId)
+            .subscribe(response => {
+                this.currentImageVis = response['image_path'];
+            });
+    }
+
+    onInference() {
+        this.visualizeService.doInference(0, this.currentImage.imageId)
+            .subscribe(response => {
+                console.log(response);
+                let scores = [];
+                for (let i = 0; i < response['class_scores'].length; i++) {
+                    const score = response['class_scores'][i];
+                    scores.push({
+                        'class_number': score.class_number,
+                        'class_name': score.class_name,
+                        'score': (score.score * 100).toFixed(2)
+                    });
+                }
+                this.dataSource = new MatTableDataSource(scores);
+            });
     }
 }
