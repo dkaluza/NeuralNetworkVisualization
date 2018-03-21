@@ -1,6 +1,6 @@
 import os
 
-from config import DATASET_FOLDER, STATIC_FOLDER
+from flask import current_app as app
 
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
@@ -41,7 +41,7 @@ class Visualize(ProtectedResource):
             return {'errormsg': "Bad algorithm id"}, 400
 
         image = Image.query.get(image_id)
-        image_path = os.path.join(STATIC_FOLDER, image.relative_path)
+        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
 
         image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
 
@@ -67,8 +67,8 @@ class Images(ProtectedResource):
     def get(self, image_id):
         print(os.curdir)
         image = Image.query.get(image_id)
-        image_path = os.path.join(STATIC_FOLDER, image.relative_path)
-        image_db_path = os.path.join(DATASET_FOLDER, 'cifar10_small_30', image.relative_path)
+        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
+        image_db_path = os.path.join(app.config['DATASET_FOLDER'], 'cifar10_small_30', image.relative_path)
         if not os.path.isfile(image_path):
             shutil.copyfile(image_db_path, image_path)
         image_url = 'api/static/' + image.relative_path
