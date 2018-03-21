@@ -88,4 +88,4 @@ def softmax(x):
 def inference(sess, logits, x, image_input):
     logits_score = logits.eval(feed_dict={x: [image_input]}, session=sess)
     predictions = softmax(logits_score[0])
-    return predictions
+    return [prediction.item() for prediction in predictions]
