@@ -62,17 +62,18 @@ class TrainThread(threading.Thread):
         if model is None:
             return
 
-        model.training_params = json.dumps(self._params)
-        model.validation_loss = self._validation_loss
-        model.training_loss = self._training_loss
-        model.update()
-
         print('saving model')
         weights_dir = app.config['WEIGHTS_DIR']
         model_dir = '{arch_id}/{model_id}/' \
             .format(arch_id=self._arch_id, model_id=self._model_id)
         path = os.path.join(weights_dir, model_dir)
         saver.save(session, path + 'model.ckpt')
+
+        model.training_params = json.dumps(self._params)
+        model.validation_loss = self._validation_loss
+        model.training_loss = self._training_loss
+        model.weights_path = path
+        model.update()
 
     def __runepoch(self, sess, ids, train=True):
         batch_losses = []
