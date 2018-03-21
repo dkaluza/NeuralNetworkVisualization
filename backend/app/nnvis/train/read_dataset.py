@@ -28,8 +28,9 @@ def read_data(dataset_id, ids):
         labels_dict[label] = i
     labels_num = len(labels)
 
-    for i in ids:
-        image = Image.query.get(int(i))
+    _ids = list(map(int, ids))
+    images = Image.query.filter(Image.id.in_(_ids)).all()
+    for image in images:
         x = imageio.imread(os.path.join(dataset.path, image.relative_path))
         y = np.zeros(labels_num)
         y[labels_dict[image.label]] = 1.

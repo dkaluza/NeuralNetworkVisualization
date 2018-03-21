@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import threading
+import time
 import json
 import os
 
@@ -101,6 +102,7 @@ class TrainThread(threading.Thread):
         self.__build_model()
 
         print('starting training')
+        start_time = time.time()
         with self._tfmodel.get_graph().as_default():
             saver = tf.train.Saver()
 
@@ -108,13 +110,17 @@ class TrainThread(threading.Thread):
                 sess.run(tf.global_variables_initializer())
 
                 for e in range(self._nepochs):
+                    start_epoch = time.time()
                     print('---- Epoch {e} ----'.format(e=e))
                     train_ids = shuffle(train_ids)
                     average_loss = self.__runepoch(sess, train_ids, train=True)
                     self._training_loss += average_loss
+                    end_epoch = time.time()
 
                     print('[Epoch {e}] Avg. loss = {loss}'
                           .format(e=e, loss=average_loss))
+                    print('[Epoch {e}] Time = {t}'
+                          .format(e=e, t=end_epoch-start_epoch))
                 print('finished training')
                 self._training_loss /= float(self._nepochs)
 
@@ -124,3 +130,5 @@ class TrainThread(threading.Thread):
                 print('Validation loss = {loss}'.format(loss=average_loss))
                 print('finished validation')
                 self.__save_model(sess, saver)
+        end_time = time.time()
+        print('Model training time = {0}'.format(end_time - start_time))
