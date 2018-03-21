@@ -75,11 +75,14 @@ import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-a
 import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service';
 import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
 import { InferenceComponent } from './visualize/images-panel/inference/inference.component';
+import { DatasetsComponent } from './datasets/datasets.component';
+
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full' },
     { path: 'manage', component: ManageComponent, canActivate: [AuthGuard] },
     { path: 'build', component: BuildComponent, canActivate: [AuthGuard] },
+    { path: 'datasets', component: DatasetsComponent, canActivate: [AuthGuard] },
     { path: 'train', component: TrainComponent, canActivate: [AuthGuard] },
     { path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard] },
     { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard] },
@@ -185,6 +188,7 @@ export class MaterialImportsModule { }
         TimeoutAlertComponent,
         InputsDialogComponent,
         InferenceComponent,
+        DatasetsComponent
     ],
     entryComponents: [
         LogInDialogComponent,

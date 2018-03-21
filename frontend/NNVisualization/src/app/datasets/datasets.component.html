@@ -1,0 +1,62 @@
+<div fxLayout="row"
+     fxLayoutAlign="center">
+    <div fxFlex="30%"
+         fxLayout="column"
+         fxLayoutAlign="start scretch">
+        <div class="filter-header">
+            <mat-form-field>
+                <input matInput
+                       (keyup)="applyFilter(datasetsDataSource, $event.target.value)"
+                       placeholder="Filter">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-table #datasets
+                       [dataSource]="datasetsDataSource">
+                <ng-container matColumnDef="position">
+                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                    <mat-cell *matCellDef="let elem"> {{elem.name}} </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef=""></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"
+                         (click)="selectDataset(row)"
+                         [class.selected-row]="row.id === selectedDatasetId">
+                </mat-row>
+            </mat-table>
+        </div>
+    </div>
+</div>
+<div fxLayout="row"
+     fxLayoutAlign="center">
+    <div fxFlex="50%"
+         fxLayout="column"
+         fxLayoutAlign="start center">
+        <ng-container *ngIf="selectedDatasetId; else noDataset">
+            <h2>Selected dataset</h2>
+            <h4>ID: {{ selectedDatasetId }}</h4>
+            <h4>Name: {{ selectedDatasetName }}</h4>
+            <h4>Description: {{ selectedDatasetDesc }}</h4>
+            <button mat-button
+                    (click)="deleteDataset()"
+                    [disabled]="!selectedDatasetId">
+                    Delete
+            </button>
+        </ng-container>
+        <ng-template #noDataset>
+            No dataset selected
+        </ng-template>
+        <div>
+            <input type="file"
+                   (change)="onDatasetFileChange($event)"
+                   accept=".zip">
+            <button mat-button
+                    (click)="addDataset()"
+                    [disabled]="!newDatasetFile">
+                Add as dataset
+            </button>
+        </div>
+    </div>
+</div>

@@ -46,6 +46,8 @@ def create_image(fname, labelsdict, dataset_id):
 
 
 # TODO: Label validation against labels passed to db
+
+
 def unzip_validate_archive(path, file, dataset_id):
     labels_filename = app.config['LABELS_FILENAME']
     try:
@@ -137,7 +139,8 @@ class UploadNewDataset(ProtectedResource):
         dataset_path = os.path.join(app.config['DATASET_FOLDER'],
                                     postdata['name'])
         new_dataset = Dataset(name=postdata['name'],
-                              description=postdata.get('description'),  # None if isn't given, TODO: check this works
+                              # None if isn't given, TODO: check this works
+                              description=postdata.get('description'),
                               path=dataset_path,
                               labels=postdata['labels'],
                               user_id=get_current_user())

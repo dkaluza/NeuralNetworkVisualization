@@ -2,16 +2,19 @@
      fxLayout="row"
      fxLayoutAlign="space-evenly center">
     <button mat-button
-       routerLinkActive="mat-accent"
-       routerLink="/manage">Manage</button>
+            routerLinkActive="mat-accent"
+            routerLink="/manage">Manage</button>
     <button mat-button
-       routerLinkActive="mat-accent"
-       routerLink="/build">Build</button>
+            routerLinkActive="mat-accent"
+            routerLink="/build">Build</button>
     <button mat-button
-       [disabled]="!selArchService.architecture"
-       routerLinkActive="mat-accent"
-       routerLink="/train">Train</button>
+            routerLinkActive="mat-accent"
+            routerLink="/datasets">Datasets</button>
     <button mat-button
-       routerLinkActive="mat-accent"
-       routerLink="/visualize">Visualize</button>
+            [disabled]="!selArchService.architecture"
+            routerLinkActive="mat-accent"
+            routerLink="/train">Train</button>
+    <button mat-button
+            routerLinkActive="mat-accent"
+            routerLink="/visualize">Visualize</button>
 </nav>
