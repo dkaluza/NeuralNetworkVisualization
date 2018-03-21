@@ -10,6 +10,7 @@ from app.utils import NnvisException
 
 import os
 import shutil
+import time
 import pandas as pd
 from zipfile import ZipFile
 
@@ -126,6 +127,7 @@ class UploadNewDataset(ProtectedResource):
         #   "[class1, class2, ...]" using a Regex or something
 
     def post(self):
+        start_time = time.time()
         if 'file' not in request.files:
             self.__abort_400('No dataset file attached')
 
@@ -152,6 +154,9 @@ class UploadNewDataset(ProtectedResource):
         except Exception as e:
             new_dataset.delete()
             abort(500, message=str(e))
+
+        end_time = time.time()
+        print('Upload time = {}'.format(end_time-start_time))
 
         return '', 201
 

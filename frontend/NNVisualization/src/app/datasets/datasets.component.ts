@@ -107,6 +107,7 @@ export class DatasetsComponent implements OnInit {
             response => {
                 this.genericDialogs.createSuccess('Dataset successfuly deleted');
                 this._updateDatasetList();
+                this.selectedDatasetId = undefined;
             },
             error => { this.genericDialogs.createWarning(error); }
         );
