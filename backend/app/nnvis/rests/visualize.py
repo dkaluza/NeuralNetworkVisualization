@@ -18,20 +18,25 @@ import json
 import shutil
 
 
+# inference/<int:model_id>/<int:image_id>
 class Inference(ProtectedResource):
     def get(self, model_id, image_id):
-        dataset_id = 0  # mocked
+        image = Image.query.get(image_id)
+        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
 
-        image = Image.query.get(image_id, dataset_id)
-        image_path, image_label = image.path, image.label
-        image_input = visualize_utils.load_image(image_path, proc=True)
+        image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
 
         # mocked model query
         model = 0  # = Model.query.get(model_id)
         graph, sess, x, _, _, logits = visualize_utils.load_model(model)
-
         predictions = visualize_utils.inference(sess, logits, x, image_input)
-        return {'class_scores': {class_idx: score for class_idx, score in enumerate(predictions)}}
+        sess.close()
+
+        #mocked
+        class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        scores = [{'class_number': class_number, 'class_name': class_names[class_number], 'score': score}
+                  for class_number, score in enumerate(predictions)]
+        return {'class_scores': scores}
 
 
 # visualize/<int:model_id>/<int:alg_id>/<int:image_id>
@@ -65,7 +70,6 @@ class Visualize(ProtectedResource):
 # /image/<string:image_id>
 class Images(ProtectedResource):
     def get(self, image_id):
-        print(os.curdir)
         image = Image.query.get(image_id)
         image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
         image_db_path = os.path.join(app.config['DATASET_FOLDER'], 'cifar10_small_30', image.relative_path)
@@ -73,6 +77,7 @@ class Images(ProtectedResource):
             shutil.copyfile(image_db_path, image_path)
         image_url = 'api/static/' + image.relative_path
         return {'image_path': image_url}
+
 
 # /images/<int:dataset_id>
 class ImageList(ProtectedResource):

@@ -27,6 +27,10 @@ export class VisualizeService implements OnInit {
             + this.currentAlgorithm.toString() + '/' + image_id.toString()).get();
     }
 
+    doInference(model_id: number, image_id: number) {
+        return this.restangular.one('inference/' + model_id.toString() +
+            '/' + image_id.toString()).get();
+    }
 
     ngOnInit() {
     }

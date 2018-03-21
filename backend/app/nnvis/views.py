@@ -30,7 +30,7 @@ api.add_resource(DatasetTask, 'dataset/<int:dataset_id>')
 api.add_resource(UploadNewDataset, 'upload_dataset')
 api.add_resource(ListAllDatasets, 'list_datasets')
 
-api.add_resource(Inference, 'inference/<int:model_id>')
+api.add_resource(Inference, 'inference/<int:model_id>/<int:image_id>')
 api.add_resource(Visualize, 'visualize/<int:model_id>/<int:alg_id>/<int:image_id>')
 api.add_resource(ImageList, 'images/<int:dataset_id>')
 api.add_resource(Images, 'image/<int:image_id>')

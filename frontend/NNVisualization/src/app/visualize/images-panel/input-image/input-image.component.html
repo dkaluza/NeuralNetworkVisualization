@@ -5,6 +5,35 @@
              fxLayoutAlign="center">
             <button mat-button (click)="onGetDataset()">load dataset</button>
         </div>
+        <div fxLayout="column"
+             fxLayoutAlign="center">
+            <button mat-button (click)="onInference()">inference</button>
+        </div>
+
+        <div class="container">
+            <mat-table #table [dataSource]="dataSource">
+
+                <ng-container matColumnDef="class_number">
+                    <mat-header-cell *matHeaderCellDef>Class Number</mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.class_number}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="class_name">
+                    <mat-header-cell *matHeaderCellDef>Class Name</mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.class_name}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="score">
+                    <mat-header-cell *matHeaderCellDef>Probability Score</mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.score}}</mat-cell>
+                </ng-container>
+
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+        </div>
+
     </div>
 
     <div fxLayout="column" class="input-image">
