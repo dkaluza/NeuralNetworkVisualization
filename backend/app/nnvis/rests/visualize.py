@@ -37,7 +37,7 @@ class Inference(ProtectedResource):
 # visualize/<int:model_id>/<int:alg_id>/<int:image_id>
 class Visualize(ProtectedResource):
     def get(self, model_id, alg_id, image_id):
-        if alg_id not in visualize_utils.algorithms_register.keys():
+        if alg_id not in visualize_utils.algorithms_register:
             return {'errormsg': "Bad algorithm id"}, 400
 
         image = Image.query.get(image_id)
@@ -53,6 +53,8 @@ class Visualize(ProtectedResource):
 
         vis_algorithm = alg_class(graph, sess, y, x)
         image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: image.label})
+
+        sess.close()
 
         image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
         visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_gray)

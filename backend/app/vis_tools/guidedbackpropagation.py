@@ -1,4 +1,4 @@
-from app.vis_tools.entropygradient import SaliencyMask
+from app.vis_tools.vanillasaliency import SaliencyMask
 import tensorflow as tf
 
 class GuidedBackprop(SaliencyMask):

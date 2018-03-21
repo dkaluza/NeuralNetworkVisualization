@@ -7,7 +7,7 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///models.db'
 JWT_SECRET_KEY = 'we_need_some_secret_key'
 
 
-STATIC_FOLDER = os.path.dirname(__file__) + '/app/static'
+STATIC_FOLDER = os.path.join(os.path.dirname(__file__),'app', 'static')
 
 WEIGHTS_DIR = os.path.join(os.path.dirname(__file__), 'app', 'weights')
 

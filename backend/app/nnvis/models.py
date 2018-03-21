@@ -7,9 +7,6 @@ import os
 from werkzeug.security import generate_password_hash
 
 
-db = SQLAlchemy()
-
-
 class CRUD():
 
     def add(self):
@@ -142,7 +139,6 @@ class Image(db.Model, CRUD):
         self.relative_path = relPath
         self.label = label
         self.dataset_id = dataset_id
-        print(imageName, relPath, label, dataset_id)
 
     def json(self):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
