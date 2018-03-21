@@ -2,16 +2,18 @@ import { Component, OnInit, OnChanges,
          ViewEncapsulation, Input, Output, EventEmitter } from '@angular/core';
 import * as shape from 'd3-shape';
 
-import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
-import { ArchNode, ArchLink } from '../selected-architecture/architecture';
+import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
+import { ArchNode, ArchLink } from '../../selected-architecture/architecture';
 import { ToolboxLayer, layerTemplates } from './toolbox-layers';
 import { Graph } from './graph';
 
-import { Layer } from './layers/layer/layer';
-import { FullyConnectedLayer } from './layers/fully-connected/fully-connected';
-import { ConvLayer } from './layers/conv/conv';
-import { InputLayer } from './layers/input/input';
-import { PoolLayer } from './layers/pool/pool';
+import { Layer } from '../layers/layer/layer';
+import { FullyConnectedLayer } from '../layers/fully-connected/fully-connected';
+import { ConvLayer } from '../layers/conv/conv';
+import { InputLayer } from '../layers/input/input';
+import { PoolLayer } from '../layers/pool/pool';
+import { DropoutLayer } from '../layers/dropout/dropout';
+import { BatchNormLayer } from '../layers/batch-norm/batch_norm';
 
 interface GraphNode {
     id: string;
@@ -191,6 +193,12 @@ export class VisArchComponent implements OnInit, OnChanges {
                 break;
             case 'pool':
                 this.layers.set(id, new PoolLayer(id, layer.shortcut));
+                break;
+            case 'dropout':
+                this.layers.set(id, new DropoutLayer(id, layer.shortcut));
+                break;
+            case 'batch_norm':
+                this.layers.set(id, new BatchNormLayer(id, layer.shortcut));
                 break;
         }
 

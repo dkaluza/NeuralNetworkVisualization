@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { Architecture, ArchNode, ArchLink } from './architecture';
 import { Model } from './model';
 
-import { Layer } from '../vis-arch/layers/layer/layer';
-
-import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
-import { ConvLayer } from '../vis-arch/layers/conv/conv';
-import { InputLayer } from '../vis-arch/layers/input/input';
-import { PoolLayer } from '../vis-arch/layers/pool/pool';
+import { Layer } from '../build/layers/layer/layer';
+import { FullyConnectedLayer } from '../build/layers/fully-connected/fully-connected';
+import { ConvLayer } from '../build/layers/conv/conv';
+import { InputLayer } from '../build/layers/input/input';
+import { PoolLayer } from '../build/layers/pool/pool';
+import { DropoutLayer } from '../build/layers/dropout/dropout';
+import { BatchNormLayer } from '../build/layers/batch-norm/batch_norm';
 
 @Injectable()
 export class SelectedArchitectureService {
@@ -57,6 +58,10 @@ export class SelectedArchitectureService {
                 return InputLayer.fromDict(node);
             case 'pool':
                 return PoolLayer.fromDict(node);
+            case 'dropout':
+                return DropoutLayer.fromDict(node);
+            case 'batch_norm':
+                return BatchNormLayer.fromDict(node);
             default:
                 return undefined;
         }

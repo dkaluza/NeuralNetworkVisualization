@@ -74,6 +74,22 @@ def _build_pool_op(node, input_ops):
         raise NnvisException('Unkown pool: {}'.format(node['params']['pool']))
 
 
+def _build_dropout_op(node, input_ops):
+    x = input_ops[0]
+    keep_prob = float(node['params']['keepProb'])
+    return layers.dropout(x, keep_prob=keep_prob)
+
+
+def _build_batch_norm_op(node, input_ops):
+    x = input_ops[0]
+    return layers.batch_norm(
+            x,
+            decay=node['params']['decay'],
+            center=node['params']['center'],
+            scale=node['params']['scale']
+            )
+
+
 def build_op(node, map_op, inputs):
     input_ops = [map_op[v] for v in inputs]
 
@@ -86,5 +102,9 @@ def build_op(node, map_op, inputs):
             return _build_conv_op(node, input_ops)
         elif node['layerType'] == 'pool':
             return _build_pool_op(node, input_ops)
+        elif node['layerType'] == 'dropout':
+            return _build_dropout_op(node, input_ops)
+        elif node['layerType'] == 'batch_norm':
+            return _build_batch_norm_op(node, input_ops)
         else:
             raise NnvisException('Unknown type of layer')
