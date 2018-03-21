@@ -71,8 +71,8 @@ class Images(ProtectedResource):
         image_db_path = os.path.join(DATASET_FOLDER, 'cifar10_small_30', image.relative_path)
         if not os.path.isfile(image_path):
             shutil.copyfile(image_db_path, image_path)
-        image_path = 'api/static/' + image.relative_path
-        return {'image_path': image_path}
+        image_url = 'api/static/' + image.relative_path
+        return {'image_path': image_url}
 
 # /images/<int:dataset_id>
 class ImageList(ProtectedResource):
