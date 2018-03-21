@@ -14,8 +14,8 @@ export class VisualizeService implements OnInit {
         // this.algorithmsList.push(new Algorithm(2, 'GradCAM'));
     }
 
-    getDataset(dataset_id: number) {
-        return this.restangular.one('images/' + dataset_id.toString()).get();
+    getDataset(model_id: number) {
+        return this.restangular.one('images/' + model_id.toString()).get();
     }
 
     getImage(image_id: number) {

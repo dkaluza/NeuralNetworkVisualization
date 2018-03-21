@@ -5,6 +5,7 @@ import {VisualizeService} from '../../visualize.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ImgSrcDirective} from '@angular/flex-layout';
 import {MatTableDataSource} from '@angular/material';
+import {SelectedArchitectureService} from '../../../selected-architecture/selected-architecture.service';
 
 @Component({
     selector: 'app-input-image',
@@ -24,20 +25,11 @@ export class InputImageComponent implements OnInit {
     dataSource = new MatTableDataSource();
 
     constructor(private visualizeService: VisualizeService,
-                private route: ActivatedRoute,
-                private router: Router) {
+                private selectedService: SelectedArchitectureService) {
     }
 
     ngOnInit() {
-        this.currentAlgorithm = this.route.snapshot.params['algorithm'];
-        this.currentImageId = this.route.snapshot.params['image_id'];
-        this.route.params
-            .subscribe(
-                (params: Params) => {
-                    this.currentAlgorithm = params['algorithm'];
-                    this.currentImageId = params['image_id'];
-                }
-            );
+
     }
 
     onGetNextImage() {
@@ -50,7 +42,6 @@ export class InputImageComponent implements OnInit {
         }
         this.currentImage = this.imagesList[index];
         this.onGetImage(this.currentImage);
-        this.router.navigate(['/visualize', this.currentAlgorithm, index]);
     }
 
     onGetPreviousImage() {
@@ -63,12 +54,13 @@ export class InputImageComponent implements OnInit {
         }
         this.currentImage = this.imagesList[index];
         this.onGetImage(this.currentImage);
-        this.router.navigate(['/visualize', this.currentAlgorithm, index]);
     }
 
     onGetDataset() {
+        const model = this.selectedService.model;
+        console.log(model);
         this.imagesList = [];
-        this.visualizeService.getDataset(3).subscribe(response => {
+        this.visualizeService.getDataset(model.id).subscribe(response => {
             for (let i = 0; i < response['images'].length; i++) {
                 const im = response['images'][i];
                 const image = new Image(im.id, im.dataset_id, im.name, im.relative_path, im.label);
@@ -101,7 +93,7 @@ export class InputImageComponent implements OnInit {
         this.visualizeService.doInference(0, this.currentImage.imageId)
             .subscribe(response => {
                 console.log(response);
-                let scores = [];
+                const scores = [];
                 for (let i = 0; i < response['class_scores'].length; i++) {
                     const score = response['class_scores'][i];
                     scores.push({
