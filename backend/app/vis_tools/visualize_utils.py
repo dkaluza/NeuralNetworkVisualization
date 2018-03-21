@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import cv2
 
-from .entropygradient import GradientSaliency
+from .vanillasaliency import GradientSaliency
 from .guidedbackpropagation import GuidedBackprop
 
 algorithms_register = {

@@ -9,7 +9,7 @@ export class VisualizeService implements OnInit {
     currentAlgorithm = -1;
 
     constructor(private restangular: Restangular) {
-        this.algorithmsList.push(new Algorithm(0, 'Entropy'));
+        this.algorithmsList.push(new Algorithm(0, 'VanillaSaliency'));
         this.algorithmsList.push(new Algorithm(1, 'GBP'));
         // this.algorithmsList.push(new Algorithm(2, 'GradCAM'));
     }
