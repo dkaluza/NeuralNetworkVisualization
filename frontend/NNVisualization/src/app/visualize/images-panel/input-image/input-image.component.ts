@@ -58,7 +58,6 @@ export class InputImageComponent implements OnInit {
 
     onGetDataset() {
         const model = this.selectedService.model;
-        console.log(model);
         this.imagesList = [];
         this.visualizeService.getDataset(model.id).subscribe(response => {
             for (let i = 0; i < response['images'].length; i++) {
@@ -83,14 +82,16 @@ export class InputImageComponent implements OnInit {
     }
 
     onVisualize() {
-        this.visualizeService.getImageVis(0, 0, this.currentImage.imageId)
+        const model = this.selectedService.model;
+        this.visualizeService.getImageVis(model.id, 0, this.currentImage.imageId)
             .subscribe(response => {
                 this.currentImageVis = response['image_path'];
             });
     }
 
     onInference() {
-        this.visualizeService.doInference(0, this.currentImage.imageId)
+        const model = this.selectedService.model;
+        this.visualizeService.doInference(model.id, this.currentImage.imageId)
             .subscribe(response => {
                 console.log(response);
                 const scores = [];
