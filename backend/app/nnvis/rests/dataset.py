@@ -54,6 +54,7 @@ def unzip_validate_archive(path, file, dataset_id):
         os.makedirs(path, exist_ok=True)
         archive = ZipFile(file)
         archive.extractall(path)
+
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
 
         cols = labelsdf.columns
