@@ -12,8 +12,9 @@ class AuthenticationTask(Resource):
             self.__abort(username)
 
     def __abort(self, username):
-        message = 'User {username} doesn\'t exist or the password is incorrect'.format(
-            username=username)
+        message = 'User {username} doesn\'t exist \
+                    or the password is incorrect'\
+                    .format(username=username)
         abort(401, message=message)
 
     def __abort_if_password_doesnt_match(self, user, username, password):

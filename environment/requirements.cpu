@@ -7,4 +7,9 @@ Flask-Cors==3.0.3
 flask-jwt-extended==3.7.1
 tensorflow
 pandas
+
 opencv-python
+
+imageio
+numpy
+

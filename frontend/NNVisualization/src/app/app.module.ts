@@ -20,6 +20,7 @@ import { LayerComponent } from './vis-arch/layers/layer/layer.component';
 import { FullyConnectedComponent } from './vis-arch/layers/fully-connected/fully-connected.component';
 import { ConvComponent } from './vis-arch/layers/conv/conv.component';
 import { InputComponent } from './vis-arch/layers/input/input.component';
+import { PoolComponent } from './vis-arch/layers/pool/pool.component';
 
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -173,6 +174,7 @@ export class MaterialImportsModule { }
         FullyConnectedComponent,
         ConvComponent,
         InputComponent,
+        PoolComponent,
         ImagesPanelComponent,
         NavAlgorithmsComponent,
         InputImageComponent,

@@ -1,4 +1,4 @@
-import { Layer, Activation } from '../layer/layer';
+import { Layer, Activation, StrToActivation } from '../layer/layer';
 import { ArchNode } from '../../../selected-architecture/architecture';
 
 export class FullyConnectedLayer extends Layer {
@@ -20,7 +20,7 @@ export class FullyConnectedLayer extends Layer {
             Number(dict.id), dict.label,
             String(dict.params.inputShape),
             dict.params.numOutputs,
-            dict.params.activation
+            StrToActivation(dict.params.activation)
         );
     }
 
@@ -41,7 +41,7 @@ export class FullyConnectedLayer extends Layer {
     }
 
     addAttributes(dict) {
-        dict['activation'] = this._activation;
+        dict['activation'] = Activation[this._activation];
         dict['numOutputs'] = this._numOutputs;
         return dict;
     }

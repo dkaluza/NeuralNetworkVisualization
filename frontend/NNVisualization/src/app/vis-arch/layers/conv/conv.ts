@@ -1,9 +1,20 @@
-import { Layer, Activation } from '../layer/layer';
+import { Layer, Activation, StrToActivation } from '../layer/layer';
 import { ArchNode } from '../../../selected-architecture/architecture';
 
 export enum Padding {
     Same,
     Valid
+}
+
+export function StrToPadding(str: string): Padding {
+    switch (str) {
+        case 'Same':
+            return Padding.Same;
+        case 'Valid':
+            return Padding.Valid;
+        default:
+            return Padding.Same;
+    }
 }
 
 export class ConvLayer extends Layer {
@@ -32,8 +43,8 @@ export class ConvLayer extends Layer {
             dict.params.numFilters,
             String(dict.params.kernelShape),
             String(dict.params.strides),
-            dict.params.padding,
-            dict.params.activation
+            StrToPadding(dict.params.padding),
+            StrToActivation(dict.params.activation)
         );
     }
 
@@ -81,8 +92,8 @@ export class ConvLayer extends Layer {
         dict['numFilters'] = this._numFilters;
         dict['kernelShape'] = this.strToArray(this._kernelShape);
         dict['strides'] = this.strToArray(this._strides);
-        dict['padding'] = this._padding;
-        dict['activation'] = this._activation;
+        dict['padding'] = Padding[this._padding];
+        dict['activation'] = Activation[this._activation];
         return dict;
     }
 }

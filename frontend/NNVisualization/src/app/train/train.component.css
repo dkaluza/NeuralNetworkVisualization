@@ -1,0 +1,52 @@
+.mat-table {
+    overflow: auto;
+    max-height: 200px;
+}
+
+.mat-row {
+    cursor: pointer;
+}
+
+.training-params {
+    margin-top: 5%;
+}
+
+.selected-dataset {
+    background-color: rgba(255, 215, 64, 0.7);
+}
+
+.step-buttons {
+    margin: 20px;
+}
+
+.step-buttons button {
+    font-size: 30px;
+    padding: 10px;
+    margin: 0px 25px;
+}
+
+.params-container {
+    font-size: large;
+}
+
+.train-button {
+    margin-top: 5%;
+
+    background-color: #bbffbb;
+    font-size: 5rem;
+    padding: 2rem;
+}
+
+.filter-header {
+    min-height: 64px;
+    padding: 8px 24px 0;
+}
+
+.mat-form-field {
+    font-size: 14px;
+    width: 100%;
+}
+
+.centered {
+    text-align: center;
+}
