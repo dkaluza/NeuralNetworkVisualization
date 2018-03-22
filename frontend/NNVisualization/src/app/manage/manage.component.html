@@ -68,13 +68,13 @@
          fxLayout="column"
          fxLayoutAlign="start center">
         <ng-container *ngIf="!add_new_arch_mode; else addArch">
-            <ng-container *ngIf="selectedArchitectureService.architecture; else noArch">
+            <ng-container *ngIf="selArchService.architecture; else noArch">
                 <h2>Current architecture</h2>
-                <h4>ID: {{ selectedArchitectureService.architecture.id }}</h4>
-                <h4>Name: {{ selectedArchitectureService.architecture.name }}</h4>
-                <h4>Description: {{ selectedArchitectureService.architecture.description }}</h4>
-                <h4>Last used: {{ selectedArchitectureService.architecture.last_used }}</h4>
-                <h4>Last modified: {{ selectedArchitectureService.architecture.last_modified }}</h4>
+                <h4>ID: {{ selArchService.architecture.id }}</h4>
+                <h4>Name: {{ selArchService.architecture.name }}</h4>
+                <h4>Description: {{ selArchService.architecture.description }}</h4>
+                <h4>Last used: {{ selArchService.architecture.last_used }}</h4>
+                <h4>Last modified: {{ selArchService.architecture.last_modified }}</h4>
 
                 <button mat-button
                         (click)="editCurrentArchitecture()">Edit</button>
@@ -89,20 +89,20 @@
     <div fxFlex="30%"
          fxLayout="column"
          fxLayoutAlign="start center">
-        <ng-container *ngIf="selectedArchitectureService.model; else noModel">
+        <ng-container *ngIf="selArchService.model; else noModel">
             <h2>Current model</h2>
-            <h4>ID: {{ selectedArchitectureService.model.id }}</h4>
-            <h4>Name: {{ selectedArchitectureService.model.name }}</h4>
-            <h4>Description: {{ selectedArchitectureService.model.description }}</h4>
+            <h4>ID: {{ selArchService.model.id }}</h4>
+            <h4>Name: {{ selArchService.model.name }}</h4>
+            <h4>Description: {{ selArchService.model.description }}</h4>
 
-            <h4>Optimizer: {{ selectedArchitectureService.model.optimizer }}</h4>
+            <h4>Optimizer: {{ selArchService.model.optimizer }}</h4>
 
-            <h4>Batch size: {{ selectedArchitectureService.model.batch_size }}</h4>
-            <h4>Num. of epochs: {{ selectedArchitectureService.model.nepochs }}</h4>
+            <h4>Batch size: {{ selArchService.model.batch_size }}</h4>
+            <h4>Num. of epochs: {{ selArchService.model.nepochs }}</h4>
 
-            <h4>Loss: {{ selectedArchitectureService.model.loss }}</h4>
-            <h4>Training loss: {{ selectedArchitectureService.model.training_loss }}</h4>
-            <h4>Validation loss: {{ selectedArchitectureService.model.validation_loss }}</h4>
+            <h4>Loss: {{ selArchService.model.loss }}</h4>
+            <h4>Training loss: {{ selArchService.model.training_loss }}</h4>
+            <h4>Validation loss: {{ selArchService.model.validation_loss }}</h4>
 
             <button mat-button
                     (click)="editCurrentModel()">Edit</button>
