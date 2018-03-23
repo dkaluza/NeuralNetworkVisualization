@@ -42,12 +42,10 @@
 
             <div *ngIf="currentImage; else placeholder">
                 <img [src]="currentImage.display_path"
-                     alt="wybierz obrazek"
                      class="img-responsive">
             </div>
             <ng-template #placeholder>
                 <img [src]="placeholder_img"
-                     alt="zrob infernecje"
                      class="img-responsive">
             </ng-template>
         </div>
@@ -82,12 +80,10 @@
              fxLayoutAlign="center">
             <div *ngIf="currentImageVis; else placeholder">
                 <img [src]="currentImageVis"
-                     alt="zrob infernecje"
                      class="img-responsive">
             </div>
             <ng-template #placeholder>
                 <img [src]="placeholder_img"
-                     alt="zrob infernecje"
                      class="img-responsive">
             </ng-template>
         </div>
