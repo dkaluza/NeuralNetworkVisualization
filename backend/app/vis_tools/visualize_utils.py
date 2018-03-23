@@ -75,9 +75,8 @@ def load_model(model):
         sess = tf.Session(graph=graph)
         saver.restore(sess, tf.train.latest_checkpoint(model_folder))
 
-        # important !!! - logits tensor and image placeholder need to be named with agreed convention
-        logits = graph.get_tensor_by_name('mock_cnn/fc5/logits:0')
-        x = graph.get_tensor_by_name('x:0')
+        logits = graph.get_tensor_by_name('logits:0')
+        x = graph.get_tensor_by_name('input/0:0')
 
         neuron_selector = tf.placeholder(tf.int32)
         y = logits[0][neuron_selector]
