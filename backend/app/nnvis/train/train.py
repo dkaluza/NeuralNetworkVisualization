@@ -38,6 +38,8 @@ class TrainThread(threading.Thread):
         self._validation_loss = 0.
         self._training_loss = 0.
 
+        self.app_ctx = app.app_context()
+
     def __build_model(self):
         print('building graph...')
         self._tfmodel = TFModel(self._nodes, self._links)
@@ -97,7 +99,7 @@ class TrainThread(threading.Thread):
         return np.mean(batch_losses)
 
     def run(self):
-
+        self.app_ctx.push()
         train_ids = get_train_ids(self._dataset_id)
         train_ids, valid_ids = split_into_train_and_valid(train_ids, 0.7)
         self.__build_model()
