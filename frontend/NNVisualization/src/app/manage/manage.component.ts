@@ -26,7 +26,7 @@ export class ManageComponent implements OnInit {
     selectedArchId: number;
     selectedModelId: number;
 
-    constructor(private selectedArchitectureService: SelectedArchitectureService,
+    constructor(private selArchService: SelectedArchitectureService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
         this.archDataSource = new MatTableDataSource<Element>([]);
@@ -35,7 +35,14 @@ export class ManageComponent implements OnInit {
 
     ngOnInit() {
         this._updateArchitectureList();
-        this._updateModelList();
+
+        if (this.selArchService.architecture) {
+            this.selectedArchId = this.selArchService.architecture.id;
+            this._updateModelList();
+            if (this.selArchService.model) {
+                this.selectedModelId = this.selArchService.model.id;
+            }
+        }
     }
 
     private _updateArchitectureList(): void {
@@ -54,11 +61,11 @@ export class ManageComponent implements OnInit {
     }
 
     private _updateModelList(): void {
-        if (!this.selectedArchitectureService.architecture) {
+        if (!this.selArchService.architecture) {
             return;
         }
 
-        const arch_id = this.selectedArchitectureService.architecture.id;
+        const arch_id = this.selArchService.architecture.id;
         this.restangular.one('list_models', arch_id)
             .getList().subscribe(_models => {
                 const modelElems = [];
@@ -92,7 +99,7 @@ export class ManageComponent implements OnInit {
                         arch.last_used,
                         arch.last_modified
                     );
-                    this.selectedArchitectureService.architecture = newArch;
+                    this.selArchService.architecture = newArch;
                     this._updateModelList();
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
@@ -116,14 +123,14 @@ export class ManageComponent implements OnInit {
                         model.train_loss,
                         model.valid_loss
                     );
-                    this.selectedArchitectureService.model = newModel;
+                    this.selArchService.model = newModel;
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
             );
     }
 
     editCurrentArchitecture(): void {
-        const arch = this.selectedArchitectureService.architecture;
+        const arch = this.selArchService.architecture;
         this.genericDialogs.createInputs(['Name', 'Description']).afterClosed().subscribe(
             result => {
                 if (result) {
@@ -154,7 +161,7 @@ export class ManageComponent implements OnInit {
                         nArch.last_used,
                         nArch.last_modified
                     );
-                    this.selectedArchitectureService.architecture = newArch;
+                    this.selArchService.architecture = newArch;
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
             );
@@ -162,12 +169,12 @@ export class ManageComponent implements OnInit {
     }
 
     deleteCurrentArchitecture(): void {
-        const arch = this.selectedArchitectureService.architecture;
+        const arch = this.selArchService.architecture;
         this.restangular.one('arch', arch.id)
             .remove().subscribe(
                 () => {
                     this._updateArchitectureList();
-                    this.selectedArchitectureService.architecture = undefined;
+                    this.selArchService.architecture = undefined;
                     this.selectedArchId = undefined;
                     this.selectedModelId = undefined;
                 },
@@ -176,7 +183,7 @@ export class ManageComponent implements OnInit {
     }
 
     editCurrentModel(): void {
-        const model = this.selectedArchitectureService.model;
+        const model = this.selArchService.model;
         const newName = prompt('Provide name:');
         const newDesc = prompt('Provide description:');
 
@@ -204,7 +211,7 @@ export class ManageComponent implements OnInit {
                         nModel.train_loss,
                         nModel.valid_loss
                     );
-                    this.selectedArchitectureService.model = newModel;
+                    this.selArchService.model = newModel;
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
             );
@@ -212,12 +219,12 @@ export class ManageComponent implements OnInit {
     }
 
     deleteCurrentModel(): void {
-        const model = this.selectedArchitectureService.model;
+        const model = this.selArchService.model;
         this.restangular.one('model', model.id)
             .remove().subscribe(
                 () => {
                     this._updateModelList();
-                    this.selectedArchitectureService.model = undefined;
+                    this.selArchService.model = undefined;
                     this.selectedModelId = undefined;
                 },
                 (e) => { this.genericDialogs.createWarning(e); }

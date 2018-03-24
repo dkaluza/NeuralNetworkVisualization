@@ -20,6 +20,7 @@ interface GraphNode {
     label: string;
     selected: boolean;
     color: string;
+    tooltip: string;
 }
 
 interface GraphLink {
@@ -96,14 +97,15 @@ export class VisArchComponent implements OnInit, OnChanges {
         this.nodes = this._graph.nodes.map(
             n => {
                 const layer = this.layers.get(n);
-                const color = layerTemplates.find(
+                const toolboxLayer =  layerTemplates.find(
                     l => (l.id === layer.layerType)
-                ).color;
+                );
                 return {
                     id: String(layer.id),
                     label: layer.label,
                     selected: false,
-                    color: color
+                    color: toolboxLayer.color,
+                    tooltip: toolboxLayer.label
                 };
             }
         );
@@ -206,7 +208,8 @@ export class VisArchComponent implements OnInit, OnChanges {
             id: String(id),
             label: layer.shortcut,
             selected: false,
-            color: layer.color
+            color: layer.color,
+            tooltip: layer.label
         });
         this._updateView();
         this.nodeSelected.emit(id);
