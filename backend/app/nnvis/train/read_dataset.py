@@ -38,7 +38,7 @@ def read_data(dataset_id, ids):
         xs.append(x)
         ys.append(y)
 
-    return np.array(xs), np.array(ys)
+    return [np.array(xs)], np.array(ys)
 
 
 def shuffle(ids):
