@@ -41,8 +41,8 @@ class TrainThread(threading.Thread):
     def __build_model(self):
         print('building graph...')
         self._tfmodel = TFModel(self._nodes, self._links)
-        self._X = self._tfmodel.get_inputs()[0]
-        self._pred = self._tfmodel.get_logits()[0]
+        self._X = self._tfmodel.get_inputs()
+        self._pred = self._tfmodel.get_logits()
 
         with self._tfmodel.get_graph().as_default():
             self._y = tf.placeholder(tf.float32, shape=(None, 10))
@@ -50,7 +50,7 @@ class TrainThread(threading.Thread):
                                         self._pred)
             self._opt = optimize(self._optimizer, self._loss, self._opt_params)
 
-        self._X_shape = self.__get_shape(self._X)
+        self._X_shapes = [self.__get_shape(x) for x in self._X]
         self._y_shape = self.__get_shape(self._y)
 
     def __get_shape(self, op):
@@ -79,13 +79,14 @@ class TrainThread(threading.Thread):
         batch_losses = []
         batches = split_into_batches(ids, self._batch_size)
         for batch_ids in batches:
-            batch_xs, batch_ys = read_data(self._dataset_id, batch_ids)
-            batch_xs = np.reshape(batch_xs, self._X_shape)
-            batch_ys = np.reshape(batch_ys, self._y_shape)
+            batch_xs, batch_y = read_data(self._dataset_id, batch_ids)
+            batch_xs = [np.reshape(bx, xshape)
+                        for bx, xshape in zip(batch_xs, self._X_shapes)]
+            batch_y = np.reshape(batch_y, self._y_shape)
             feed_dict = {
-                    self._X: batch_xs,
-                    self._y: batch_ys
+                    x: batch_x for x, batch_x in zip(self._X, batch_xs)
                     }
+            feed_dict[self._y] = batch_y
 
             if train:
                 _, loss = sess.run([self._opt, self._loss],

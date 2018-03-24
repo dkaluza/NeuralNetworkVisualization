@@ -7,6 +7,20 @@ class TFModel:
         self._nodes = nodes
         self._links = links
         self._ops, self._graph = self._build_model(nodes, links)
+        self.__rename_logits()
+
+    def __rename_logits(self):
+        ids = [node['id'] for node in self._nodes]
+        num_outputs = {id: 0 for id in ids}
+
+        for l in self._links:
+            num_outputs[l['source']] += 1
+
+        logits_ids = list(filter(lambda id: num_outputs[id] == 0, ids))
+        logits_id = logits_ids[0]
+        logits_op = self._ops[logits_id]
+
+        self._ops[logits_id] = tf.identity(logits_op, name='logits')
 
     def get_graph(self):
         return self._graph
@@ -67,4 +81,5 @@ class TFModel:
             num_outputs[l['source']] += 1
 
         logits_ids = list(filter(lambda id: num_outputs[id] == 0, ids))
-        return [self._ops[id] for id in logits_ids]
+        logits_id = logits_ids[0]
+        return self._ops[logits_id]

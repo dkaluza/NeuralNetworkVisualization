@@ -30,7 +30,8 @@ def _get_padding(node):
 def _build_input_op(node, input_ops):
     shape = node['params']['outputShape']
     shape = [d if d > 0 else None for d in shape]
-    return tf.placeholder(tf.float32, shape=shape)
+    return tf.placeholder(tf.float32, shape=shape,
+                          name=str(node['params']['inputId']))
 
 
 def _build_fc_op(node, input_ops):
@@ -38,7 +39,8 @@ def _build_fc_op(node, input_ops):
     x = layers.flatten(x)
     return layers.fully_connected(
             x, num_outputs=node['params']['numOutputs'],
-            activation_fn=_get_activation(node))
+            activation_fn=_get_activation(node),
+            scope=node['id'])
 
 
 def _build_conv_op(node, input_ops):
@@ -52,7 +54,8 @@ def _build_conv_op(node, input_ops):
             kernel_size=kernel_size,
             stride=strides,
             padding=_get_padding(node),
-            activation_fn=_get_activation(node))
+            activation_fn=_get_activation(node),
+            scope=node['id'])
 
 
 def _build_pool_op(node, input_ops):
@@ -64,12 +67,14 @@ def _build_pool_op(node, input_ops):
         return layers.max_pool2d(x,
                                  kernel_size=kernel_size,
                                  stride=strides,
-                                 padding=_get_padding(node))
+                                 padding=_get_padding(node),
+                                 scope=node['id'])
     elif node['params']['pool'] == 'Avarage':
         return layers.avg_pool2d(x,
                                  kernel_size=kernel_size,
                                  stride=strides,
-                                 padding=_get_padding(node))
+                                 padding=_get_padding(node),
+                                 scope=node['id'])
     else:
         raise NnvisException('Unkown pool: {}'.format(node['params']['pool']))
 
@@ -77,7 +82,7 @@ def _build_pool_op(node, input_ops):
 def build_op(node, map_op, inputs):
     input_ops = [map_op[v] for v in inputs]
 
-    with tf.name_scope(node['id']):
+    with tf.name_scope(node['layerType']):
         if node['layerType'] == 'input':
             return _build_input_op(node, input_ops)
         elif node['layerType'] == 'fc':
