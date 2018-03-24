@@ -14,13 +14,15 @@ import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
 import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
-import { VisArchComponent } from './vis-arch/vis-arch.component';
+import { VisArchComponent } from './build/vis-arch/vis-arch.component';
 
-import { LayerComponent } from './vis-arch/layers/layer/layer.component';
-import { FullyConnectedComponent } from './vis-arch/layers/fully-connected/fully-connected.component';
-import { ConvComponent } from './vis-arch/layers/conv/conv.component';
-import { InputComponent } from './vis-arch/layers/input/input.component';
-import { PoolComponent } from './vis-arch/layers/pool/pool.component';
+import { LayerComponent } from './build/layers/layer/layer.component';
+import { FullyConnectedComponent } from './build/layers/fully-connected/fully-connected.component';
+import { ConvComponent } from './build/layers/conv/conv.component';
+import { InputComponent } from './build/layers/input/input.component';
+import { PoolComponent } from './build/layers/pool/pool.component';
+import { DropoutComponent } from './build/layers/dropout/dropout.component';
+import { BatchNormComponent } from './build/layers/batch-norm/batch_norm.component';
 
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -176,6 +178,8 @@ export class MaterialImportsModule { }
         ConvComponent,
         InputComponent,
         PoolComponent,
+        DropoutComponent,
+        BatchNormComponent,
         ImagesPanelComponent,
         NavAlgorithmsComponent,
         InputImageComponent,
