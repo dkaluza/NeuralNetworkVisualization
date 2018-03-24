@@ -24,8 +24,10 @@ def normalize_rgb(img):
     img = img.astype(np.uint8)
     return img
 
+
 def rgb2gray(img):
     return np.dot(img[..., :3], [0.299, 0.587, 0.144])
+
 
 def normalize_gray(img):
     img -= img.min()
@@ -47,7 +49,9 @@ def normalize_gray_pos(img):
 
 
 def load_image(image_path, proc=None):
-    image = cv2.imread(image_path)
+    # todo preprocessing and postprocessing choice feature
+    flag = cv2.IMREAD_GRAYSCALE
+    image = cv2.imread(image_path, flag)
     if proc:
         image = proc(image)
     return image
