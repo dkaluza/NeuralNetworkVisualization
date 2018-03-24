@@ -76,7 +76,7 @@ def load_model(model):
         saver.restore(sess, tf.train.latest_checkpoint(model_folder))
 
         logits = graph.get_tensor_by_name('logits:0')
-        x = graph.get_tensor_by_name('input/0:0')
+        x = graph.get_tensor_by_name('input/1:0')
 
         neuron_selector = tf.placeholder(tf.int32)
         y = logits[0][neuron_selector]
