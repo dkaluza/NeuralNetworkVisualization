@@ -129,11 +129,15 @@ class Dataset(db.Model, CRUD):
 
 class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=64, nullable=False)
+    name = db.Column(db.String(64), nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
     label = db.Column(db.Text(256), nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
                            nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'dataset_id', name='_name_dataset_id_uc'),
+    )
 
     def __init__(self, imageName, relPath, label, dataset_id):
         self.name = imageName

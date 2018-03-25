@@ -95,7 +95,7 @@ main()
 
     case $1 in
         connect|clean)
-        if [ "$#" -ne 1]; then
+        if [ "$#" -ne 1 ]; then
             usage
             exit 1
         fi

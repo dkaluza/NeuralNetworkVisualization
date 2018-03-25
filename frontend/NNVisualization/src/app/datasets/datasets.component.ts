@@ -72,19 +72,17 @@ export class DatasetsComponent implements OnInit {
     }
 
     addDataset() {
-        this.genericDialogs.createInputs(['Name', 'Description', 'Labels'])
+        this.genericDialogs.createInputs(['Name', 'Description'])
             .afterClosed().subscribe(response => {
                 if (response) {
-                    this._addDatasetWithData(response['Name'], response['Description'],
-                        response['Labels']);
+                    this._addDatasetWithData(response['Name'], response['Description']);
                 }
             });
     }
 
-    private _addDatasetWithData(name: string, desc: string, labels: string) {
+    private _addDatasetWithData(name: string, desc: string) {
         const formData = new FormData();
         formData.append('name', name);
-        formData.append('labels', labels);
         formData.append('file', this.newDatasetFile);
         if (desc) {
             formData.append('description', desc);

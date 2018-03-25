@@ -74,6 +74,8 @@ def unzip_validate_archive(path, file, dataset_id):
         db.session.bulk_save_objects(images)
         db.session.commit()
 
+        return labelsdf[cols[1]].unique().tolist()
+
     except:
         shutil.rmtree(path, ignore_errors=True)
         raise
@@ -119,11 +121,6 @@ class UploadNewDataset(ProtectedResource):
     def __verify_postdata(self, postdata):
         if 'name' not in postdata:
             self.__abort_400('Name for new dataset required')
-        if 'labels' not in postdata:
-            self.__abort_400('Labels for new dataset required')
-
-        # TODO: verify labels format, probably something like
-        #   "[class1, class2, ...]" using a Regex or something
 
     def post(self):
         if 'file' not in request.files:
@@ -142,16 +139,19 @@ class UploadNewDataset(ProtectedResource):
                               # None if isn't given, TODO: check this works
                               description=postdata.get('description'),
                               path=dataset_path,
-                              labels=postdata['labels'],
+                              labels='',
                               user_id=get_current_user())
 
         try:
             new_dataset.add()
-            unzip_validate_archive(dataset_path, postfile.stream,
+            unique_labels = unzip_validate_archive(dataset_path, postfile.stream,
                                    new_dataset.id)
-        except Exception as e:
+
+            new_dataset.labels = str(unique_labels).replace(' ', '')
+            new_dataset.update()
+        except:
             new_dataset.delete()
-            abort(500, message=str(e))
+            raise
 
         return '', 201
 
