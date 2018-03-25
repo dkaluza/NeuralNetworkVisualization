@@ -19,6 +19,11 @@
 }
 
 .node-selected {
+    stroke: green;
+    stroke-width: 2px;
+}
+
+.node-incorrect {
     stroke: red;
     stroke-width: 2px;
 }

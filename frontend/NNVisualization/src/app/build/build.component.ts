@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
+import { SelectedArchitectureService, ErrorInfo } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
 
 import { VisArchComponent } from './vis-arch/vis-arch.component';
@@ -23,9 +23,12 @@ export class BuildComponent implements OnInit {
     selectedLayer: Layer;
     private selectedID: number;
 
+    graphErrorInfo: ErrorInfo;
+
     constructor(private selArchService: SelectedArchitectureService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
+        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
     }
 
     ngOnInit() {
@@ -44,6 +47,8 @@ export class BuildComponent implements OnInit {
 
         this.nodes = data.nodes;
         this.links = data.links;
+
+        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
     }
 
     onNodeSelected(id): void {
@@ -51,9 +56,12 @@ export class BuildComponent implements OnInit {
         this.selectedID = id;
     }
 
-    onNodeUpdate(): void {
-        this.hasNodesBeenModified = !this.hasNodesBeenModified;
-        // this.hasNodesBeenModified = true;
+    onNodeUpdate(redraw: boolean): void {
+        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
+        if (redraw) {
+            // trigger ngOnChanges in VisArchComponent
+            this.hasNodesBeenModified = !this.hasNodesBeenModified;
+        }
     }
 
     clearCurrentArch(): void {
@@ -76,6 +84,9 @@ export class BuildComponent implements OnInit {
 
     saveCurrentArch() {
         if (this.selArchService.architecture) {
+            if (!this.selArchService.checkIfArchIsValid().value) {
+                return;
+            }
             const arch = this.selArchService.architecture;
 
             const data = {
@@ -93,6 +104,9 @@ export class BuildComponent implements OnInit {
     }
 
     saveAsNewArch() {
+        if (!this.selArchService.checkIfArchIsValid().value) {
+            return;
+        }
         this.genericDialogs.createInputs(['Name', 'Description']).afterClosed().subscribe(
             result => {
                 if (result && result['Name']) {

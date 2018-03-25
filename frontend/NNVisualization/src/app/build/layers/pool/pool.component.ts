@@ -13,14 +13,16 @@ import { FormControl, Validators } from '@angular/forms';
 export class PoolComponent extends LayerComponent {
     @Input() layer: PoolLayer;
 
-    private _regex = '^([0-9]+,[ ]?)*([0-9]+)$';
+    private _patternString = '^[1-9][0-9]*,[ ]?[1-9][0-9]*$';
+    private _pattern = new RegExp(this._patternString);
+
 
     kernelShapeFormControl = new FormControl('', [
-        Validators.pattern(this._regex)
+        Validators.pattern(this._patternString)
     ]);
 
     stridesFormControl = new FormControl('', [
-        Validators.pattern(this._regex)
+        Validators.pattern(this._patternString)
     ]);
 
     matcher = new LayerErrorStateMatcher();
@@ -44,8 +46,6 @@ export class PoolComponent extends LayerComponent {
             'viewValue': Pool[Pool.Avarage]
         }
     ];
-
-    private _pattern = new RegExp(this._regex);
 
     onKernelShapeChange(value: string) {
         if (this._pattern.test(value)) {

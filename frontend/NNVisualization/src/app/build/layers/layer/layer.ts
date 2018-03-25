@@ -70,6 +70,11 @@ export abstract class Layer {
         dict.params = this.addAttributes(dict.params);
         return dict;
     }
+
+    abstract getMinNumOfInputs(): number;
+    abstract getMaxNumOfInputs(): number;
+
+    abstract calculateOutputShape(shapes: number[][]): number[];
 }
 
 export enum Activation {

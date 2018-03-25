@@ -54,4 +54,16 @@ export class BatchNormLayer extends Layer {
         dict['scale'] = this._scale;
         return dict;
     }
+
+    getMinNumOfInputs(): number {
+        return 1;
+    }
+
+    getMaxNumOfInputs(): number {
+        return 1;
+    }
+
+    calculateOutputShape(shapes: number[][]): number[] {
+        return shapes[0];
+    }
 }

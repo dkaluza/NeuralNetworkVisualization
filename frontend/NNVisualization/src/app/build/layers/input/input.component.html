@@ -4,15 +4,20 @@
     </div>
     <mat-form-field>
         <input matInput placeholder="Label"
-                        required
                         [(ngModel)]="layer.label"
-                        (input)="onChangeLabel($event.target.value)">
+                        (input)="onChange(true)">
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Input ID"
-                        required
                         type="number" min="1"
-                        [(ngModel)]="layer.inputId">
+                        [ngModel]="layer.inputId"
+                        (ngModelChange)="onInputIdChange($event)"
+                        (input)="onChange()"
+                        [formControl]="inputIdFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="inputIdFormControl.hasError('min')">
+            Input ID must be &gt;= 1
+        </mat-error>
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Shape"

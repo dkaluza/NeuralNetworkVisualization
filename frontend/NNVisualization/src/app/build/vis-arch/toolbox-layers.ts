@@ -7,20 +7,20 @@ export interface ToolboxLayer {
 
 export const layerTemplates: ToolboxLayer[] = [
     {
-        id: 'conv',
-        label: 'Convolution',
-        shortcut: 'conv',
-        color: '#6666aa'
+        id: 'input',
+        label: 'Input',
+        shortcut: 'input',
+        color: '#994499'
     }, {
         id: 'fc',
         label: 'Fully Connected',
         shortcut: 'fc',
         color: '#00FF00'
     }, {
-        id: 'input',
-        label: 'Input',
-        shortcut: 'input',
-        color: '#994499'
+        id: 'conv',
+        label: 'Convolution',
+        shortcut: 'conv',
+        color: '#6666aa'
     }, {
         id: 'pool',
         label: 'Pooling',
@@ -35,6 +35,6 @@ export const layerTemplates: ToolboxLayer[] = [
         id: 'batch_norm',
         label: 'Batch Normalization',
         shortcut: 'batch norm',
-        color: '#7812a4'
+        color: '#aa88a4'
     }
 ];

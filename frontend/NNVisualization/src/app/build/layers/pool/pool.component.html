@@ -6,7 +6,7 @@
         <input matInput placeholder="Label"
                         required
                         [(ngModel)]="layer.label"
-                        (input)="onChangeLabel($event.target.value)">
+                        (input)="onChange(true)">
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Kernel shape"

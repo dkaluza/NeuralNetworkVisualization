@@ -4,15 +4,18 @@
     </div>
     <mat-form-field>
         <input matInput placeholder="Label"
-                        required
                         [(ngModel)]="layer.label"
-                        (input)="onChangeLabel($event.target.value)">
+                        (input)="onChange(true)">
     </mat-form-field>
     <mat-form-field>
         <input matInput placeholder="Keep prop"
-                        required
-                        number step="any" min="0" max="1"
-                        [(ngModel)]="layer.keepProb"
-                        (input)="onChangeLabel($event.target.value)">
+                        type="number" step="any" min="0" max="1"
+                        [ngModel]="layer.keepProb"
+                        (ngModelChange)="onKeepProbChange($event)"
+                        [formControl]="keepProbFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="keepProbFormControl.hasError('min') || keepProbFormControl.hasError('max')">
+            Keep prob must be between 0 and 1
+        </mat-error>
     </mat-form-field>
 </div>

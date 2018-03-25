@@ -32,4 +32,16 @@ export class InputLayer extends Layer {
         dict['inputId'] = this._inputId;
         return dict;
     }
+
+    getMinNumOfInputs(): number {
+        return 0;
+    }
+
+    getMaxNumOfInputs(): number {
+        return 0;
+    }
+
+    calculateOutputShape(shapes: number[][]): number[] {
+        return this.strToArray(this.inputShape);
+    }
 }

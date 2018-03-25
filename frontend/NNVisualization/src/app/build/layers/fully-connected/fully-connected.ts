@@ -45,4 +45,17 @@ export class FullyConnectedLayer extends Layer {
         dict['numOutputs'] = this._numOutputs;
         return dict;
     }
+
+    getMinNumOfInputs(): number {
+        return 1;
+    }
+
+    getMaxNumOfInputs(): number {
+        return 1;
+    }
+
+    calculateOutputShape(shapes: number[][]): number[] {
+        const shape = shapes[0];
+        return [-1, this._numOutputs];
+    }
 }

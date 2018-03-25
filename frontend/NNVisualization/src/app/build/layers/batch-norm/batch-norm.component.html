@@ -1,0 +1,24 @@
+<div class="node-container">
+    <div class="node-header">
+        <span><strong>ID: {{ layer.id }}</strong></span>
+    </div>
+    <mat-form-field>
+        <input matInput placeholder="Label"
+                        [(ngModel)]="layer.label"
+                        (input)="onChange(true)">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput placeholder="Decay"
+                        type="number" step="any" min="0" max="1"
+                        [ngModel]="layer.decay"
+                        (ngModelChange)="onDecayChange($event)"
+                        [formControl]="decayFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="decayFormControl.hasError('min') || decayFormControl.hasError('max')">
+            Decay must be between 0 and 1
+        </mat-error>
+    </mat-form-field>
+    <mat-checkbox [(ngModel)]="layer.center">Center</mat-checkbox>
+    <mat-divider></mat-divider>
+    <mat-checkbox [(ngModel)]="layer.scale">Scale</mat-checkbox>
+</div>

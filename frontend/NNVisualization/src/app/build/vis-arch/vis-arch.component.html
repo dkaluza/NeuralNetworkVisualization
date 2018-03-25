@@ -45,6 +45,7 @@
                    [tooltipType]="'tooltip'"
                    [tooltipTitle]="node.tooltip">
                 <svg:rect [class.node-selected]="node.selected"
+                          [class.node-incorrect]="node.incorrect"
                           [attr.width]="node.width"
                           [attr.height]="node.height"
                           [attr.fill]="node.color" />

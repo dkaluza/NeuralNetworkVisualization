@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { LayerComponent } from '../layer/layer.component';
+import { LayerComponent, LayerErrorStateMatcher } from '../layer/layer.component';
 import { FullyConnectedLayer } from './fully-connected';
+
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-layer-fc',
@@ -10,7 +12,18 @@ import { FullyConnectedLayer } from './fully-connected';
 export class FullyConnectedComponent extends LayerComponent {
     @Input() layer: FullyConnectedLayer;
 
-    onChangeNumOutputs(value: string) {
-        this.layer.numOutputs = Number(value);
+    numOutputsControl = new FormControl('', [
+        Validators.min(1)
+    ]);
+
+    matcher = new LayerErrorStateMatcher();
+
+    onNumOutputsChange(value) {
+        if (value === null) {
+            return;
+        }
+        if (1 <= value) {
+            this.layer.numOutputs = value;
+        }
     }
 }
