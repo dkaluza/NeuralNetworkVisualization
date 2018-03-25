@@ -21,8 +21,7 @@ def read_data(dataset_id, ids):
     ys = []
 
     dataset = Dataset.query.get(dataset_id)
-    labels = list(eval(dataset.labels))
-    labels = [str(l) for l in labels]
+    labels = dataset.labels.split(',')
     labels_dict = {}
     for i, label in enumerate(labels):
         labels_dict[label] = i

@@ -25,7 +25,7 @@ class TrainThread(threading.Thread):
         self._model_id = model_id
         self._dataset_id = dataset_id
         dataset = Dataset.query.get(dataset_id)
-        self._num_labels = len(list(eval(dataset.labels)))
+        self._num_labels = len(dataset.labels.split(','))
         arch = Architecture.query.get(arch_id)
         graph = json.loads(arch.graph)
         self._nodes = graph['nodes']
