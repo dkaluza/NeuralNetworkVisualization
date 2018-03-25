@@ -147,7 +147,7 @@ class UploadNewDataset(ProtectedResource):
             unique_labels = unzip_validate_archive(dataset_path, postfile.stream,
                                    new_dataset.id)
 
-            new_dataset.labels = ','.join(unique_labels)
+            new_dataset.labels = ','.join(map(str, unique_labels))
             new_dataset.update()
         except:
             new_dataset.delete()
