@@ -38,14 +38,14 @@ def check_supported_extension(fname):
 
 def create_image(fname, labelsdict, dataset_id):
     _assert(check_supported_extension(fname), "Unsupported extension found")
+
+    l = str(labelsdict[fname])
+    _assert(',' not in l, "Labels can't contain commas")
     new_image = Image(imageName=fname.rsplit('.', 1)[0],
                       relPath=fname,
-                      label=labelsdict[fname],
+                      label=l,
                       dataset_id=dataset_id)
     return new_image
-
-
-# TODO: Label validation against labels passed to db
 
 
 def unzip_validate_archive(path, file, dataset_id):
@@ -147,7 +147,7 @@ class UploadNewDataset(ProtectedResource):
             unique_labels = unzip_validate_archive(dataset_path, postfile.stream,
                                    new_dataset.id)
 
-            new_dataset.labels = str(unique_labels).replace(' ', '')
+            new_dataset.labels = ','.join(map(str, unique_labels))
             new_dataset.update()
         except:
             new_dataset.delete()
