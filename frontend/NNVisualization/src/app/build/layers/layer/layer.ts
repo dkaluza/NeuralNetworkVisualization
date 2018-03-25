@@ -71,7 +71,12 @@ export abstract class Layer {
         return dict;
     }
 
+    // returns minimal number of inputs to the layere
+    //    if there is no limit returns undefined
     abstract getMinNumOfInputs(): number;
+
+    // returns maximal number of inputs to the layere
+    //    if there is no limit returns undefined
     abstract getMaxNumOfInputs(): number;
 
     abstract calculateOutputShape(shapes: number[][]): number[];

@@ -154,15 +154,22 @@ export class SelectedArchitectureService {
 
     private _checkNumOfInputs(silence: boolean): ErrorInfo {
         const incorrectNodes = [];
-        let message = '';
         for (const id of Array.from(this._currentNodes.keys())) {
             const layer = this._currentNodes.get(id);
             const numOfInputs = this._graph.getNodeInputs(id).length;
-            if (layer.getMinNumOfInputs() > numOfInputs ||
-                layer.getMaxNumOfInputs() < numOfInputs) {
-                incorrectNodes.push(id);
+            if (layer.getMinNumOfInputs() !== undefined) {
+                if (layer.getMinNumOfInputs() > numOfInputs) {
+                    incorrectNodes.push(id);
+                    break;
+                }
+            }
+            if (layer.getMaxNumOfInputs() !== undefined) {
+                if (layer.getMaxNumOfInputs() < numOfInputs) {
+                    incorrectNodes.push(id);
+                }
             }
         }
+        let message = '';
         if (incorrectNodes.length > 0) {
             message = 'Nodes (';
             for (let i = 0; i < incorrectNodes.length - 1; i += 1) {
