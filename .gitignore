@@ -8,4 +8,6 @@ backend/app/nnvis_test_tmp
 ./UltiSnips/
 .idea
 
+graph_lib/
+
 **/__pycache__/
