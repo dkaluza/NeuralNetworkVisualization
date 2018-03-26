@@ -24,10 +24,9 @@ class Inference(ProtectedResource):
         image = Image.query.get(image_id)
         image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
 
-        image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
-
         model = Model.query.get(model_id)
         graph, sess, x, _, _, logits = visualize_utils.load_model(model)
+        image_input = visualize_utils.load_image(image_path, x.shape.to_list()[1:], proc=visualize_utils.preprocess)
         predictions = visualize_utils.inference(sess, logits, x, image_input)
         sess.close()
 
@@ -49,14 +48,13 @@ class Visualize(ProtectedResource):
         image = Image.query.get(image_id)
         image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
 
-        image_input = visualize_utils.load_image(image_path, proc=visualize_utils.preprocess)
-
         model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
 
         alg_class = visualize_utils.algorithms_register[alg_id]
-
         vis_algorithm = alg_class(graph, sess, y, x)
+
+        image_input = visualize_utils.load_image(image_path, x.shape.to_list()[1:], proc=visualize_utils.preprocess)
         image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: image.label})
 
         sess.close()

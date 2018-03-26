@@ -48,10 +48,13 @@ def normalize_gray_pos(img):
     return img
 
 
-def load_image(image_path, proc=None):
-    # todo preprocessing and postprocessing choice feature
-    flag = cv2.IMREAD_GRAYSCALE
-    image = cv2.imread(image_path, flag)
+def load_image(image_path, dst_shape, proc=None):
+    if len(dst_shape) == 2 or (len(dst_shape) == 3 and dst_shape[-1] == 1):
+        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        image = np.reshape(image, dst_shape)
+    else:
+        image = cv2.imread(image_path)
+
     if proc:
         image = proc(image)
     return image
