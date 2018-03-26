@@ -1,2 +1,0 @@
-model_checkpoint_path: "mock_cnn_cifar10.ckpt"
-all_model_checkpoint_paths: "mock_cnn_cifar10.ckpt"

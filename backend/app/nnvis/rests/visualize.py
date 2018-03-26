@@ -31,7 +31,7 @@ class Inference(ProtectedResource):
         sess.close()
 
         dataset = Dataset.query.get(model.dataset_id)
-        class_names = dataset.labels[1:-1].split(',')
+        class_names = dataset.labels.split(',')
         scores = [{'class_number': class_number,
                    'class_name': class_names[class_number],
                    'score': score}
