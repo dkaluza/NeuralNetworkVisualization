@@ -2,15 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
 
-import { VisArchComponent } from '../vis-arch/vis-arch.component';
+import { VisArchComponent } from './vis-arch/vis-arch.component';
 
 import { Architecture, ArchNode, ArchLink } from '../selected-architecture/architecture';
 
-import { Layer } from '../vis-arch/layers/layer/layer';
-import { FullyConnectedLayer } from '../vis-arch/layers/fully-connected/fully-connected';
-import { ConvLayer } from '../vis-arch/layers/conv/conv';
-import { InputLayer } from '../vis-arch/layers/input/input';
-import { PoolLayer } from '../vis-arch/layers/pool/pool';
+import { Layer } from './layers/layer/layer';
 import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 
 @Component({

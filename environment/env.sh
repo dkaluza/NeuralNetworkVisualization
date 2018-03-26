@@ -75,7 +75,7 @@ do-run()
 
 do-start()
 {
-    do-build
+#    do-build
     do-run
 }
 
@@ -95,7 +95,7 @@ main()
 
     case $1 in
         connect|clean)
-        if [ "$#" -ne 1]; then
+        if [ "$#" -ne 1 ]; then
             usage
             exit 1
         fi

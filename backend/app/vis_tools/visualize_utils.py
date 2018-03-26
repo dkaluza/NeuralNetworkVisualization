@@ -31,6 +31,8 @@ def rgb2gray(img):
 
 def normalize_gray(img):
     img -= img.min()
+    if img.shape[-1] == 3:
+        img = rgb2gray(img)
     img = rgb2gray(img)
     img /= img.max()
     img *= 255
@@ -39,7 +41,8 @@ def normalize_gray(img):
 
 
 def normalize_gray_pos(img):
-    img = rgb2gray(img)
+    if img.shape[-1] == 3:
+        img = rgb2gray(img)
     img[img < 0] = 0
     img /= img.max()
     img *= 255

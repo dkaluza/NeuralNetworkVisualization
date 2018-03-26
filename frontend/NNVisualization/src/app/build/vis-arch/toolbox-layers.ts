@@ -26,10 +26,15 @@ export const layerTemplates: ToolboxLayer[] = [
         label: 'Pooling',
         shortcut: 'pool',
         color: '#bbaa77'
-    }// , {
-        // id: 'concat',
-        // label: 'Concatenation',
-        // shortcut: 'concat',
-        // color: '#528233'
-    // }
+    }, {
+        id: 'dropout',
+        label: 'Dropout',
+        shortcut: 'dropout',
+        color: '#77bbaa'
+    }, {
+        id: 'batch_norm',
+        label: 'Batch Normalization',
+        shortcut: 'batch norm',
+        color: '#7812a4'
+    }
 ];

@@ -60,7 +60,8 @@ export class InputImageComponent implements OnInit {
         const model = this.selectedService.model;
         this.imagesList = [];
         this.visualizeService.getDataset(model.id).subscribe(response => {
-            for (let i = 0; i < response['images'].length; i++) {
+            const minLength = Math.min(30, response['images'].length);
+            for (let i = 0; i < minLength; i++) {
                 const im = response['images'][i];
                 const image = new Image(im.id, im.dataset_id, im.name, im.relative_path, im.label);
                 this.imagesList.push(image);
