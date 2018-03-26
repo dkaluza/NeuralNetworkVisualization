@@ -75,7 +75,7 @@ do-run()
 
 do-start()
 {
-#    do-build
+    do-build
     do-run
 }
 
