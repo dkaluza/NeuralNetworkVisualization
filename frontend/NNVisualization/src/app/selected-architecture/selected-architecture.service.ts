@@ -62,6 +62,10 @@ export class SelectedArchitectureService {
         return this._graph;
     }
 
+    set graph(graph: Graph) {
+        this._graph = graph;
+    }
+
     get model(): Model {
         return this._model;
     }
@@ -115,8 +119,14 @@ export class SelectedArchitectureService {
         if (!error.value) { return error; }
         error = this._checkForLoop(silence);
         if (!error.value) { return error; }
+        error = this._checkShapes(silence);
+        if (!error.value) { return error; }
 
-        return error;
+        return {
+            value: true,
+            nodeIds: [],
+            message: ''
+        };
     }
 
     private _checkInputIds(silence: boolean): ErrorInfo {
@@ -221,6 +231,38 @@ export class SelectedArchitectureService {
                 message: message
             };
         }
+        return {
+            value: true,
+            nodeIds: [],
+            message: ''
+        };
+    }
+
+    private _checkShapes(silence: boolean): ErrorInfo {
+        const sorted = this._graph.sortTopologically();
+        const shapes = new Map();
+
+        for (const n of sorted) {
+            const layer = this._currentNodes.get(n);
+            const inputs = [];
+            this._graph.getNodeInputs(n).forEach(v => {
+                inputs.push(shapes.get(v));
+            });
+            if (layer.validateInputShapes(inputs)) {
+                shapes.set(n, layer.calculateOutputShape(inputs));
+            } else {
+                const message = 'Node ' + n + ' has incorrect inputs: ' + inputs;
+                if (!silence) {
+                    this.genericDialogs.createWarning(message);
+                }
+                return {
+                    value: false,
+                    nodeIds: [n],
+                    message: message
+                };
+            }
+        }
+
         return {
             value: true,
             nodeIds: [],

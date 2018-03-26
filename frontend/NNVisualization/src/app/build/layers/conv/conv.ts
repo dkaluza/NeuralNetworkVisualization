@@ -107,16 +107,35 @@ export class ConvLayer extends Layer {
 
     calculateOutputShape(shapes: number[][]): number[] {
         const shape = shapes[0];
-        let x = 0, y = 0;
-        const s = this.strToArray(this._strides);
-        if (this._padding === Padding.Same) {
-            x = Math.ceil(shape[1] / s[0]);
-            y = Math.ceil(shape[2] / s[1]);
-        } else { // this._padding === Padding.Valid
-            x = Math.ceil((shape[1] - s[0] + 1) / s[0]);
-            y = Math.ceil((shape[2] - s[1] + 1) / s[1]);
+        const strides = this.strToArray(this._strides);
+        const output = [shape[0]];
+        for (let i = 0; i < strides.length; i += 1) {
+            let dim = 0;
+            if (this._padding === Padding.Same) {
+                dim = shape[i + 1] / strides[i];
+            } else { // this._padding === Padding.Valid
+                dim = (shape[i + 1] - strides[i] + 1) / strides[0];
+            }
+            output.push(Math.ceil(dim));
         }
+        output.push(shape[shape.length - 1]);
+        return output;
+    }
 
-        return [shape[0], x, y, shape[3]];
+    validateInputShapes(shapes: number[][]): boolean {
+        if (shapes.length !== 1) {
+            return false;
+        }
+        const shape = shapes[0];
+        if (shape.length < 3 || shape.length > 5) {
+            return false;
+        }
+        const strides = this.strToArray(this._strides);
+        const kernel = this.strToArray(this._kernelShape);
+        if (shape.length !== strides.length + 2 ||
+            shape.length !== kernel.length + 2) {
+            return false;
+        }
+        return true;
     }
 }

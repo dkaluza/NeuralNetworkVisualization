@@ -80,6 +80,8 @@ export abstract class Layer {
     abstract getMaxNumOfInputs(): number;
 
     abstract calculateOutputShape(shapes: number[][]): number[];
+
+    abstract validateInputShapes(shapes: number[][]): boolean;
 }
 
 export enum Activation {

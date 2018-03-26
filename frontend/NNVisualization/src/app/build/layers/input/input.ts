@@ -42,6 +42,10 @@ export class InputLayer extends Layer {
     }
 
     calculateOutputShape(shapes: number[][]): number[] {
-        return this.strToArray(this.inputShape);
+        return this.strToArray(this.outputShape);
+    }
+
+    validateInputShapes(shapes: number[][]): boolean {
+        return shapes.length === 0;
     }
 }

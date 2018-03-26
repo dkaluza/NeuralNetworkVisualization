@@ -5,6 +5,7 @@ import { Restangular } from 'ngx-restangular';
 import { VisArchComponent } from './vis-arch/vis-arch.component';
 
 import { Architecture, ArchNode, ArchLink } from '../selected-architecture/architecture';
+import { Graph } from '../selected-architecture/graph';
 
 import { Layer } from './layers/layer/layer';
 import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
@@ -67,17 +68,20 @@ export class BuildComponent implements OnInit {
     clearCurrentArch(): void {
         this.selArchService.currentNodes.clear();
         this.selArchService.currentLinks = [];
-        this.nodes = this.selArchService.currentNodes;
-        this.links = this.selArchService.currentLinks;
-
-        this._unselectNode();
+        this.selArchService.graph = new Graph();
+        this._updateView();
     }
 
     resetArch(): void {
         // this line sets currentNodes and currentLinks to those in selected architecture
         this.selArchService.architecture = this.selArchService.architecture;
+        this._updateView();
+    }
+
+    private _updateView(): void {
         this.nodes = this.selArchService.currentNodes;
         this.links = this.selArchService.currentLinks;
+        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
 
         this._unselectNode();
     }

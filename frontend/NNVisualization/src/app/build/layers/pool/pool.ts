@@ -108,4 +108,13 @@ export class PoolLayer extends Layer {
         return [shape[0], x, y, shape[3]];
     }
 
+    validateInputShapes(shapes: number[][]): boolean {
+        if (shapes.length !== 1) {
+            return false;
+        }
+        if (shapes[0].length !== 4) {
+            return false;
+        }
+        return true;
+    }
 }

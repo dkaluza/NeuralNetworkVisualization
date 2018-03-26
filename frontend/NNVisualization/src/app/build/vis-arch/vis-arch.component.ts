@@ -76,15 +76,13 @@ export class VisArchComponent implements OnInit, OnChanges {
     }
 
     ngOnChanges(changes) {
+        this._setGraphData();
         this.nodes = this.nodes.map( n => {
             if (this.graphErrorInfo.nodeIds.indexOf(Number(n.id)) > -1) {
                 n.incorrect = true;
             }
             return n;
         });
-        if (changes.hasLayersBeenModified) {
-            this._setGraphData();
-        }
     }
 
     private _setGraphData(): void {

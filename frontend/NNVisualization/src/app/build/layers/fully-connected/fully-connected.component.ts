@@ -24,6 +24,7 @@ export class FullyConnectedComponent extends LayerComponent {
         }
         if (1 <= value) {
             this.layer.numOutputs = value;
+            this.onChange();
         }
     }
 }

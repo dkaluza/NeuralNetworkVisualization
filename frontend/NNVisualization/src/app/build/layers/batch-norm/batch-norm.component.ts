@@ -24,6 +24,7 @@ export class BatchNormComponent extends LayerComponent {
         }
         if (0 <= value && value <= 1) {
             this.layer.decay = value;
+            this.onChange();
         }
     }
 }

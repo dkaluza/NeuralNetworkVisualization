@@ -56,6 +56,10 @@ export class FullyConnectedLayer extends Layer {
 
     calculateOutputShape(shapes: number[][]): number[] {
         const shape = shapes[0];
-        return [-1, this._numOutputs];
+        return [shape[0], this._numOutputs];
+    }
+
+    validateInputShapes(shapes: number[][]): boolean {
+        return shapes.length === 1;
     }
 }

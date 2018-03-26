@@ -42,4 +42,8 @@ export class DropoutLayer extends Layer {
     calculateOutputShape(shapes: number[][]): number[] {
         return shapes[0];
     }
+
+    validateInputShapes(shapes: number[][]): boolean {
+        return shapes.length === 1;
+    }
 }

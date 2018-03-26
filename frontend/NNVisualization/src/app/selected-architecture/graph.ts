@@ -114,4 +114,30 @@ export class Graph {
         });
         return loop;
     }
+
+    sortTopologically(): number[] {
+        // assumes that graph is DAG
+        const sorted = [];
+
+        const edgeCounter = new Map();
+        this._nodes.forEach(n => { edgeCounter.set(n, 0); });
+        this._links.forEach(l => {
+            l.forEach(n => {
+                edgeCounter.set(n, edgeCounter.get(n) + 1);
+            });
+        });
+        const queue = this.getGraphInputs();
+        while (queue.length > 0) {
+            const n = queue.shift();
+            sorted.push(n);
+            this._links.get(n).forEach(m => {
+                edgeCounter.set(m, edgeCounter.get(m) - 1);
+                if (edgeCounter.get(m) === 0) {
+                    queue.push(m);
+                }
+            });
+        }
+
+        return sorted;
+    }
 }

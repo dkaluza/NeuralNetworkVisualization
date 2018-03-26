@@ -50,12 +50,14 @@ export class PoolComponent extends LayerComponent {
     onKernelShapeChange(value: string) {
         if (this._pattern.test(value)) {
             this.layer.kernelShape = value;
+            this.onChange();
         }
     }
 
     onStridesChange(value: string) {
         if (this._pattern.test(value)) {
             this.layer.strides = value;
+            this.onChange();
         }
     }
 }

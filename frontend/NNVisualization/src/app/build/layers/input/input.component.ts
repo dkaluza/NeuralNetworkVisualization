@@ -12,7 +12,7 @@ import { FormControl, Validators } from '@angular/forms';
 export class InputComponent extends LayerComponent {
     @Input() layer: InputLayer;
 
-    private _patternString =  '^(-1,[ ]?)?(([0-9]+),[ ]?)*([0-9]+)$';
+    private _patternString =  '^(-1,[ ]?)?(([1-9][0-9]*),[ ]?)*([1-9][0-9]*)$';
     private _pattern = new RegExp(this._patternString);
 
     shapeFormControl = new FormControl('', [
@@ -27,12 +27,14 @@ export class InputComponent extends LayerComponent {
     onInputIdChange(value: number) {
         if (value >= 1) {
             this.layer.inputId = value;
+            this.onChange();
         }
     }
 
     onShapeChange(value: string) {
         if (this._pattern.test(value)) {
             this.layer.outputShape = value;
+            this.onChange();
         }
     }
 }

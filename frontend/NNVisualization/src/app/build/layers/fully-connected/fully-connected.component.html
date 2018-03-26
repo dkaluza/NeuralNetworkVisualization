@@ -2,12 +2,12 @@
     <div class="node-header">
         <span><strong>ID: {{ layer.id }}</strong></span>
     </div>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="Label"
                         [(ngModel)]="layer.label"
                         (input)="onChange(true)">
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="# Output units"
                         type="number" min="1"
                         [ngModel]="layer.numOutputs"
@@ -18,7 +18,7 @@
             Number of output units must be &gt;= 1
         </mat-error>
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <mat-select placeholder="Activation" [(value)]="layer.activation">
             <mat-option *ngFor="let a of activations" [value]="a.value">
                 {{ a.viewValue }}

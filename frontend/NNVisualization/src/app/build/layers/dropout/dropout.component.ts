@@ -24,6 +24,7 @@ export class DropoutComponent extends LayerComponent {
         }
         if (0 <= value && value <= 1) {
             this.layer.keepProb = value;
+            this.onChange();
         }
     }
 }
