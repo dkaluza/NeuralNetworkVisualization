@@ -157,6 +157,6 @@ class TrainThread(threading.Thread):
                 end_time = time.time()
                 print('Model training time = {0}'
                       .format(end_time - start_time))
-            except Exception:
+            except:
                 Model.query.get(self._model_id).delete()
                 raise
