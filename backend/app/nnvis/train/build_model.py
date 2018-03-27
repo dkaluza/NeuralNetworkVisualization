@@ -9,7 +9,6 @@ class TFModel:
         self._ops, self._graph = self._build_model(self._nodes, links)
         self.__rename_logits_and_output()
 
-
     def __rename_logits_and_output(self):
         ids = list(map(str, self._nodes.keys()))
         num_outputs = {id: 0 for id in ids}
@@ -79,12 +78,7 @@ class TFModel:
         return [self._ops[id] for id in input_ids]
 
     def get_logits(self):
-        ids = list(map(str, self._nodes.keys()))
-        num_outputs = {id: 0 for id in ids}
+        return self._graph.get_tensor_by_name('logits:0')
 
-        for l in self._links:
-            num_outputs[l['source']] += 1
-
-        logits_ids = list(filter(lambda id: num_outputs[id] == 0, ids))
-        logits_id = logits_ids[0]
-        return self._ops[logits_id]
+    def get_output(self):
+        return self._graph.get_tensor_by_name('output:0')

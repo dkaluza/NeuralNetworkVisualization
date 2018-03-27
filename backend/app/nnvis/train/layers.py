@@ -31,8 +31,9 @@ def _build_input_op(node, input_ops):
     shape = node['params']['outputShape']
     shape = [d if d > 0 else None for d in shape]
     inputId = node['params']['inputId']
-    return tf.placeholder(tf.float32, shape=shape,
-                          name='input/{0}'.format(inputId))
+    op = tf.placeholder(tf.float32, shape=shape,
+                        name='input/{0}'.format(inputId))
+    return tf.identity(op, name='{0}/logits'.format(node['id']))
 
 
 def _build_fc_op(node, input_ops):
