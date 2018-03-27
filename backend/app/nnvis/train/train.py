@@ -114,43 +114,49 @@ class TrainThread(threading.Thread):
 
     def run(self):
         with self.app_ctx:
-            train_ids = get_train_ids(self._dataset_id)
-            train_ids, valid_ids = split_into_train_and_valid(train_ids, 0.7)
-            self.__build_model()
+            try:
+                train_ids = get_train_ids(self._dataset_id)
+                train_ids, valid_ids =\
+                    split_into_train_and_valid(train_ids, 0.7)
+                self.__build_model()
 
-            print('starting training')
-            start_time = time.time()
-            with self._tfmodel.get_graph().as_default():
-                saver = tf.train.Saver()
+                print('starting training')
+                start_time = time.time()
+                with self._tfmodel.get_graph().as_default():
+                    saver = tf.train.Saver()
 
-                with tf.Session() as sess:
-                    sess.run(tf.global_variables_initializer())
+                    with tf.Session() as sess:
+                        sess.run(tf.global_variables_initializer())
 
-                    for e in range(self._nepochs):
-                        start_epoch = time.time()
-                        print('---- Epoch {e} ----'.format(e=e))
-                        train_ids = shuffle(train_ids)
-                        average_loss, average_acc =\
-                            self.__runepoch(sess, train_ids, train=True)
-                        self._training_loss += average_loss
-                        end_epoch = time.time()
+                        for e in range(self._nepochs):
+                            start_epoch = time.time()
+                            print('---- Epoch {e} ----'.format(e=e))
+                            train_ids = shuffle(train_ids)
+                            average_loss, average_acc =\
+                                self.__runepoch(sess, train_ids, train=True)
+                            self._training_loss += average_loss
+                            end_epoch = time.time()
 
-                        print('[Epoch {e}] Avg. loss = {loss}'
-                              .format(e=e, loss=average_loss))
-                        print('[Epoch {e}] Avg. acc = {acc}'
-                              .format(e=e, acc=average_acc))
-                        print('[Epoch {e}] Time = {t}'
-                              .format(e=e, t=end_epoch-start_epoch))
-                    print('finished training')
-                    self._training_loss /= float(self._nepochs)
+                            print('[Epoch {e}] Avg. loss = {loss}'
+                                  .format(e=e, loss=average_loss))
+                            print('[Epoch {e}] Avg. acc = {acc}'
+                                  .format(e=e, acc=average_acc))
+                            print('[Epoch {e}] Time = {t}'
+                                  .format(e=e, t=end_epoch-start_epoch))
+                        print('finished training')
+                        self._training_loss /= float(self._nepochs)
 
-                    print('staring validation')
-                    self._validation_loss, average_acc = \
-                        self.__runepoch(sess, valid_ids, train=False)
-                    print('Validation loss = {loss}'
-                          .format(loss=self._validation_loss))
-                    print('Validation acc = {acc}'.format(acc=average_acc))
-                    print('finished validation')
-                    self.__save_model(sess, saver)
-            end_time = time.time()
-            print('Model training time = {0}'.format(end_time - start_time))
+                        print('staring validation')
+                        self._validation_loss, average_acc = \
+                            self.__runepoch(sess, valid_ids, train=False)
+                        print('Validation loss = {loss}'
+                              .format(loss=self._validation_loss))
+                        print('Validation acc = {acc}'.format(acc=average_acc))
+                        print('finished validation')
+                        self.__save_model(sess, saver)
+                end_time = time.time()
+                print('Model training time = {0}'
+                      .format(end_time - start_time))
+            except:
+                Model.query.get(self._model_id).delete()
+                raise

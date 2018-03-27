@@ -18,6 +18,10 @@
     border-style: solid;
 }
 
+.node {
+    cursor: pointer;
+}
+
 .node-selected {
     stroke: green;
     stroke-width: 2px;
@@ -42,6 +46,8 @@
     display: inline-block;
     width: auto !important;
     height: auto !important;
+
+    cursor: move;
 }
 
 /* drag and drop hacks do not touch */
