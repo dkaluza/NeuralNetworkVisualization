@@ -1,0 +1,20 @@
+<div class="node-container">
+    <div class="node-header">
+        <span><strong>ID: {{ layer.id }}</strong></span>
+    </div>
+    <mat-form-field>
+        <input matInput placeholder="Label"
+                        required
+                        [(ngModel)]="layer.label"
+                        (input)="onChangeLabel($event.target.value)">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput placeholder="Decay"
+                        required
+                        number step="any" min="0" max="1"
+                        [(ngModel)]="layer.decay"
+                        (input)="onChangeLabel($event.target.value)">
+    </mat-form-field>
+    <mat-checkbox [(ngModel)]="layer.center">Center</mat-checkbox>
+    <mat-checkbox [(ngModel)]="layer.scale">Scale</mat-checkbox>
+</div>
