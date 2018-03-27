@@ -113,8 +113,8 @@ class TrainThread(threading.Thread):
         return epoch_loss, epoch_acc
 
     def run(self):
-        try:
-            with self.app_ctx:
+        with self.app_ctx:
+            try:
                 train_ids = get_train_ids(self._dataset_id)
                 train_ids, valid_ids =\
                     split_into_train_and_valid(train_ids, 0.7)
@@ -157,5 +157,6 @@ class TrainThread(threading.Thread):
                 end_time = time.time()
                 print('Model training time = {0}'
                       .format(end_time - start_time))
-        except Exception as e:
-            Model.query.get(self._model_id).delete()
+            except Exception:
+                Model.query.get(self._model_id).delete()
+                raise
