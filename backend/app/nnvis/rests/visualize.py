@@ -31,7 +31,10 @@ class Inference(ProtectedResource):
         output_op = graph.get_tensor_by_name('output:0')
 
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        predictions = visualize_utils.inference(sess, output_op, x, image_input)
+
+        predictions = output_op.eval(feed_dict={x: [image_input]}, session=sess)
+        predictions = [prediction.item() for prediction in predictions]
+
         sess.close()
 
         dataset = Dataset.query.get(model.dataset_id)
