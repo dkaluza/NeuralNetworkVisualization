@@ -33,7 +33,7 @@ class Inference(ProtectedResource):
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
 
         predictions = output_op.eval(feed_dict={x: [image_input]}, session=sess)
-        predictions = [prediction.item() for prediction in predictions]
+        predictions = predictions[0]
 
         sess.close()
 
@@ -41,7 +41,7 @@ class Inference(ProtectedResource):
         class_names = dataset.labels.split(',')
         scores = [{'class_number': class_number,
                    'class_name': class_names[class_number],
-                   'score': score}
+                   'score': str(score)}
                   for class_number, score in enumerate(predictions)]
         return {'class_scores': scores}
 
