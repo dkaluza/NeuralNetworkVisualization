@@ -95,4 +95,4 @@ class ImageList(ProtectedResource):
 
 class Algorithms(ProtectedResource):
     def get(self):
-        return {alg_class.__name__: alg_id for alg_id, alg_class in algorithms_register}
+        return {alg_class.__name__: alg_id for alg_id, alg_class in visualize_utils.algorithms_register}
