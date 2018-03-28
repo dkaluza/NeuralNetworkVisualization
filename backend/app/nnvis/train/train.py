@@ -46,7 +46,7 @@ class TrainThread(threading.Thread):
         print('building graph...')
         self._tfmodel = TFModel(self._nodes, self._links)
         self._X = self._tfmodel.get_inputs()
-        self._pred = self._tfmodel.get_logits()
+        self._pred = self._tfmodel.get_output()
 
         with self._tfmodel.get_graph().as_default():
             self._y = tf.placeholder(tf.float32,
