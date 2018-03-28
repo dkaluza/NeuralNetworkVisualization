@@ -24,10 +24,10 @@ export class ConvLayer extends Layer {
     private _padding: Padding;
     private _activation: Activation;
 
-    constructor(id: number, label: string, input = '1',
+    constructor(id: number, label: string,
                 numFilters = 1, kernelShape = '3, 3', strides = '1, 1',
                 padding = Padding.Same, activation = Activation.Relu) {
-        super(id, label, 'conv', input, String(numFilters));
+        super(id, label, 'conv');
 
         this._numFilters = numFilters;
         this._kernelShape = kernelShape;
@@ -39,7 +39,6 @@ export class ConvLayer extends Layer {
     static fromDict(dict: ArchNode): ConvLayer {
         return new ConvLayer(
             Number(dict.id), dict.label,
-            String(dict.params.inputShape),
             dict.params.numFilters,
             String(dict.params.kernelShape),
             String(dict.params.strides),
@@ -118,7 +117,7 @@ export class ConvLayer extends Layer {
             }
             output.push(Math.ceil(dim));
         }
-        output.push(shape[shape.length - 1]);
+        output.push(this._numFilters);
         return output;
     }
 

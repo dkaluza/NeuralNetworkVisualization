@@ -4,16 +4,15 @@ import { ArchNode } from '../../../selected-architecture/architecture';
 export class DropoutLayer extends Layer {
     private _keepProb: number;
 
-    constructor(id: number, label: string, input = '1',
+    constructor(id: number, label: string,
                 keepProb = 0.5) {
-        super(id, label, 'dropout', input, input);
+        super(id, label, 'dropout');
         this._keepProb = keepProb;
     }
 
     static fromDict(dict: ArchNode): DropoutLayer {
         return new DropoutLayer(
             Number(dict.id), dict.label,
-            String(dict.params.inputShape),
             dict.params.keepProb
         );
     }

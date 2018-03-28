@@ -35,6 +35,18 @@
             (changed)="onNodeUpdate($event)">
         </app-layer-batch-norm>
     </ng-template>
+    <ng-template ngSwitchCase="add">
+        <app-layer-add
+            [layer]="layer"
+            (changed)="onNodeUpdate($event)">
+        </app-layer-add>
+    </ng-template>
+    <ng-template ngSwitchCase="concat">
+        <app-layer-concat
+            [layer]="layer"
+            (changed)="onNodeUpdate($event)">
+        </app-layer-concat>
+    </ng-template>
     <ng-template ngSwitchDefault>
         <h4>Wrong type of layer: {{ layer.layerType }}</h4>
     </ng-template>

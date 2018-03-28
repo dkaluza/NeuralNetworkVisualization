@@ -7,9 +7,9 @@ export class FullyConnectedLayer extends Layer {
 
 
     constructor(id: number, label: string,
-                input = '1', numOutputs = 1,
+                numOutputs = 1,
                 activation = Activation.Relu) {
-        super(id, label, 'fc', input, String(numOutputs));
+        super(id, label, 'fc');
 
         this._activation = activation;
         this._numOutputs = numOutputs;
@@ -18,7 +18,6 @@ export class FullyConnectedLayer extends Layer {
     static fromDict(dict: ArchNode): FullyConnectedLayer {
         return new FullyConnectedLayer(
             Number(dict.id), dict.label,
-            String(dict.params.inputShape),
             dict.params.numOutputs,
             StrToActivation(dict.params.activation)
         );
