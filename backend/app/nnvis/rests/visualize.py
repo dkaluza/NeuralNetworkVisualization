@@ -25,9 +25,13 @@ class Inference(ProtectedResource):
         image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
 
         model = Model.query.get(model_id)
-        graph, sess, x, _, _, logits = visualize_utils.load_model(model)
+        graph, sess, x, *_ = visualize_utils.load_model(model)
+
+
+        output_op = graph.get_tensor_by_name('output:0')
+
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        predictions = visualize_utils.inference(sess, logits, x, image_input)
+        predictions = visualize_utils.inference(sess, output_op, x, image_input)
         sess.close()
 
         dataset = Dataset.query.get(model.dataset_id)
