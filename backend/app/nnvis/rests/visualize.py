@@ -62,7 +62,7 @@ class Visualize(ProtectedResource):
         vis_algorithm = alg_class(graph, sess, y, x)
 
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: image.label})
+        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
 
         sess.close()
 
