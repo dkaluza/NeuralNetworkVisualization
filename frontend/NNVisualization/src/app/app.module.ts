@@ -62,8 +62,6 @@ import {
     MatStepperModule,
 } from '@angular/material';
 import { CdkTableModule } from '@angular/cdk/table';
-import { InputImageComponent } from './visualize/images-panel/input-image/input-image.component';
-import { OutputImageComponent } from './visualize/images-panel/output-image/output-image.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
@@ -76,7 +74,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-alert.component';
 import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service';
 import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
-import { InferenceComponent } from './visualize/images-panel/inference/inference.component';
 import { DatasetsComponent } from './datasets/datasets.component';
 
 
@@ -184,14 +181,11 @@ export class MaterialImportsModule { }
         BatchNormComponent,
         ImagesPanelComponent,
         NavAlgorithmsComponent,
-        InputImageComponent,
-        OutputImageComponent,
         VisArchComponent,
         LogInDialogComponent,
         UnauthorizedComponent,
         TimeoutAlertComponent,
         InputsDialogComponent,
-        InferenceComponent,
         DatasetsComponent
     ],
     entryComponents: [
