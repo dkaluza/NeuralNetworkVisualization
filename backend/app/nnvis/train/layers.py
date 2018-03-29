@@ -44,7 +44,7 @@ def _build_fc_op(node, input_ops):
                 x, num_outputs=node['params']['numOutputs'],
                 activation_fn=tf.identity)
         op = tf.identity(op, name='logits')
-        return _get_activation(node)(op, name=node['params']['activation'])
+        return _get_activation(node)(op, name='activation')
 
 
 def _build_conv_op(node, input_ops):
@@ -119,6 +119,17 @@ def _build_concat_op(node, input_ops):
         return tf.concat(input_ops, axis=axis, name='logits')
 
 
+def _build_softmax_op(node, input_ops):
+    x = input_ops[0]
+    axis = int(node['params']['axis'])
+    with tf.name_scope(node['id']):
+        x = tf.identity(x, name='logits')
+        # x = tf.Print(x, [x], message='X : ', summarize=10)
+        s = tf.nn.softmax(x, axis=axis)
+        # s = tf.Print(s, [s], message='S : ', summarize=10)
+        return s
+
+
 def build_op(node, map_op, inputs):
     input_ops = [map_op[v] for v in inputs]
 
@@ -130,7 +141,8 @@ def build_op(node, map_op, inputs):
         'dropout': _build_dropout_op,
         'batch_norm': _build_batch_norm_op,
         'add': _build_add_op,
-        'concat': _build_concat_op
+        'concat': _build_concat_op,
+        'softmax': _build_softmax_op
     }
     op = ops.get(node['layerType'])
     if op is None:

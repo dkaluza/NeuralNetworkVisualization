@@ -10,7 +10,8 @@ from app.nnvis.rests.protected_resource import ProtectedResource
 LOSS_NAMES = {
         'none': None,
         'logloss': 'Logloss',
-        'mse': 'Mean Squared Error'
+        'mse': 'Mean Squared Error',
+        'cross_entropy': 'Cross entropy'
         }
 
 OPTIMIZER_NAMES = {

@@ -30,6 +30,9 @@ export class TrainComponent implements OnInit {
         }, {
             'value': 'mse',
             'name': 'Mean squared error'
+        }, {
+            'value': 'cross_entropy',
+            'name': 'Cross entropy'
         }
     ];
     loss: string = undefined;

@@ -46,5 +46,10 @@ export const layerTemplates: ToolboxLayer[] = [
         label: 'Concatenation',
         shortcut: 'concat',
         color: '#99a355'
+    }, {
+        id: 'softmax',
+        label: 'Softmax',
+        shortcut: 'softmax',
+        color: '#abab65'
     }
 ];

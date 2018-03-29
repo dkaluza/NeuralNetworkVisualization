@@ -13,6 +13,7 @@ import { DropoutComponent } from './dropout/dropout.component';
 import { BatchNormComponent } from './batch-norm/batch-norm.component';
 import { AddComponent } from './add/add.component';
 import { ConcatComponent } from './concat/concat.component';
+import { SoftmaxComponent } from './softmax/softmax.component';
 
 import { LayerStatsComponent } from './layer-stats.component';
 
@@ -25,6 +26,7 @@ import { DropoutLayer } from './dropout/dropout';
 import { BatchNormLayer } from './batch-norm/batch-norm';
 import { AddLayer } from './add/add';
 import { ConcatLayer } from './concat/concat';
+import { SoftmaxLayer } from './softmax/softmax';
 
 import { ArchNode } from '../../selected-architecture/architecture';
 import { ToolboxLayer } from '../vis-arch/toolbox-layers';
@@ -47,6 +49,8 @@ function archNodeToLayer(node: ArchNode): Layer {
             return AddLayer.fromDict(node);
         case 'concat':
             return ConcatLayer.fromDict(node);
+        case 'softmax':
+            return SoftmaxLayer.fromDict(node);
         default:
             return undefined;
     }
@@ -70,6 +74,8 @@ function toolboxLayerToLayer(layer: ToolboxLayer, id: number): Layer {
             return new AddLayer(id, layer.shortcut);
         case 'concat':
             return new ConcatLayer(id, layer.shortcut);
+        case 'softmax':
+            return new SoftmaxLayer(id, layer.shortcut);
     }
 }
 
@@ -86,6 +92,7 @@ export { Layer, archNodeToLayer, toolboxLayerToLayer };
         BatchNormComponent,
         AddComponent,
         ConcatComponent,
+        SoftmaxComponent,
         LayerStatsComponent
     ],
     imports: [
