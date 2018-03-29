@@ -18,7 +18,7 @@ export class BatchNormLayer extends Layer {
         return new BatchNormLayer(
             Number(dict.id), dict.label,
             String(dict.params.inputShape),
-            dict.params.decay,
+            Number(dict.params.decay),
             dict.params.center,
             dict.params.scale
         );
