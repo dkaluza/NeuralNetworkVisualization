@@ -1,0 +1,32 @@
+button {
+    background-color: lightblue;
+}
+
+img {
+    width: 400px;
+    height: auto;
+}
+
+.input-image {
+    margin: 30px;
+}
+
+.output-image {
+    margin: 30px;
+}
+
+.icon-button {
+    margin: 30px;
+}
+
+.example-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+  min-width: 300px;
+}
+
+.mat-table {
+  overflow: auto;
+  max-height: 500px;
+}
