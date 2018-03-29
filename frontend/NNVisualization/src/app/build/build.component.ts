@@ -92,18 +92,29 @@ export class BuildComponent implements OnInit {
                 return;
             }
             const arch = this.selArchService.architecture;
-
-            const data = {
-                graph: {
-                    nodes: this.selArchService.currentNodesToDict(),
-                    links: this.selArchService.currentLinks
-                }
-            };
-            this.restangular.all('arch').all(arch.id)
-                .post(data).subscribe(
-                    (nArch) => { this.genericDialogs.createSuccess('Save successful!'); },
-                    () => { this.genericDialogs.createWarning('Something went wrong while saving!', 'Warning!'); }
-                );
+            this.restangular.one('list_models', arch.id)
+                .getList().subscribe(models => {
+                    if (models.length > 0) {
+                        this.genericDialogs.createWarning(
+                            'This architecture has models, you can\'t change it'
+                        );
+                        return;
+                    }
+                    const data = {
+                        graph: {
+                            nodes: this.selArchService.currentNodesToDict(),
+                            links: this.selArchService.currentLinks
+                        }
+                    };
+                    this.restangular.all('arch').all(arch.id)
+                        .post(data).subscribe(
+                            (nArch) => { this.genericDialogs.createSuccess('Save successful!'); },
+                            () => { this.genericDialogs.createWarning(
+                                        'Something went wrong while saving!',
+                                        'Warning!');
+                            }
+                        );
+                });
         }
     }
 
