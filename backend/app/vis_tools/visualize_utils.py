@@ -91,18 +91,4 @@ def load_model(model):
         neuron_selector = tf.placeholder(tf.int32)
         y = logits[0][neuron_selector]
 
-        # Construct tensor for predictions.
-        # prediction = tf.argmax(logits, 1)
-
     return graph, sess, x, y, neuron_selector, logits
-
-
-def softmax(x):
-    e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum()
-
-
-def inference(sess, logits, x, image_input):
-    logits_score = logits.eval(feed_dict={x: [image_input]}, session=sess)
-    predictions = softmax(logits_score[0])
-    return [prediction.item() for prediction in predictions]
