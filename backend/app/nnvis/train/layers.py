@@ -44,7 +44,7 @@ def _build_fc_op(node, input_ops):
                 x, num_outputs=node['params']['numOutputs'],
                 activation_fn=tf.identity)
         op = tf.identity(op, name='logits')
-        return _get_activation(node)(op, name='activation')
+        return _get_activation(node)(op, name=node['params']['activation'])
 
 
 def _build_conv_op(node, input_ops):
