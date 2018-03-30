@@ -57,7 +57,7 @@ def unzip_validate_archive(path, file, dataset_id):
 
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
         cols = labelsdf.columns
-        label_list = labelsdf[cols[1]].unique().tolist()
+        label_list = sorted(labelsdf[cols[1]].unique().tolist())
         classname_to_index = {l: i for i, l in enumerate(label_list)}
         labelsdict = pd.Series(labelsdf[cols[1]].map(classname_to_index).values,
                                index=labelsdf[cols[0]]).to_dict()
