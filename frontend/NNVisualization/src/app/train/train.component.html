@@ -36,6 +36,7 @@
             <div fxFlex>
                 <mat-form-field>
                     <input matInput
+                           required
                            type="number" min="1"
                            placeholder="Number of epochs"
                            [(ngModel)]="nepochs">
@@ -44,6 +45,7 @@
             <div fxFlex>
                 <mat-form-field>
                     <input matInput
+                           required
                            type="number" min="1"
                            placeholder="Batch size"
                            [(ngModel)]="batchSize">
@@ -51,7 +53,7 @@
             </div>
             <div fxFlex>
                 <mat-form-field>
-                    <mat-select placeholder="Loss function"
+                    <mat-select placeholder="Loss function" required
                                 (selectionChange)="onLossChange($event.value)">
                         <mat-option *ngFor="let l of losses" [value]="l.value">
                             {{ l.name }}
@@ -70,7 +72,7 @@
     <mat-step [completed]="isThirdStepCompleted()">
         <ng-template matStepLabel>Select optimizer</ng-template>
         <mat-form-field>
-            <mat-select placeholder="Optimizer"
+            <mat-select placeholder="Optimizer" required
                         (selectionChange)="onOptimizerChange($event.value)">
                 <mat-option *ngFor="let o of optimizers" [value]="o.value">
                     {{ o.name }}
@@ -81,10 +83,11 @@
             <h5>Set optimizer params</h5>
             <mat-form-field *ngFor="let param of optimizerParamsSets[optimizer]">
                 <input matInput
-                        type="number" step="any" min="0"
-                        [placeholder]="param.name"
-                        [value]="param.default"
-                        (input)="onParamChange(param.value, $event.target.value)">
+                       required
+                       type="number" step="any" min="0"
+                       [placeholder]="param.name"
+                       [value]="param.default"
+                       (input)="onParamChange(param.value, $event.target.value)">
             </mat-form-field>
         </div>
         <div class="centered step-buttons">
