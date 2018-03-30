@@ -1,0 +1,41 @@
+<div [ngSwitch]="layer.layerType">
+    <ng-template ngSwitchCase="fc">
+        <app-layer-fc
+            [layer]="layer"
+            (changed)="emitNodeUpdate($event)">
+        </app-layer-fc>
+    </ng-template>
+    <ng-template ngSwitchCase="conv">
+        <app-layer-conv
+            [layer]="layer"
+            (changed)="emitNodeUpdate($event)">
+        </app-layer-conv>
+    </ng-template>
+    <ng-template ngSwitchCase="input">
+        <app-layer-input
+            [layer]="layer"
+            (changed)="emitNodeUpdate($event)">
+        </app-layer-input>
+    </ng-template>
+    <ng-template ngSwitchCase="pool">
+        <app-layer-pool
+            [layer]="layer"
+            (changed)="emitNodeUpdate($event)">
+        </app-layer-pool>
+    </ng-template>
+    <ng-template ngSwitchCase="dropout">
+        <app-layer-dropout
+            [layer]="layer"
+            (changed)="emitNodeUpdate($event)">
+        </app-layer-dropout>
+    </ng-template>
+    <ng-template ngSwitchCase="batch_norm">
+        <app-layer-batch-norm
+            [layer]="layer"
+            (changed)="emitNodeUpdate($event)">
+        </app-layer-batch-norm>
+    </ng-template>
+    <ng-template ngSwitchDefault>
+        <h4>Wrong type of layer: {{ layer.layerType }}</h4>
+    </ng-template>
+</div>

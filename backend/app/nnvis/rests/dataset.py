@@ -133,20 +133,21 @@ class UploadNewDataset(ProtectedResource):
         postdata = request.form
         self.__verify_postdata(postdata)
 
-        dataset_path = os.path.join(app.config['DATASET_FOLDER'],
-                                    postdata['name'])
         new_dataset = Dataset(name=postdata['name'],
                               # None if isn't given, TODO: check this works
                               description=postdata.get('description'),
-                              path=dataset_path,
+                              path='',
                               labels='',
                               user_id=get_current_user())
 
         try:
             new_dataset.add()
-            unique_labels = unzip_validate_archive(dataset_path, postfile.stream,
-                                   new_dataset.id)
-
+            new_dataset.path = os.path.join(app.config['DATASET_FOLDER'],
+                                            str(new_dataset.id))
+            unique_labels = unzip_validate_archive(
+                                new_dataset.path,
+                                postfile.stream,
+                                new_dataset.id)
             new_dataset.labels = ','.join(map(str, unique_labels))
             new_dataset.update()
         except:

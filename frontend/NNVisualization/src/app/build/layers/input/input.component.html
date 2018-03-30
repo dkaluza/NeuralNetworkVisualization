@@ -2,19 +2,23 @@
     <div class="node-header">
         <span><strong>ID: {{ layer.id }}</strong></span>
     </div>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="Label"
-                        required
                         [(ngModel)]="layer.label"
-                        (input)="onChangeLabel($event.target.value)">
+                        (input)="onChange(true)">
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="Input ID"
-                        required
                         type="number" min="1"
-                        [(ngModel)]="layer.inputId">
+                        [ngModel]="layer.inputId"
+                        (ngModelChange)="onInputIdChange($event)"
+                        [formControl]="inputIdFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="inputIdFormControl.hasError('min')">
+            Input ID must be &gt;= 1
+        </mat-error>
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="Shape"
                         [ngModel]="layer.outputShape"
                         (ngModelChange)="onShapeChange($event)"

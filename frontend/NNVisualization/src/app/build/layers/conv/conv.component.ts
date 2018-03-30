@@ -12,14 +12,15 @@ import { FormControl, Validators } from '@angular/forms';
 export class ConvComponent extends LayerComponent {
     @Input() layer: ConvLayer;
 
-    private _regex = '^([0-9]+,[ ]?)*([0-9]+)$';
+    private _patternString = '^([1-9][0-9]*,[ ]?){1,2}([1-9][0-9]*)$';
+    private _pattern = new RegExp(this._patternString);
 
     kernelShapeFormControl = new FormControl('', [
-        Validators.pattern(this._regex)
+        Validators.pattern(this._patternString)
     ]);
 
     stridesFormControl = new FormControl('', [
-        Validators.pattern(this._regex)
+        Validators.pattern(this._patternString)
     ]);
 
     matcher = new LayerErrorStateMatcher();
@@ -34,17 +35,17 @@ export class ConvComponent extends LayerComponent {
         }
     ];
 
-    private _pattern = new RegExp(this._regex);
-
     onKernelShapeChange(value: string) {
         if (this._pattern.test(value)) {
             this.layer.kernelShape = value;
+            this.onChange();
         }
     }
 
     onStridesChange(value: string) {
         if (this._pattern.test(value)) {
             this.layer.strides = value;
+            this.onChange();
         }
     }
 }
