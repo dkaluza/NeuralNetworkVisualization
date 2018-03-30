@@ -47,7 +47,9 @@ const appRoutes: Routes = [
 ];
 
 // Function for setting the default restangular configuration
-export function RestangularConfigFactory(RestangularProvider, authService: AuthenticationWithoutLoginService) {
+export function RestangularConfigFactory(RestangularProvider,
+    authService: AuthenticationWithoutLoginService,
+    genericDialogs: GenericDialogsService) {
     RestangularProvider.setBaseUrl('/api');
 
     RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
@@ -75,6 +77,16 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
             default:
                 return data;
         }
+    });
+
+    RestangularProvider.addErrorInterceptor((response, subject, responseHandler) => {
+        if (response.status === 504) {
+            genericDialogs.createWarning('Data or authorization server is not responding.\n \
+                Please contact the administrator or try again later.', 'Error');
+            return false;
+        }
+
+        return true;
     });
 }
 
@@ -109,7 +121,8 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
         ReactiveFormsModule,
         HttpClientModule,
         RouterModule.forRoot(appRoutes),
-        RestangularModule.forRoot([AuthenticationWithoutLoginService], RestangularConfigFactory),
+        RestangularModule.forRoot([AuthenticationWithoutLoginService,
+            GenericDialogsService], RestangularConfigFactory),
         MaterialImportsModule,
         FlexLayoutModule,
         JwtModule.forRoot({
