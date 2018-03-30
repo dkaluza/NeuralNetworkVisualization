@@ -44,7 +44,9 @@
                    [tooltipPlacement]="'top'"
                    [tooltipType]="'tooltip'"
                    [tooltipTitle]="node.tooltip">
-                <svg:rect [class.node-selected]="node.selected"
+                <svg:rect [class.node-connecting]="node.selected"
+                          [class.node-incorrect]="node.incorrect && !node.selected"
+                          [class.node-selected]="node.id === selectedNodeId"
                           [attr.width]="node.width"
                           [attr.height]="node.height"
                           [attr.fill]="node.color" />
