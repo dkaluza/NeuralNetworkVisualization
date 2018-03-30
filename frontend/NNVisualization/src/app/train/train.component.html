@@ -25,7 +25,9 @@
             </mat-table>
         </div>
         <div class="centered step-buttons">
-            <button mat-raised-button color="accent" matStepperNext>Next</button>
+            <button mat-raised-button
+                    [disabled]="!isFirstStepCompleted()"
+                    color="accent" matStepperNext>Next</button>
         </div>
     </mat-step>
     <mat-step [completed]="isSecondStepCompleted()">
@@ -60,7 +62,9 @@
         </div>
         <div class="centered step-buttons">
             <button mat-raised-button color="accent" matStepperPrevious>Back</button>
-            <button mat-raised-button color="accent" matStepperNext>Next</button>
+            <button mat-raised-button
+                    [disabled]="!isSecondStepCompleted()"
+                    color="accent" matStepperNext>Next</button>
         </div>
     </mat-step>
     <mat-step [completed]="isThirdStepCompleted()">
@@ -85,7 +89,9 @@
         </div>
         <div class="centered step-buttons">
             <button mat-raised-button color="accent" matStepperPrevious>Back</button>
-            <button mat-raised-button color="accent" matStepperNext>Next</button>
+            <button mat-raised-button
+                    [disabled]="!isThirdStepCompleted()"
+                    color="accent" matStepperNext>Next</button>
         </div>
     </mat-step>
     <mat-step>
