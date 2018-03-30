@@ -22,14 +22,19 @@
     cursor: pointer;
 }
 
-.node-selected {
+.node-connecting {
     stroke: green;
     stroke-width: 2px;
 }
 
 .node-incorrect {
     stroke: red;
-    stroke-width: 2px;
+    stroke-width: 3px;
+}
+
+.node-selected {
+    stroke: black;
+    stroke-width: 3px;
 }
 
 .edge>path {

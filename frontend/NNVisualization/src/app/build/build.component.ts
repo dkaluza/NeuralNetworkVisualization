@@ -29,12 +29,13 @@ export class BuildComponent implements OnInit {
     constructor(private selArchService: SelectedArchitectureService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
-        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
     }
 
     ngOnInit() {
         this.nodes = this.selArchService.currentNodes;
         this.links = this.selArchService.currentLinks;
+
+        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
     }
 
     private _unselectNode(): void {
@@ -53,8 +54,12 @@ export class BuildComponent implements OnInit {
     }
 
     onNodeSelected(id): void {
-        this.selectedLayer = this.nodes.get(id);
-        this.selectedID = id;
+        if (id === -1) {
+            this._unselectNode();
+        } else {
+            this.selectedLayer = this.nodes.get(id);
+            this.selectedID = id;
+        }
     }
 
     onNodeUpdate(redraw: boolean): void {
