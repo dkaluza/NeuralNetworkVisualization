@@ -54,7 +54,7 @@ export class BuildComponent implements OnInit {
     }
 
     onNodeSelected(id): void {
-        if (id === -1) {
+        if (id === undefined) {
             this._unselectNode();
         } else {
             this.selectedLayer = this.nodes.get(id);

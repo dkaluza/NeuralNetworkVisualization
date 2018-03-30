@@ -162,7 +162,7 @@ export class VisArchComponent implements OnInit, OnChanges {
         this.deletingMode = false;
         // unselect node
         this.selectedNodeId = undefined;
-        this.nodeSelected.emit(-1);
+        this.nodeSelected.emit(undefined);
     }
 
     toggleDeleting(): void {
@@ -173,7 +173,7 @@ export class VisArchComponent implements OnInit, OnChanges {
         });
         // unselect node
         this.selectedNodeId = undefined;
-        this.nodeSelected.emit(-1);
+        this.nodeSelected.emit(undefined);
     }
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
