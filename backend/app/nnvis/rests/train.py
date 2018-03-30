@@ -6,6 +6,9 @@ from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Dataset, Architecture, Model
 from app.nnvis.train.train import TrainThread
 
+from app.nnvis.train.losses import list_losses
+from app.nnvis.train.optimizers import list_optimizers
+
 
 ARGS_LIST = [
         'dataset_id',
@@ -13,7 +16,6 @@ ARGS_LIST = [
         'optimizer',
         'nepochs',
         'batch_size',
-        'optimizer_params'
         ]
 
 
@@ -47,14 +49,14 @@ class TrainNewModel(ProtectedResource):
         model.add()
         try:
             optparams = {}
-            for k, v in args['optimizer_params'].items():
-                optparams[k] = float(v)
+            for param in args['optimizer']['params']:
+                optparams[param['id']] = float(param['value'])
 
             params = {
                     'nepochs': int(args['nepochs']),
                     'batch_size': int(args['batch_size']),
-                    'loss': args['loss'],
-                    'optimizer': args['optimizer'],
+                    'loss': args['loss']['id'],
+                    'optimizer': args['optimizer']['id'],
                     'optimizer_params': optparams
                     }
             thread1 = TrainThread(model.arch_id, model.id,
@@ -71,3 +73,13 @@ class TrainModel(ProtectedResource):
     def get(self, model_id):
         # TODO: train_model REST
         pass
+
+
+class ListLosses(ProtectedResource):
+    def get(self):
+        return list_losses()
+
+
+class ListOptimizers(ProtectedResource):
+    def get(self):
+        return list_optimizers()

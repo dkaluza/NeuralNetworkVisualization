@@ -50,3 +50,7 @@
 .centered {
     text-align: center;
 }
+
+.error-param {
+    color: red;
+}
