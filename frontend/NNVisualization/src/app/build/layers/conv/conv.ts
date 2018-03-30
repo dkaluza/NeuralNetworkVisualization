@@ -96,4 +96,46 @@ export class ConvLayer extends Layer {
         dict['activation'] = Activation[this._activation];
         return dict;
     }
+
+    getMinNumOfInputs(): number {
+        return 1;
+    }
+
+    getMaxNumOfInputs(): number {
+        return 1;
+    }
+
+    calculateOutputShape(shapes: number[][]): number[] {
+        const shape = shapes[0];
+        const strides = this.strToArray(this._strides);
+        const output = [shape[0]];
+        for (let i = 0; i < strides.length; i += 1) {
+            let dim = 0;
+            if (this._padding === Padding.Same) {
+                dim = shape[i + 1] / strides[i];
+            } else { // this._padding === Padding.Valid
+                dim = (shape[i + 1] - strides[i] + 1) / strides[0];
+            }
+            output.push(Math.ceil(dim));
+        }
+        output.push(shape[shape.length - 1]);
+        return output;
+    }
+
+    validateInputShapes(shapes: number[][]): boolean {
+        if (shapes.length !== 1) {
+            return false;
+        }
+        const shape = shapes[0];
+        if (shape.length < 3 || shape.length > 5) {
+            return false;
+        }
+        const strides = this.strToArray(this._strides);
+        const kernel = this.strToArray(this._kernelShape);
+        if (shape.length !== strides.length + 2 ||
+            shape.length !== kernel.length + 2) {
+            return false;
+        }
+        return true;
+    }
 }

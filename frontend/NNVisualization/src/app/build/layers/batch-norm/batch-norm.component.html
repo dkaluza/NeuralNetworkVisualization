@@ -8,14 +8,17 @@
                         (input)="onChange(true)">
     </mat-form-field>
     <mat-form-field class="node-element">
-        <input matInput placeholder="Keep prop"
+        <input matInput placeholder="Decay"
                         type="number" step="any" min="0" max="1"
-                        [ngModel]="layer.keepProb"
-                        (ngModelChange)="onKeepProbChange($event)"
-                        [formControl]="keepProbFormControl"
+                        [ngModel]="layer.decay"
+                        (ngModelChange)="onDecayChange($event)"
+                        [formControl]="decayFormControl"
                         [errorStateMatcher]="matcher">
-        <mat-error *ngIf="keepProbFormControl.hasError('min') || keepProbFormControl.hasError('max')">
-            Keep prob must be between 0 and 1
+        <mat-error *ngIf="decayFormControl.hasError('min') || decayFormControl.hasError('max')">
+            Decay must be between 0 and 1
         </mat-error>
     </mat-form-field>
+    <mat-checkbox [(ngModel)]="layer.center">Center</mat-checkbox>
+    <mat-divider></mat-divider>
+    <mat-checkbox [(ngModel)]="layer.scale">Scale</mat-checkbox>
 </div>

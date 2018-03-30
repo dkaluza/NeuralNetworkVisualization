@@ -2,40 +2,40 @@
     <div class="node-header">
         <span><strong>ID: {{ layer.id }}</strong></span>
     </div>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="Label"
                         required
                         [(ngModel)]="layer.label"
-                        (input)="onChangeLabel($event.target.value)">
+                        (input)="onChange(true)">
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="Kernel shape"
                         [ngModel]="layer.kernelShape"
                         (ngModelChange)="onKernelShapeChange($event)"
                         [formControl]="kernelShapeFormControl"
                         [errorStateMatcher]="matcher">
         <mat-error *ngIf="kernelShapeFormControl.hasError('pattern')">
-            Invalid shape, try: 3,3
+            Invalid shape, kernel must have 2 elements
         </mat-error>
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <input matInput placeholder="Strides"
                         [ngModel]="layer.strides"
                         (ngModelChange)="onStridesChange($event)"
                         [formControl]="stridesFormControl"
                         [errorStateMatcher]="matcher">
         <mat-error *ngIf="stridesFormControl.hasError('pattern')">
-            Invalid shape, try: 3,3
+            Invalid shape, strides must have 2 elements
         </mat-error>
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <mat-select placeholder="Padding" [(value)]="layer.padding">
             <mat-option *ngFor="let p of paddings" [value]="p.value">
                 {{ p.viewValue }}
             </mat-option>
         </mat-select>
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field class="node-element">
         <mat-select placeholder="Pool type" [(value)]="layer.pool">
             <mat-option *ngFor="let p of pools" [value]="p.value">
                 {{ p.viewValue }}

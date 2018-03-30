@@ -2,9 +2,20 @@
     text-align: center;
 }
 
-.buttons-row {
+.build-container {
     margin-top: 2%;
+}
+
+.error-message {
+    color: red;
+}
+
+.buttons-row {
     text-align: center;
+}
+
+.buttons-row, .error-message {
+    height: 10%;
 }
 
 .buttons-row button {
