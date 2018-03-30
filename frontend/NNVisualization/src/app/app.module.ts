@@ -124,8 +124,8 @@ export function RestangularConfigFactory(RestangularProvider,
 
     RestangularProvider.addErrorInterceptor((response, subject, responseHandler) => {
         if (response.status === 504) {
-            genericDialogs.createWarning('Data or authorization server is not responding. \
-                \n Please contact the administrator or try again later.', 'Error');
+            genericDialogs.createWarning('Data or authorization server is not responding.\n \
+                Please contact the administrator or try again later.', 'Error');
             return false;
         }
 
