@@ -87,32 +87,50 @@ export class Graph {
     }
 
     checkForLoop(): number[] {
-        // this tries to do topological sort
-        // if it can't that means that there exists a loop
-        const edgeCounter = new Map();
-        this._nodes.forEach(n => { edgeCounter.set(n, 0); });
-        this._links.forEach(l => {
-            l.forEach(n => {
-                edgeCounter.set(n, edgeCounter.get(n) + 1);
-            });
-        });
-        const queue = this.getGraphInputs();
-        while (queue.length > 0) {
-            const n = queue.shift();
-            this._links.get(n).forEach(m => {
-                edgeCounter.set(m, edgeCounter.get(m) - 1);
-                if (edgeCounter.get(m) === 0) {
-                    queue.push(m);
+        const white = new Set(this._nodes);
+        const gray = new Set;
+        const black = new Set;
+        const loopMap = new Map;
+
+        const visit = n => {
+            const links = this._links.get(n);
+            for (let i = 0; i < links.length; i += 1) {
+                const v = links[i];
+                if (white.has(v)) {
+                    white.delete(v);
+                    gray.add(v);
+                    loopMap.set(v, n);
+                    const ret = visit(v);
+                    if (ret !== undefined) {
+                        return ret;
+                    }
+                } else if (gray.has(v)) {
+                    loopMap.set(v, n);
+                    return v;
                 }
-            });
-        }
-        const loop = [];
-        edgeCounter.forEach((l, n) => {
-            if (l > 0) {
-                loop.push(n);
             }
-        });
-        return loop;
+            gray.delete(n);
+            black.add(n);
+            return undefined;
+        };
+
+        while (white.size > 0) {
+            let n = white.values().next().value;
+            white.delete(n);
+            gray.add(n);
+            loopMap.set(n, undefined);
+            const ret = visit(n);
+            if (ret !== undefined) {
+                const loop = [ret];
+                n = loopMap.get(ret);
+                while (n !== ret) {
+                    loop.push(n);
+                    n = loopMap.get(n);
+                }
+                return loop;
+            }
+        }
+        return [];
     }
 
     sortTopologically(): number[] {
