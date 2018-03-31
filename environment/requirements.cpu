@@ -9,3 +9,4 @@ tensorflow
 pandas
 imageio
 numpy
+opencv-python

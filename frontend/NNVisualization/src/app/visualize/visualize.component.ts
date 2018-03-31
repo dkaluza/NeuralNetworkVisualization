@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {VisualizeService} from "./visualize.service";
+import { VisualizeService } from "./visualize.service";
 
 @Component({
     selector: 'app-visualize',
@@ -10,7 +10,8 @@ import {VisualizeService} from "./visualize.service";
 })
 export class VisualizeComponent implements OnInit {
 
-    constructor() { }
+    constructor() {
+    }
 
     ngOnInit() {
     }
