@@ -162,8 +162,7 @@ class Image(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def json(self):
-        return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
-                'label': self.label, 'dataset_id': self.dataset_id}
+        return {'imageName': self.imageName, 'imagePath': self.imagePath}
 
 
 class User(db.Model, CRUD):

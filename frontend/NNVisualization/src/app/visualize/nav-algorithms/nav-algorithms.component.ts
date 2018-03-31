@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { VisualizeService } from '../visualize.service';
 
 @Component({
     selector: 'app-nav-algorithms',
@@ -8,13 +7,8 @@ import { VisualizeService } from '../visualize.service';
 })
 export class NavAlgorithmsComponent implements OnInit {
 
-    constructor(public visualizeService: VisualizeService) {
-    }
+    constructor() { }
 
-    ngOnInit() {
-    }
+    ngOnInit() { }
 
-    onSelectorSelect(event) {
-        this.visualizeService.currentAlgorithm = event.value;
-    }
 }

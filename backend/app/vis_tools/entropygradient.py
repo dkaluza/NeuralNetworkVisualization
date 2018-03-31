@@ -1,8 +1,8 @@
 import tensorflow as tf
 
-class GuidedBackprop(object):
+class EntropyGradient(object):
 
-    def __init__(self, graph, session, y):
+    def __init__(self, graph, session, y=None):
         pass
 
     def getMask(self, x):

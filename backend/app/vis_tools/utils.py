@@ -2,11 +2,11 @@ import tensorflow as tf
 import json
 import numpy as np
 
-from .vanillasaliency import GradientSaliency
+from .entropygradient import EntropyGradient
 from .guidedbackpropagation import GuidedBackprop
 
 algorithms_register = {
-    0: GradientSaliency,
+    0: EntropyGradient,
     1: GuidedBackprop
 }
 
