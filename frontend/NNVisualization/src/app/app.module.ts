@@ -21,7 +21,9 @@ import { BuildModule, BuildComponent } from './build/build.module';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { RestangularModule } from 'ngx-restangular';
+import { RestangularModule, Restangular } from 'ngx-restangular';
+import { InputImageComponent } from './visualize/images-panel/input-image/input-image.component';
+import { OutputImageComponent } from './visualize/images-panel/output-image/output-image.component';
 import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
 import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service';
 import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service';
@@ -33,22 +35,21 @@ import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service
 import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
 import { DatasetsComponent } from './datasets/datasets.component';
 
-
 const appRoutes: Routes = [
-    {path: '', redirectTo: 'manage', pathMatch: 'full'},
-    {path: 'manage', component: ManageComponent, canActivate: [AuthGuard]},
-    {path: 'build', component: BuildComponent, canActivate: [AuthGuard]},
-    {path: 'datasets', component: DatasetsComponent, canActivate: [AuthGuard]},
-    {path: 'train', component: TrainComponent, canActivate: [AuthGuard]},
-    {path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard]},
-    {path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard]},
-    {path: 'unauthorized', component: UnauthorizedComponent},
+    { path: '', redirectTo: 'manage', pathMatch: 'full' },
+    { path: 'manage', component: ManageComponent, canActivate: [AuthGuard] },
+    { path: 'build', component: BuildComponent, canActivate: [AuthGuard] },
+    { path: 'datasets', component: DatasetsComponent, canActivate: [AuthGuard] },
+    { path: 'train', component: TrainComponent, canActivate: [AuthGuard] },
+    { path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'unauthorized', component: UnauthorizedComponent },
 ];
 
 // Function for setting the default restangular configuration
 export function RestangularConfigFactory(RestangularProvider,
-                                         authService: AuthenticationWithoutLoginService,
-                                         genericDialogs: GenericDialogsService) {
+    authService: AuthenticationWithoutLoginService,
+    genericDialogs: GenericDialogsService) {
     RestangularProvider.setBaseUrl('/api');
 
     RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
@@ -56,7 +57,7 @@ export function RestangularConfigFactory(RestangularProvider,
             const bearerToken = authService.getToken();
 
             return {
-                headers: Object.assign({}, headers, {Authorization: `Bearer ${bearerToken}`})
+                headers: Object.assign({}, headers, { Authorization: `Bearer ${bearerToken}` })
             };
         }
         return {};
@@ -71,9 +72,7 @@ export function RestangularConfigFactory(RestangularProvider,
             case 'put':
                 return data;
             case 'remove':
-                if (!data) {
-                    return {};
-                }
+                if (!data) { return {}; }
                 return data;
             default:
                 return data;
@@ -102,6 +101,8 @@ export function RestangularConfigFactory(RestangularProvider,
         VisualizeComponent,
         ImagesPanelComponent,
         NavAlgorithmsComponent,
+        InputImageComponent,
+        OutputImageComponent,
         LogInDialogComponent,
         UnauthorizedComponent,
         TimeoutAlertComponent,
@@ -138,7 +139,6 @@ export function RestangularConfigFactory(RestangularProvider,
         GenericDialogsService],
     bootstrap: [AppComponent]
 })
-export class AppModule {
-}
+export class AppModule { }
 
 platformBrowserDynamic().bootstrapModule(AppModule);

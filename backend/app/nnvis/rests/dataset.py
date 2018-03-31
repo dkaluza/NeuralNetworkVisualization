@@ -49,13 +49,13 @@ def create_image(fname, labelsdict, dataset_id):
 
 def unzip_validate_archive(path, file, dataset_id):
     labels_filename = app.config['LABELS_FILENAME']
+
     try:
         os.makedirs(path, exist_ok=True)
         archive = ZipFile(file)
         archive.extractall(path)
 
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
-
         cols = labelsdf.columns
         label_list = sorted(labelsdf[cols[1]].unique().tolist())
         classname_to_index = {l: i for i, l in enumerate(label_list)}
