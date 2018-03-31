@@ -77,8 +77,8 @@ class Images(ProtectedResource):
     def get(self, image_id):
         image = Image.query.get(image_id)
         image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
-        dataset_name = Dataset.query.get(image.dataset_id).name
-        image_db_path = os.path.join(app.config['DATASET_FOLDER'], dataset_name, image.relative_path)
+        dataset = Dataset.query.get(image.dataset_id)
+        image_db_path = os.path.join(dataset.path, image.relative_path)
         if not os.path.isfile(image_path):
             shutil.copyfile(image_db_path, image_path)
         image_url = 'api/static/' + image.relative_path
