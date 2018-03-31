@@ -1,37 +1,37 @@
-import {BrowserModule} from '@angular/platform-browser';
-import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {NgModule} from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgModule } from '@angular/core';
 
-import {MaterialImportsModule} from './material-imports.module';
+import { MaterialImportsModule } from './material-imports.module';
 
-import {AppComponent} from './app.component';
-import {HeaderComponent} from './header/header.component';
-import {NavbarComponent} from './navbar/navbar.component';
-import {ManageComponent} from './manage/manage.component';
-import {TrainComponent} from './train/train.component';
-import {ImagesPanelComponent} from './visualize/images-panel/images-panel.component';
-import {SelectedBarComponent} from './selected-bar/selected-bar.component';
-import {SelectedArchitectureService} from './selected-architecture/selected-architecture.service';
-import {VisualizeComponent} from './visualize/visualize.component';
-import {NavAlgorithmsComponent} from './visualize/nav-algorithms/nav-algorithms.component';
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './header/header.component';
+import { NavbarComponent } from './navbar/navbar.component';
+import { ManageComponent } from './manage/manage.component';
+import { TrainComponent } from './train/train.component';
+import { ImagesPanelComponent } from './visualize/images-panel/images-panel.component';
+import { SelectedBarComponent } from './selected-bar/selected-bar.component';
+import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
+import { VisualizeComponent } from './visualize/visualize.component';
+import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
 
-import {BuildModule, BuildComponent} from './build/build.module';
+import { BuildModule, BuildComponent } from './build/build.module';
 
-import {RouterModule, Routes} from '@angular/router';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
-import {RestangularModule} from 'ngx-restangular';
-import {LogInDialogComponent} from './header/log-in-dialog/log-in-dialog.component';
-import {AuthenticationGuardService as AuthGuard} from './authentication/authentication-guard.service';
-import {AuthenticationService, AuthenticationWithoutLoginService} from './authentication/authentication.service';
-import {JwtModule, JwtHelperService as JwtHelper} from '@auth0/angular-jwt';
-import {UnauthorizedComponent} from './unauthorized/unauthorized.component';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {TimeoutAlertComponent} from './generic-dialogs/timeout-alert/timeout-alert.component';
-import {GenericDialogsService} from './generic-dialogs/generic-dialogs.service';
-import {InputsDialogComponent} from './generic-dialogs/inputs-dialog/inputs-dialog.component';
-import {DatasetsComponent} from './datasets/datasets.component';
+import { RouterModule, Routes } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { RestangularModule } from 'ngx-restangular';
+import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
+import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service';
+import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service';
+import { JwtModule, JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
+import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-alert.component';
+import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service';
+import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
+import { DatasetsComponent } from './datasets/datasets.component';
 
 
 const appRoutes: Routes = [
