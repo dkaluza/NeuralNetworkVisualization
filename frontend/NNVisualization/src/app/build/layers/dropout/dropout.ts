@@ -30,4 +30,20 @@ export class DropoutLayer extends Layer {
         dict['keepProb'] = this._keepProb;
         return dict;
     }
+
+    getMinNumOfInputs(): number {
+        return 1;
+    }
+
+    getMaxNumOfInputs(): number {
+        return 1;
+    }
+
+    calculateOutputShape(shapes: number[][]): number[] {
+        return shapes[0];
+    }
+
+    validateInputShapes(shapes: number[][]): boolean {
+        return shapes.length === 1;
+    }
 }

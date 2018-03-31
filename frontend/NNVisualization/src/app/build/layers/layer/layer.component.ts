@@ -38,8 +38,7 @@ export class LayerComponent {
         }
     ];
 
-    onChangeLabel(value) {
-        // this.layer.label = value;
-        this.changed.emit(this.layer.id);
+    onChange(redraw = false) {
+        this.changed.emit(redraw);
     }
 }

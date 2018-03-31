@@ -2,10 +2,9 @@ import { Component, OnInit, OnChanges,
          ViewEncapsulation, Input, Output, EventEmitter } from '@angular/core';
 import * as shape from 'd3-shape';
 
-import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
+import { SelectedArchitectureService, ErrorInfo } from '../../selected-architecture/selected-architecture.service';
 import { ArchNode, ArchLink } from '../../selected-architecture/architecture';
 import { ToolboxLayer, layerTemplates } from './toolbox-layers';
-import { Graph } from './graph';
 
 import { Layer } from '../layers/layer/layer';
 import { FullyConnectedLayer } from '../layers/fully-connected/fully-connected';
@@ -13,7 +12,7 @@ import { ConvLayer } from '../layers/conv/conv';
 import { InputLayer } from '../layers/input/input';
 import { PoolLayer } from '../layers/pool/pool';
 import { DropoutLayer } from '../layers/dropout/dropout';
-import { BatchNormLayer } from '../layers/batch-norm/batch_norm';
+import { BatchNormLayer } from '../layers/batch-norm/batch-norm';
 
 interface GraphNode {
     id: string;
@@ -21,6 +20,7 @@ interface GraphNode {
     selected: boolean;
     color: string;
     tooltip: string;
+    incorrect: boolean;
 }
 
 interface GraphLink {
@@ -36,6 +36,7 @@ interface GraphLink {
 })
 export class VisArchComponent implements OnInit, OnChanges {
     @Input() layers: Map<number, Layer>;
+    @Input() graphErrorInfo: ErrorInfo;
     @Input() connections: ArchLink[];
     @Input() hasLayersBeenModified: boolean;
 
@@ -55,8 +56,6 @@ export class VisArchComponent implements OnInit, OnChanges {
     nodes: GraphNode[] = [];
     links: GraphLink[] = [];
 
-    // stores only graph structure
-    private _graph: Graph;
     // stores information abouts layers
     // private _layerData: { [id: number]: Layer };
     // private _layerData: Layer[];
@@ -66,35 +65,29 @@ export class VisArchComponent implements OnInit, OnChanges {
     deletingMode = false;
     private _selectedSource = undefined;
     private _selectedTarget = undefined;
+    selectedNodeId: string;
 
     // used for drag 'n' drop
     toolboxLayers = layerTemplates;
 
     constructor(private selArchService: SelectedArchitectureService) {
-        this._graph = new Graph();
-        // this._layerData = [];
     }
 
     ngOnInit() {
     }
 
     ngOnChanges(changes) {
-        console.log('OnChanges');
-
-        this._graph = new Graph();
-        this.layers.forEach(
-            (node, id) => { this._graph.addNode(id); }
-        );
-        this.connections.forEach(
-            link => { this._graph.addLink(Number(link.source),
-                                          Number(link.target)); }
-        );
-
         this._setGraphData();
+        this.nodes = this.nodes.map( n => {
+            if (this.graphErrorInfo.nodeIds.indexOf(Number(n.id)) > -1) {
+                n.incorrect = true;
+            }
+            return n;
+        });
     }
 
     private _setGraphData(): void {
-        this.nodes = this._graph.nodes.map(
+        this.nodes = this.selArchService.graph.nodes.map(
             n => {
                 const layer = this.layers.get(n);
                 const toolboxLayer =  layerTemplates.find(
@@ -102,14 +95,15 @@ export class VisArchComponent implements OnInit, OnChanges {
                 );
                 return {
                     id: String(layer.id),
-                    label: layer.label,
+                    label: layer.label + ' (' + layer.id + ')',
                     selected: false,
                     color: toolboxLayer.color,
-                    tooltip: toolboxLayer.label
+                    tooltip: toolboxLayer.label,
+                    incorrect: false
                 };
             }
         );
-        this.links = this._graph.links;
+        this.links = this.selArchService.graph.links;
     }
 
     onNodeSelect(data) {
@@ -119,6 +113,7 @@ export class VisArchComponent implements OnInit, OnChanges {
             this._handleSelectInDeletionMode(data);
         } else {
             // this.selectedLayer = this.layers.get(Number(data.id));
+            this.selectedNodeId = data.id;
             this.nodeSelected.emit(Number(data.id));
         }
     }
@@ -139,8 +134,8 @@ export class VisArchComponent implements OnInit, OnChanges {
             this._selectedTarget = data;
             this._selectedSource.selected = false;
 
-            this._graph.addLink(Number(this._selectedSource.id),
-                                Number(this._selectedTarget.id));
+            this.selArchService.graph.addLink(Number(this._selectedSource.id),
+                                              Number(this._selectedTarget.id));
 
             this._selectedSource = undefined;
             this._selectedTarget = undefined;
@@ -151,7 +146,7 @@ export class VisArchComponent implements OnInit, OnChanges {
     private _handleSelectInDeletionMode(data): void {
         const id = Number(data.id);
 
-        this._graph.removeNode(id);
+        this.selArchService.graph.removeNode(id);
         this.layers.delete(id);
 
         this._updateView();
@@ -165,6 +160,9 @@ export class VisArchComponent implements OnInit, OnChanges {
 
     toggleLinking(): void {
         this.deletingMode = false;
+        // unselect node
+        this.selectedNodeId = undefined;
+        this.nodeSelected.emit(undefined);
     }
 
     toggleDeleting(): void {
@@ -173,15 +171,18 @@ export class VisArchComponent implements OnInit, OnChanges {
             node.selected = false;
             return node;
         });
+        // unselect node
+        this.selectedNodeId = undefined;
+        this.nodeSelected.emit(undefined);
     }
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
         const layer: ToolboxLayer = event.value;
 
         // find smallest free id
-        let id = this._graph.nodes.reduce((p, n) => (n > p ? n : p), 0);
+        let id = this.selArchService.graph.nodes.reduce((p, n) => (n > p ? n : p), 0);
         id += 1;
-        this._graph.addNode(id);
+        this.selArchService.graph.addNode(id);
 
         switch (layer.id) {
             case 'fc':
@@ -206,10 +207,11 @@ export class VisArchComponent implements OnInit, OnChanges {
 
         this.nodes.push({
             id: String(id),
-            label: layer.shortcut,
+            label: layer.shortcut + ' (' + id + ')',
             selected: false,
             color: layer.color,
-            tooltip: layer.label
+            tooltip: layer.label,
+            incorrect: false
         });
         this._updateView();
         this.nodeSelected.emit(id);
@@ -217,8 +219,8 @@ export class VisArchComponent implements OnInit, OnChanges {
 
     onLinkSelect(data): void {
         if (this.deletingMode) {
-            this._graph.removeLink(Number(data.source),
-                                   Number(data.target));
+            this.selArchService.graph.removeLink(Number(data.source),
+                                                 Number(data.target));
             this._updateView();
         }
     }
