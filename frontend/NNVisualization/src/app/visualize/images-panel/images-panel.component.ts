@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {Image} from '../image.model';
-import {MatTableDataSource} from '@angular/material';
-import {VisualizeService} from '../visualize.service';
-import {SelectedArchitectureService} from '../../selected-architecture/selected-architecture.service';
+import { Image } from '../image.model';
+import { MatTableDataSource } from '@angular/material';
+import { VisualizeService } from '../visualize.service';
+import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
 
 @Component({
     selector: 'app-images-panel',

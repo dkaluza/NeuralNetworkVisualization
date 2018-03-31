@@ -1,7 +1,6 @@
-import {Injectable, OnInit} from '@angular/core';
-import {Image} from './image.model';
-import {Restangular} from 'ngx-restangular';
-import {Algorithm} from './algorithm.model';
+import { Injectable, OnInit } from '@angular/core';
+import { Restangular } from 'ngx-restangular';
+import { Algorithm } from './algorithm.model';
 
 @Injectable()
 export class VisualizeService implements OnInit {
