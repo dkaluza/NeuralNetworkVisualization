@@ -12,7 +12,8 @@
 <div class="graph"
      ngxDroppable="graph"
      (drop)="onLayerDrop($event)"
-     [model]=[]>
+     [model]=[]
+     #graph>
     <ngx-graph [autoZoom]="true"
                [legend]="false"
                [links]="links"
