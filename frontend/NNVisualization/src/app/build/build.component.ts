@@ -35,6 +35,8 @@ export class BuildComponent implements OnInit {
     ngOnInit() {
         this.nodes = this.selArchService.currentNodes;
         this.links = this.selArchService.currentLinks;
+
+        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
     }
 
     private _unselectNode(): void {
@@ -53,8 +55,12 @@ export class BuildComponent implements OnInit {
     }
 
     onNodeSelected(id): void {
-        this.selectedLayer = this.nodes.get(id);
-        this.selectedID = id;
+        if (id === undefined) {
+            this._unselectNode();
+        } else {
+            this.selectedLayer = this.nodes.get(id);
+            this.selectedID = id;
+        }
     }
 
     onNodeUpdate(redraw: boolean): void {

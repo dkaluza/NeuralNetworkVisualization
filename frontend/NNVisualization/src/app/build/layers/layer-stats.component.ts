@@ -12,7 +12,7 @@ export class LayerStatsComponent {
 
     constructor() { }
 
-    onNodeUpdate(redraw: boolean) {
+    emitNodeUpdate(redraw: boolean) {
         this.nodeUpdate.emit(redraw);
     }
 }

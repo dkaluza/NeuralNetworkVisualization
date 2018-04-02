@@ -65,6 +65,7 @@ export class VisArchComponent implements OnInit, OnChanges {
     deletingMode = false;
     private _selectedSource = undefined;
     private _selectedTarget = undefined;
+    selectedNodeId: string;
 
     // used for drag 'n' drop
     toolboxLayers = layerTemplates;
@@ -94,7 +95,7 @@ export class VisArchComponent implements OnInit, OnChanges {
                 );
                 return {
                     id: String(layer.id),
-                    label: layer.label,
+                    label: layer.label + ' (' + layer.id + ')',
                     selected: false,
                     color: toolboxLayer.color,
                     tooltip: toolboxLayer.label,
@@ -112,6 +113,7 @@ export class VisArchComponent implements OnInit, OnChanges {
             this._handleSelectInDeletionMode(data);
         } else {
             // this.selectedLayer = this.layers.get(Number(data.id));
+            this.selectedNodeId = data.id;
             this.nodeSelected.emit(Number(data.id));
         }
     }
@@ -158,6 +160,9 @@ export class VisArchComponent implements OnInit, OnChanges {
 
     toggleLinking(): void {
         this.deletingMode = false;
+        // unselect node
+        this.selectedNodeId = undefined;
+        this.nodeSelected.emit(undefined);
     }
 
     toggleDeleting(): void {
@@ -166,6 +171,9 @@ export class VisArchComponent implements OnInit, OnChanges {
             node.selected = false;
             return node;
         });
+        // unselect node
+        this.selectedNodeId = undefined;
+        this.nodeSelected.emit(undefined);
     }
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
@@ -199,7 +207,7 @@ export class VisArchComponent implements OnInit, OnChanges {
 
         this.nodes.push({
             id: String(id),
-            label: layer.shortcut,
+            label: layer.shortcut + ' (' + id + ')',
             selected: false,
             color: layer.color,
             tooltip: layer.label,

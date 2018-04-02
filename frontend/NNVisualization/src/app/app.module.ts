@@ -21,9 +21,7 @@ import { BuildModule, BuildComponent } from './build/build.module';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { RestangularModule, Restangular } from 'ngx-restangular';
-import { InputImageComponent } from './visualize/images-panel/input-image/input-image.component';
-import { OutputImageComponent } from './visualize/images-panel/output-image/output-image.component';
+import { RestangularModule } from 'ngx-restangular';
 import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
 import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service';
 import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service';
@@ -35,19 +33,22 @@ import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service
 import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
 import { DatasetsComponent } from './datasets/datasets.component';
 
+
 const appRoutes: Routes = [
-    { path: '', redirectTo: 'manage', pathMatch: 'full' },
-    { path: 'manage', component: ManageComponent, canActivate: [AuthGuard] },
-    { path: 'build', component: BuildComponent, canActivate: [AuthGuard] },
-    { path: 'datasets', component: DatasetsComponent, canActivate: [AuthGuard] },
-    { path: 'train', component: TrainComponent, canActivate: [AuthGuard] },
-    { path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard] },
-    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard] },
-    { path: 'unauthorized', component: UnauthorizedComponent },
+    {path: '', redirectTo: 'manage', pathMatch: 'full'},
+    {path: 'manage', component: ManageComponent, canActivate: [AuthGuard]},
+    {path: 'build', component: BuildComponent, canActivate: [AuthGuard]},
+    {path: 'datasets', component: DatasetsComponent, canActivate: [AuthGuard]},
+    {path: 'train', component: TrainComponent, canActivate: [AuthGuard]},
+    {path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard]},
+    {path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard]},
+    {path: 'unauthorized', component: UnauthorizedComponent},
 ];
 
 // Function for setting the default restangular configuration
-export function RestangularConfigFactory(RestangularProvider, authService: AuthenticationWithoutLoginService) {
+export function RestangularConfigFactory(RestangularProvider,
+                                         authService: AuthenticationWithoutLoginService,
+                                         genericDialogs: GenericDialogsService) {
     RestangularProvider.setBaseUrl('/api');
 
     RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
@@ -55,7 +56,7 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
             const bearerToken = authService.getToken();
 
             return {
-                headers: Object.assign({}, headers, { Authorization: `Bearer ${bearerToken}` })
+                headers: Object.assign({}, headers, {Authorization: `Bearer ${bearerToken}`})
             };
         }
         return {};
@@ -70,11 +71,23 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
             case 'put':
                 return data;
             case 'remove':
-                if (!data) { return {}; }
+                if (!data) {
+                    return {};
+                }
                 return data;
             default:
                 return data;
         }
+    });
+
+    RestangularProvider.addErrorInterceptor((response, subject, responseHandler) => {
+        if (response.status === 504) {
+            genericDialogs.createWarning('Data or authorization server is not responding.\n \
+                Please contact the administrator or try again later.', 'Error');
+            return false;
+        }
+
+        return true;
     });
 }
 
@@ -89,8 +102,6 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
         VisualizeComponent,
         ImagesPanelComponent,
         NavAlgorithmsComponent,
-        InputImageComponent,
-        OutputImageComponent,
         LogInDialogComponent,
         UnauthorizedComponent,
         TimeoutAlertComponent,
@@ -109,7 +120,8 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
         ReactiveFormsModule,
         HttpClientModule,
         RouterModule.forRoot(appRoutes),
-        RestangularModule.forRoot([AuthenticationWithoutLoginService], RestangularConfigFactory),
+        RestangularModule.forRoot([AuthenticationWithoutLoginService,
+            GenericDialogsService], RestangularConfigFactory),
         MaterialImportsModule,
         FlexLayoutModule,
         JwtModule.forRoot({
@@ -126,6 +138,7 @@ export function RestangularConfigFactory(RestangularProvider, authService: Authe
         GenericDialogsService],
     bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
 
 platformBrowserDynamic().bootstrapModule(AppModule);
