@@ -19,9 +19,8 @@ interface Element {
 })
 export class TrainComponent implements OnInit {
 
-    nepochs = '10';
-    batchSize = '32';
-    learningRate = '0.1';
+    nepochs = 10;
+    batchSize = 32;
     selectedDatasetId: number = undefined;
     selectedDatasetName: string = undefined;
 
@@ -44,6 +43,28 @@ export class TrainComponent implements OnInit {
 
     ngOnInit() {
         this._updateDatasetList();
+    }
+
+    isFirstStepCompleted(): boolean {
+        return this.selectedDatasetId !== undefined;
+    }
+
+    isSecondStepCompleted(): boolean {
+        return this.nepochs &&
+               this.batchSize &&
+               this.loss !== undefined;
+    }
+
+    isThirdStepCompleted(): boolean {
+        if (this.optimizer === undefined) {
+            return false;
+        }
+        for (const param of this.optimizer.params) {
+            if (param.value === null || param.value === undefined) {
+                return false;
+            }
+        }
+        return true;
     }
 
     _updateDatasetList() {
@@ -79,24 +100,11 @@ export class TrainComponent implements OnInit {
     }
 
     onOptimizerChange(id) {
-        this.optimizer = Object.assign({}, this.trainParams.getOptimizer(id));
-        // this.optimizerParams = new Map;
-        // for (let i = 0; i < this.optimizers.length; i += 1) {
-        //     if (this.optimizers[i].value === value) {
-        //         this.optimizerName = this.optimizers[i].name;
-        //         break;
-        //     }
-        // }
-        // this.optimizerParamsSets[value].forEach(
-        //     val => {
-        //         this.optimizerParams.set(val.value, val.default);
-        //     }
-        // );
-        // this.optimizer = value;
-    }
-
-    onParamChange(param, value) {
-        this.optimizer.params.find(p => p.id === param).value = value;
+        const optimizerTemplate = this.trainParams.getOptimizer(id);
+        this.optimizer = Object.assign({}, optimizerTemplate);
+        this.optimizer.params = optimizerTemplate.params.map(p => {
+            return Object.assign({}, p);
+        });
     }
 
     onTrain() {
@@ -110,7 +118,6 @@ export class TrainComponent implements OnInit {
             return;
         }
         for (let i = 0; i < this.optimizer.params.length; i += 1) {
-        // for (let i = 0; i < this.optimizerParamsSets[this.optimizer].length; i += 1) {
             const param = this.optimizer.params[i];
             if (param.value === null || param.value === undefined) {
                 this.genericDialog.createWarning(

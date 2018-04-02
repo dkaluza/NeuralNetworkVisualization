@@ -1,9 +1,11 @@
 <mat-horizontal-stepper linear class="training-params">
-    <mat-step>
+    <mat-step [completed]="isFirstStepCompleted()">
         <ng-template matStepLabel>Select dataset</ng-template>
         <div class="filter-header">
             <mat-form-field>
-                <input matInput (keyup)="applyFilter(datasetDataSource, $event.target.value)" placeholder="Filter">
+                <input matInput
+                      (keyup)="applyFilter(datasetDataSource, $event.target.value)"
+                      placeholder="Filter">
             </mat-form-field>
         </div>
         <div>
@@ -17,21 +19,24 @@
 
                 <mat-header-row *matHeaderRowDef=""></mat-header-row>
                 <mat-row mat-button *matRowDef="let row; columns: displayedColumns;"
-                        (click)="selectDataset(row)"
-                        [class.selected-dataset]="row.id === selectedDatasetId">
+                         (click)="selectDataset(row)"
+                         [class.selected-dataset]="row.id === selectedDatasetId">
                 </mat-row>
             </mat-table>
         </div>
         <div class="centered step-buttons">
-            <button mat-raised-button color="accent" matStepperNext>Next</button>
+            <button mat-raised-button
+                    [disabled]="!isFirstStepCompleted()"
+                    color="accent" matStepperNext>Next</button>
         </div>
     </mat-step>
-    <mat-step>
+    <mat-step [completed]="isSecondStepCompleted()">
         <ng-template matStepLabel>Select parameters</ng-template>
         <div fxLayout="column" fxLayoutGap="20px">
             <div fxFlex>
                 <mat-form-field>
                     <input matInput
+                           required
                            type="number" min="1"
                            placeholder="Number of epochs"
                            [(ngModel)]="nepochs">
@@ -40,6 +45,7 @@
             <div fxFlex>
                 <mat-form-field>
                     <input matInput
+                           required
                            type="number" min="1"
                            placeholder="Batch size"
                            [(ngModel)]="batchSize">
@@ -47,8 +53,8 @@
             </div>
             <div fxFlex>
                 <mat-form-field>
-                    <mat-select placeholder="Loss function"
-                        (selectionChange)="onLossChange($event.value)">
+                    <mat-select placeholder="Loss function" required
+                                (selectionChange)="onLossChange($event.value)">
                         <mat-option *ngFor="let l of trainParams.listLosses()"
                                     [value]="l.id">
                             {{ l.name }}
@@ -59,14 +65,16 @@
         </div>
         <div class="centered step-buttons">
             <button mat-raised-button color="accent" matStepperPrevious>Back</button>
-            <button mat-raised-button color="accent" matStepperNext>Next</button>
+            <button mat-raised-button
+                    [disabled]="!isSecondStepCompleted()"
+                    color="accent" matStepperNext>Next</button>
         </div>
     </mat-step>
-    <mat-step>
+    <mat-step [completed]="isThirdStepCompleted()">
         <ng-template matStepLabel>Select optimizer</ng-template>
         <mat-form-field>
-            <mat-select placeholder="Optimizer"
-                (selectionChange)="onOptimizerChange($event.value)">
+            <mat-select placeholder="Optimizer" required
+                        (selectionChange)="onOptimizerChange($event.value)">
                 <mat-option *ngFor="let o of trainParams.listOptimizers()"
                             [value]="o.id">
                     {{ o.name }}
@@ -77,15 +85,17 @@
             <h5>Set optimizer params</h5>
             <mat-form-field *ngFor="let param of optimizer.params">
                 <input matInput
-                type="number" step="any" min="0"
-                [placeholder]="param.name"
-                [value]="param.value"
-                (input)="onParamChange(param.id, $event.target.value)">
+                       required
+                       type="number" step="any" min="0"
+                       [placeholder]="param.name"
+                       [(ngModel)]="param.value">
             </mat-form-field>
         </div>
         <div class="centered step-buttons">
             <button mat-raised-button color="accent" matStepperPrevious>Back</button>
-            <button mat-raised-button color="accent" matStepperNext>Next</button>
+            <button mat-raised-button
+                    [disabled]="!isThirdStepCompleted()"
+                    color="accent" matStepperNext>Next</button>
         </div>
     </mat-step>
     <mat-step>
