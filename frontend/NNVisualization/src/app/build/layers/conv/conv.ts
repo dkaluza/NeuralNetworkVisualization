@@ -114,11 +114,11 @@ export class ConvLayer extends Layer {
             if (this._padding === Padding.Same) {
                 dim = shape[i + 1] / strides[i];
             } else { // this._padding === Padding.Valid
-                dim = (shape[i + 1] - strides[i] + 1) / strides[0];
+                dim = (shape[i + 1] - strides[i] + 1) / strides[i];
             }
             output.push(Math.ceil(dim));
         }
-        output.push(shape[shape.length - 1]);
+        output.push(this.numFilters);
         return output;
     }
 
