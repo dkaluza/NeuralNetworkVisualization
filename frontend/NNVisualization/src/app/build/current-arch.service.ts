@@ -17,17 +17,62 @@ export interface ErrorInfo {
 export class CurrentArchService {
 
     private _layers: Map<number, Layer>;
-    private _links;
+    private _links: ArchLink[];
     private _graph: Graph;
+    private _architectureId: number;
 
     constructor(private genericDialogs: GenericDialogsService) {
         this._layers = new Map;
         this._links = [];
         this._graph = new Graph();
+        this._architectureId = undefined;
+    }
+
+    get layers(): Map<number, Layer> {
+        return this._layers;
+    }
+
+    get links(): ArchLink[] {
+        return this._links;
+    }
+
+    get nodes(): number[] {
+        return this._graph.nodes;
+    }
+
+    get archId(): number {
+        return this._architectureId;
+    }
+
+    addNode(node: ArchNode) {
+        this._layers.set(
+            Number(node.id),
+            archNodeToLayer(node)
+        );
+        this._graph.addNode(Number(node.id));
+    }
+
+    removeNode(id: number) {
+        this._layers.delete(id);
+        this._graph.removeNode(id);
+        this._links = this._graph.links;
+    }
+
+    addLink(source: number, target: number) {
+        this._links.push({
+            source: String(source),
+            target: String(target)
+        });
+    }
+
+    removeLink(source: number, target: number) {
+        this._graph.removeLink(source, target);
+        this._links = this._graph.links;
     }
 
     setArchitecture(architecture: Architecture) {
         if (architecture) {
+            this._architectureId = architecture.id;
             this._layers = new Map;
             architecture.nodes.forEach(
                 node => {
@@ -41,6 +86,7 @@ export class CurrentArchService {
             this._graph = this._graphFromData(this._layers,
                                               this._links);
         } else {
+            this._architectureId = undefined;
             this._layers = new Map;
             this._links = [];
             this._graph = new Graph();

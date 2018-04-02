@@ -29,8 +29,7 @@
             </div>
         </div>
         <div class="vis-arch-container">
-            <app-vis-arch [(layers)]="nodes"
-                [(connections)]="links"
+            <app-vis-arch
                 [hasLayersBeenModified]="hasNodesBeenModified"
                 (modified)="onGraphModified($event)"
                 (nodeSelected)="onNodeSelected($event)"
