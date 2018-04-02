@@ -1,0 +1,50 @@
+<div class="node-container">
+    <div class="node-header">
+        <span><strong>ID: {{ layer.id }}</strong></span>
+    </div>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="Label"
+                        required
+                        [(ngModel)]="layer.label"
+                        (input)="onChange(true)">
+    </mat-form-field>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="# Filters"
+                        [(ngModel)]="layer.numFilters"
+                        type="number">
+    </mat-form-field>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="Kernel shape"
+                        [ngModel]="layer.kernelShape"
+                        (ngModelChange)="onKernelShapeChange($event)"
+                        [formControl]="kernelShapeFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="kernelShapeFormControl.hasError('pattern')">
+            Invalid shape, kernel must have 1, 2 or 3 elements
+        </mat-error>
+    </mat-form-field>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="Strides"
+                        [ngModel]="layer.strides"
+                        (ngModelChange)="onStridesChange($event)"
+                        [formControl]="stridesFormControl"
+                        [errorStateMatcher]="matcher">
+        <mat-error *ngIf="stridesFormControl.hasError('pattern')">
+            Invalid shape, strides must have 1, 2 or 3 elements
+        </mat-error>
+    </mat-form-field>
+    <mat-form-field class="node-element">
+        <mat-select placeholder="Activation" [(value)]="layer.activation">
+            <mat-option *ngFor="let act of activations" [value]="act.value">
+                {{ act.viewValue }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field class="node-element">
+        <mat-select placeholder="Padding" [(value)]="layer.padding">
+            <mat-option *ngFor="let p of paddings" [value]="p.value">
+                {{ p.viewValue }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>

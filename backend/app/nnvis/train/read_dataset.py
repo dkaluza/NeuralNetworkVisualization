@@ -21,24 +21,19 @@ def read_data(dataset_id, ids):
     ys = []
 
     dataset = Dataset.query.get(dataset_id)
-    labels = list(eval(dataset.labels))
-    labels = [str(l) for l in labels]
-    labels_dict = {}
-    for i, label in enumerate(labels):
-        labels_dict[label] = i
-    labels_num = len(labels)
+    labels_num = len(dataset.labels.split(','))
 
     _ids = list(map(int, ids))
     images = Image.query.filter(Image.id.in_(_ids)).all()
     for image in images:
         x = imageio.imread(os.path.join(dataset.path, image.relative_path))
         y = np.zeros(labels_num)
-        y[labels_dict[image.label]] = 1.
+        y[int(image.label)] = 1.
 
         xs.append(x)
         ys.append(y)
 
-    return np.array(xs), np.array(ys)
+    return [np.array(xs)], np.array(ys)
 
 
 def shuffle(ids):

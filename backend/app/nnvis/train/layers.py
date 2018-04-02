@@ -7,7 +7,7 @@ from app.utils import NnvisException
 def _get_activation(node):
     activation = node['params']['activation']
     if activation == 'None':
-        return None
+        return tf.identity
     elif activation == 'Sigmoid':
         return tf.sigmoid
     elif activation == 'Relu':
@@ -27,64 +27,103 @@ def _get_padding(node):
         raise NnvisException('Unknown padding: {}'.format(padding))
 
 
-def _build_input_op(node, input_ops):
+def _build_input_op(node, input_ops, is_training):
     shape = node['params']['outputShape']
     shape = [d if d > 0 else None for d in shape]
-    return tf.placeholder(tf.float32, shape=shape)
+    inputId = node['params']['inputId']
+    op = tf.placeholder(tf.float32, shape=shape,
+                        name='input/{0}'.format(inputId))
+    return tf.identity(op, name='{0}/logits'.format(node['id']))
 
 
-def _build_fc_op(node, input_ops):
+def _build_fc_op(node, input_ops, is_training):
     x = input_ops[0]
     x = layers.flatten(x)
-    return layers.fully_connected(
-            x, num_outputs=node['params']['numOutputs'],
-            activation_fn=_get_activation(node))
+    with tf.name_scope(node['id']):
+        op = layers.fully_connected(
+                x, num_outputs=node['params']['numOutputs'],
+                activation_fn=tf.identity)
+        op = tf.identity(op, name='logits')
+        return _get_activation(node)(op, name=node['params']['activation'])
 
 
-def _build_conv_op(node, input_ops):
+def _build_conv_op(node, input_ops, is_training):
     x = input_ops[0]
     num_filters = node['params']['numFilters']
     kernel_size = node['params']['kernelShape']
     strides = node['params']['strides']
 
-    return layers.conv2d(
-            x, num_outputs=num_filters,
-            kernel_size=kernel_size,
-            stride=strides,
-            padding=_get_padding(node),
-            activation_fn=_get_activation(node))
+    with tf.name_scope(node['id']):
+        op = layers.conv2d(
+                x, num_outputs=num_filters,
+                kernel_size=kernel_size,
+                stride=strides,
+                padding=_get_padding(node),
+                activation_fn=tf.identity)
+        op = tf.identity(op, name='logits')
+        return _get_activation(node)(op, name=node['params']['activation'])
 
 
-def _build_pool_op(node, input_ops):
+def _build_pool_op(node, input_ops, is_training):
     x = input_ops[0]
     kernel_size = node['params']['kernelShape']
     strides = node['params']['strides']
 
-    if node['params']['pool'] == 'Max':
-        return layers.max_pool2d(x,
-                                 kernel_size=kernel_size,
-                                 stride=strides,
-                                 padding=_get_padding(node))
-    elif node['params']['pool'] == 'Avarage':
-        return layers.avg_pool2d(x,
-                                 kernel_size=kernel_size,
-                                 stride=strides,
-                                 padding=_get_padding(node))
-    else:
-        raise NnvisException('Unkown pool: {}'.format(node['params']['pool']))
+    with tf.name_scope(node['id']):
+        if node['params']['pool'] == 'Max':
+            pool_op = layers.max_pool2d(
+                    x,
+                    kernel_size=kernel_size,
+                    stride=strides,
+                    padding=_get_padding(node))
+        elif node['params']['pool'] == 'Avarage':
+            pool_op = layers.avg_pool2d(
+                    x,
+                    kernel_size=kernel_size,
+                    stride=strides,
+                    padding=_get_padding(node))
+        else:
+            raise NnvisException('Unkown pool: {}'
+                                 .format(node['params']['pool']))
+        return tf.identity(pool_op, name='logits')
 
 
-def build_op(node, map_op, inputs):
+def _build_dropout_op(node, input_ops, is_training):
+    x = input_ops[0]
+    keep_prob = float(node['params']['keepProb'])
+    keep_prob = tf.where(is_training, keep_prob, 1.0)
+    with tf.name_scope(node['id']):
+        op = layers.dropout(x, keep_prob=keep_prob)
+        return tf.identity(op, name='logits')
+
+
+def _build_batch_norm_op(node, input_ops, is_training):
+    x = input_ops[0]
+    with tf.name_scope(node['id']):
+        op = layers.batch_norm(
+                x,
+                decay=node['params']['decay'],
+                center=node['params']['center'],
+                scale=node['params']['scale'],
+                is_training=is_training
+                )
+        return tf.identity(op, name='logits')
+
+
+def build_op(node, map_op, inputs, is_training):
     input_ops = [map_op[v] for v in inputs]
 
-    with tf.name_scope(node['id']):
-        if node['layerType'] == 'input':
-            return _build_input_op(node, input_ops)
-        elif node['layerType'] == 'fc':
-            return _build_fc_op(node, input_ops)
-        elif node['layerType'] == 'conv':
-            return _build_conv_op(node, input_ops)
-        elif node['layerType'] == 'pool':
-            return _build_pool_op(node, input_ops)
-        else:
-            raise NnvisException('Unknown type of layer')
+    if node['layerType'] == 'input':
+        return _build_input_op(node, input_ops, is_training)
+    elif node['layerType'] == 'fc':
+        return _build_fc_op(node, input_ops, is_training)
+    elif node['layerType'] == 'conv':
+        return _build_conv_op(node, input_ops, is_training)
+    elif node['layerType'] == 'pool':
+        return _build_pool_op(node, input_ops, is_training)
+    elif node['layerType'] == 'dropout':
+        return _build_dropout_op(node, input_ops, is_training)
+    elif node['layerType'] == 'batch_norm':
+        return _build_batch_norm_op(node, input_ops, is_training)
+    else:
+        raise NnvisException('Unknown type of layer')

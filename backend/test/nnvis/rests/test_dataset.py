@@ -52,7 +52,7 @@ def good_zipfile_imgs():
     return (retfile, 'imgs.zip')
 
 DATASET_NAME = 'testname'
-DATASET_LABELS = 'testlabel'
+DATASET_LABELS = ['class1','class2']
 DATASET_DESCRIPTION = 'testdesc'
 
 class UploadNewDatasetTest(unittest.TestCase):
@@ -69,7 +69,6 @@ class UploadNewDatasetTest(unittest.TestCase):
     def test_nofile(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
             name=DATASET_NAME,
-            labels=DATASET_LABELS,
             description=DATASET_DESCRIPTION
         ), mimetype='multipart/form-data')
 
@@ -80,7 +79,6 @@ class UploadNewDatasetTest(unittest.TestCase):
 
     def test_noname(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-            labels=DATASET_LABELS,
             description=DATASET_DESCRIPTION,
             file=bad_zipfile()
         ), mimetype='multipart/form-data')
@@ -105,7 +103,6 @@ class UploadNewDatasetTest(unittest.TestCase):
     def test_bad_zipfile(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
             name=DATASET_NAME,
-            labels=DATASET_LABELS,
             description=DATASET_DESCRIPTION,
             file=bad_zipfile()
         ), mimetype='multipart/form-data')
@@ -118,7 +115,6 @@ class UploadNewDatasetTest(unittest.TestCase):
     def test_zipfile_noimgs(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
             name=DATASET_NAME,
-            labels=DATASET_LABELS,
             description=DATASET_DESCRIPTION,
             file=good_zipfile_noimgs()
         ), mimetype='multipart/form-data')
@@ -144,7 +140,7 @@ class UploadNewDatasetTest(unittest.TestCase):
         self.assertEqual(len(datasets), 1)
         ds = datasets[0]
         self.assertEqual(ds.name, DATASET_NAME)
-        self.assertEqual(ds.labels, DATASET_LABELS)
+        self.assertEqual(eval('[' + ds.labels + ']'), DATASET_LABELS)
         self.assertEqual(ds.description, DATASET_DESCRIPTION)
 
     def _assertImagesCreated(self):
@@ -163,14 +159,13 @@ class UploadNewDatasetTest(unittest.TestCase):
         self.assertEqual(images[1].relative_path, '01.jpg')
         self.assertEqual(images[2].relative_path, '69.jpg')
 
-        self.assertEqual(images[0].label, 'class2')
-        self.assertEqual(images[1].label, 'class1')
-        self.assertEqual(images[2].label, 'class1')
+        self.assertEqual(images[0].label, '1')
+        self.assertEqual(images[1].label, '0')
+        self.assertEqual(images[2].label, '0')
 
     def test_zipfile_someimgs(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
             name=DATASET_NAME,
-            labels=DATASET_LABELS,
             description=DATASET_DESCRIPTION,
             file=good_zipfile_imgs()
         ), mimetype='multipart/form-data')

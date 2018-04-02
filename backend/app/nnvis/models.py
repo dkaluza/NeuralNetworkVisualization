@@ -23,7 +23,7 @@ class CRUD():
 
 class Architecture(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True, nullable=False)
+    name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text(256))
     graph = db.Column(db.Text, nullable=False)
     last_used = db.Column(db.Date)
@@ -31,6 +31,10 @@ class Architecture(db.Model, CRUD):
     models = db.relationship('Model', backref='architecture', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                         nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'user_id', name='_name_userid_uc'),
+    )
 
     def __init__(self, name, description, graph, user_id):
         self.name = name
@@ -61,7 +65,7 @@ class Architecture(db.Model, CRUD):
 
 class Model(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True, nullable=False)
+    name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text(256))
     weights_path = db.Column(db.Text(256), nullable=False)
     arch_id = db.Column(db.Integer, db.ForeignKey('architecture.id'),
@@ -70,6 +74,11 @@ class Model(db.Model, CRUD):
     training_params = db.Column(db.Text)
     validation_loss = db.Column(db.Float)
     training_loss = db.Column(db.Float)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'arch_id',
+                            name='_name_archid_uc'),
+    )
 
     def __init__(self, name, description, weights_path,
                  arch_id, dataset_id=None, params=None,
@@ -106,7 +115,7 @@ class Model(db.Model, CRUD):
 
 class Dataset(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=64, nullable=False)
+    name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text(256))
     path = db.Column(db.Text(256), nullable=False)
     labels = db.Column(db.Text(256), nullable=False)
@@ -114,6 +123,10 @@ class Dataset(db.Model, CRUD):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     images = db.relationship('Image', cascade='all, delete-orphan',
                              backref='dataset', lazy=True)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'user_id', name='_name_userid_uc'),
+    )
 
     def __init__(self, name, description, path, labels, user_id):
         self.name = name
@@ -126,14 +139,21 @@ class Dataset(db.Model, CRUD):
         return '<Dataset {id} {name} of user {user_id}>'.format(
                 id=self.id, name=self.name, user_id=self.user_id)
 
+    def class_num_to_name_dict(self):
+        return {str(i): c for i, c in enumerate(self.labels.split(','))}
+
 
 class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=64, nullable=False)
+    name = db.Column(db.String(64), nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
     label = db.Column(db.Text(256), nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
                            nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'dataset_id', name='_name_dataset_id_uc'),
+    )
 
     def __init__(self, imageName, relPath, label, dataset_id):
         self.name = imageName
@@ -142,7 +162,8 @@ class Image(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def json(self):
-        return {'imageName': self.imageName, 'imagePath': self.imagePath}
+        return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
+                'label': self.label, 'dataset_id': self.dataset_id}
 
 
 class User(db.Model, CRUD):
