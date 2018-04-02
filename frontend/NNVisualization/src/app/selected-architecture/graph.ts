@@ -87,37 +87,39 @@ export class Graph {
     }
 
     checkForLoop(): number[] {
-        const white = new Set(this._nodes);
-        const gray = new Set;
-        const black = new Set;
+        const notVisited = new Set(this._nodes);
+        const beingVisited = new Set;
+        const visited = new Set;
+        // map for reconstructing loop
         const loopMap = new Map;
 
+        // function that recursively visit nodes
         const visit = n => {
             const links = this._links.get(n);
             for (let i = 0; i < links.length; i += 1) {
                 const v = links[i];
-                if (white.has(v)) {
-                    white.delete(v);
-                    gray.add(v);
+                if (notVisited.has(v)) {
+                    notVisited.delete(v);
+                    beingVisited.add(v);
                     loopMap.set(v, n);
                     const ret = visit(v);
                     if (ret !== undefined) {
                         return ret;
                     }
-                } else if (gray.has(v)) {
+                } else if (beingVisited.has(v)) {
                     loopMap.set(v, n);
                     return v;
                 }
             }
-            gray.delete(n);
-            black.add(n);
+            beingVisited.delete(n);
+            visited.add(n);
             return undefined;
         };
 
-        while (white.size > 0) {
-            let n = white.values().next().value;
-            white.delete(n);
-            gray.add(n);
+        while (notVisited.size > 0) {
+            let n = notVisited.values().next().value;
+            notVisited.delete(n);
+            beingVisited.add(n);
             loopMap.set(n, undefined);
             const ret = visit(n);
             if (ret !== undefined) {
