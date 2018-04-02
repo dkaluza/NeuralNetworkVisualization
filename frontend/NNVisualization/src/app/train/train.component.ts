@@ -17,9 +17,8 @@ interface Element {
 })
 export class TrainComponent implements OnInit {
 
-    nepochs = '10';
-    batchSize = '32';
-    learningRate = '0.1';
+    nepochs = 10;
+    batchSize = 32;
     selectedDatasetId: number = undefined;
     selectedDatasetName: string = undefined;
 
@@ -61,7 +60,7 @@ export class TrainComponent implements OnInit {
             'name': 'Epsilon', 'value': 'epsilon', 'default': 0.00000001
         }]
     };
-    optimizerParams = undefined;
+    optimizerParams: Map<string, any>;
 
     displayedColumns = ['position', 'name'];
 
@@ -78,6 +77,28 @@ export class TrainComponent implements OnInit {
 
     ngOnInit() {
         this._updateDatasetList();
+    }
+
+    isFirstStepCompleted(): boolean {
+        return this.selectedDatasetId !== undefined;
+    }
+
+    isSecondStepCompleted(): boolean {
+        return this.nepochs &&
+               this.batchSize &&
+               this.loss !== undefined;
+    }
+
+    isThirdStepCompleted(): boolean {
+        if (this.optimizer === undefined) {
+            return false;
+        }
+        for (const key of Array.from(this.optimizerParams.keys())) {
+            if (!this.optimizerParams.get(key)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     _updateDatasetList() {

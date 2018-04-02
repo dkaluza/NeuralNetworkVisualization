@@ -139,6 +139,9 @@ class Dataset(db.Model, CRUD):
         return '<Dataset {id} {name} of user {user_id}>'.format(
                 id=self.id, name=self.name, user_id=self.user_id)
 
+    def class_num_to_name_dict(self):
+        return {str(i): c for i, c in enumerate(self.labels.split(','))}
+
 
 class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
@@ -159,7 +162,8 @@ class Image(db.Model, CRUD):
         self.dataset_id = dataset_id
 
     def json(self):
-        return {'imageName': self.imageName, 'imagePath': self.imagePath}
+        return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
+                'label': self.label, 'dataset_id': self.dataset_id}
 
 
 class User(db.Model, CRUD):

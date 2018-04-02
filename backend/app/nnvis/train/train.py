@@ -47,6 +47,7 @@ class TrainThread(threading.Thread):
         self._tfmodel = TFModel(self._nodes, self._links)
         self._X = self._tfmodel.get_inputs()
         self._pred = self._tfmodel.get_output()
+        self._is_training = self._tfmodel.get_is_training()
 
         with self._tfmodel.get_graph().as_default():
             self._y = tf.placeholder(tf.float32,
@@ -97,6 +98,7 @@ class TrainThread(threading.Thread):
                     x: batch_x for x, batch_x in zip(self._X, batch_xs)
                     }
             feed_dict[self._y] = batch_y
+            feed_dict[self._is_training] = train
 
             if train:
                 _, loss, acc = sess.run([self._opt, self._loss, self._acc],
