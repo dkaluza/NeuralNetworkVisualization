@@ -87,13 +87,37 @@ export class Graph {
     }
 
     checkForLoop(): number[] {
+        /*
+         * notVisited - nodes that weren't yet visited
+         * beingVisited - nodes that we started visiting,
+         *    but some children are still not done
+         * visited - nodes that were visited and all its
+         *    children were visited
+         */
         const notVisited = new Set(this._nodes);
         const beingVisited = new Set;
         const visited = new Set;
-        // map for reconstructing loop
+        /*
+         * map for reconstructing loop
+         * every node remebers from which node
+         *      it was visited
+         */
         const loopMap = new Map;
 
-        // function that recursively visit nodes
+        /*
+         * function that recursively visit nodes
+         *
+         * it checks all children (v) of a node (n)
+         * if v is in notVisited set:
+         *      v is moved to beingVisited
+         *      parent v is set to n
+         *      recursively visit v
+         * if v is in beingVisited it means that
+         *      we found a loop
+         * undefined means that no loop was found
+         * number u as result means that there is a loop,
+         *      and node u is in a loop
+         */
         const visit = n => {
             const links = this._links.get(n);
             for (let i = 0; i < links.length; i += 1) {
