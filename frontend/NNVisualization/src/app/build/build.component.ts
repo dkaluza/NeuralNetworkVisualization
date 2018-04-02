@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { SelectedArchitectureService, ErrorInfo } from '../selected-architecture/selected-architecture.service';
+import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
+import { CurrentArchService, ErrorInfo } from './current-arch.service';
 import { Restangular } from 'ngx-restangular';
 
 import { VisArchComponent } from './vis-arch/vis-arch.component';
 
 import { Architecture, ArchNode, ArchLink } from '../selected-architecture/architecture';
-import { Graph } from '../selected-architecture/graph';
+import { Graph } from './graph';
 
 import { Layer } from './layers/layer/layer';
 import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
@@ -26,17 +27,18 @@ export class BuildComponent implements OnInit {
 
     graphErrorInfo: ErrorInfo;
 
-    constructor(private selArchService: SelectedArchitectureService,
+    constructor(
+        private selArchService: SelectedArchitectureService,
+        private currentArch: CurrentArchService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
-        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
     }
 
     ngOnInit() {
         this.nodes = this.selArchService.currentNodes;
         this.links = this.selArchService.currentLinks;
 
-        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
+        this.graphErrorInfo = this.currentArch.checkIfArchIsValid(true);
     }
 
     private _unselectNode(): void {
