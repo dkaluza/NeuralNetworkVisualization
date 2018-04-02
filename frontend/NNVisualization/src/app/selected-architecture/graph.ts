@@ -120,8 +120,7 @@ export class Graph {
          */
         const visit = n => {
             const links = this._links.get(n);
-            for (let i = 0; i < links.length; i += 1) {
-                const v = links[i];
+            for (const v of links) {
                 if (notVisited.has(v)) {
                     notVisited.delete(v);
                     beingVisited.add(v);
