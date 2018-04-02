@@ -18,11 +18,18 @@ interface GraphNode {
     label: string;
     selected: boolean;
     color: string;
+    x?: number;
+    y?: number;
 }
 
 interface GraphLink {
     source: string;
     target: string;
+}
+
+interface NodePos {
+    x: number;
+    y: number;
 }
 
 @Component({
@@ -51,6 +58,7 @@ export class VisArchComponent implements OnInit, OnChanges {
     // this is data for visualizing architecture
     nodes: GraphNode[] = [];
     links: GraphLink[] = [];
+    positions: Map<String, NodePos>;
 
     // stores only graph structure
     private _graph: Graph;
@@ -69,6 +77,7 @@ export class VisArchComponent implements OnInit, OnChanges {
 
     constructor(private selArchService: SelectedArchitectureService) {
         this._graph = new Graph();
+        this.positions = new Map;
         // this._layerData = [];
     }
 
@@ -105,6 +114,14 @@ export class VisArchComponent implements OnInit, OnChanges {
                 };
             }
         );
+        this.nodes = this.nodes.map(node => {
+            if (this.positions.has(node.id)) {
+                const pos = this.positions.get(node.id);
+                node.x = pos.x;
+                node.y = pos.y;
+            }
+            return node;
+        });
         this.links = this._graph.links;
     }
 
@@ -154,6 +171,12 @@ export class VisArchComponent implements OnInit, OnChanges {
     }
 
     private _updateView(): void {
+        this.positions = new Map;
+        this.nodes.forEach(node => {
+            this.positions.set(
+                node.id, {x: node.x, y: node.y}
+            );
+        });
         this._setGraphData();
 
         this.modified.emit({nodes: this.layers, links: this.links});

@@ -18,7 +18,6 @@
                [links]="links"
                [nodes]="nodes"
                [orientation]="orientation"
-               [curve]="curve"
                [draggingEnabled]="!connectingMode && !deletingMode"
                (select)="onNodeSelect($event)"
                ngxDraggable
@@ -49,8 +48,9 @@
                           [attr.height]="node.height"
                           [attr.fill]="node.color" />
                 <svg:text alignment-baseline="central"
-                          [attr.x]="10"
-                          [attr.y]="node.height / 2">
+                          transform="rotate(-90)"
+                          [attr.x]="-node.height + 10"
+                          [attr.y]="node.width / 2">
                     {{node.label}}
                 </svg:text>
             </svg:g>
