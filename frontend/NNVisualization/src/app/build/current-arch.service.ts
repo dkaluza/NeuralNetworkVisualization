@@ -17,13 +17,11 @@ export interface ErrorInfo {
 export class CurrentArchService {
 
     private _layers: Map<number, Layer>;
-    private _links: ArchLink[];
     private _graph: Graph;
     private _architectureId: number;
 
     constructor(private genericDialogs: GenericDialogsService) {
         this._layers = new Map;
-        this._links = [];
         this._graph = new Graph();
         this._architectureId = undefined;
     }
@@ -33,7 +31,7 @@ export class CurrentArchService {
     }
 
     get links(): ArchLink[] {
-        return this._links;
+        return this._graph.links;
     }
 
     get nodes(): number[] {
@@ -55,19 +53,14 @@ export class CurrentArchService {
     removeNode(id: number) {
         this._layers.delete(id);
         this._graph.removeNode(id);
-        this._links = this._graph.links;
     }
 
     addLink(source: number, target: number) {
-        this._links.push({
-            source: String(source),
-            target: String(target)
-        });
+        this._graph.addLink(source, target);
     }
 
     removeLink(source: number, target: number) {
         this._graph.removeLink(source, target);
-        this._links = this._graph.links;
     }
 
     setArchitecture(architecture: Architecture) {
@@ -82,13 +75,13 @@ export class CurrentArchService {
                     );
                 }
             );
-            this._links = architecture.links;
-            this._graph = this._graphFromData(this._layers,
-                                              this._links);
+            this._graph = this._graphFromData(
+                this._layers,
+                architecture.links
+            );
         } else {
             this._architectureId = undefined;
             this._layers = new Map;
-            this._links = [];
             this._graph = new Graph();
         }
     }
@@ -108,7 +101,7 @@ export class CurrentArchService {
     toDict() {
         const ret = {
             nodes: [],
-            links: this._links
+            links: this._graph.links
         };
         this._layers.forEach(
             (node) => { ret.nodes.push(node.toDict()); }

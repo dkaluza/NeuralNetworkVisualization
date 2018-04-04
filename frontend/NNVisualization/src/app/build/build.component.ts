@@ -33,8 +33,10 @@ export class BuildComponent implements OnInit {
     }
 
     ngOnInit() {
-        if (this.selArchService.architecture.id !== this.currentArch.archId) {
-            this.currentArch.setArchitecture(this.selArchService.architecture);
+        if (this.selArchService.architecture) {
+            if (this.selArchService.architecture.id !== this.currentArch.archId) {
+                this.currentArch.setArchitecture(this.selArchService.architecture);
+            }
         }
 
         this.graphErrorInfo = this.currentArch.checkIfArchIsValid(true);

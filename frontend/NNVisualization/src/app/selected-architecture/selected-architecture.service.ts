@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Architecture, ArchNode, ArchLink } from './architecture';
+import { Architecture } from './architecture';
 import { Model } from './model';
-
-import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 
 @Injectable()
 export class SelectedArchitectureService {
@@ -10,7 +8,7 @@ export class SelectedArchitectureService {
     private _architecture: Architecture;
     private _model: Model;
 
-    constructor(private genericDialogs: GenericDialogsService) { }
+    constructor() { }
 
     get architecture(): Architecture {
         return this._architecture;
