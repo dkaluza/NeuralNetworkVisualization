@@ -6,23 +6,24 @@ import json
 from app.nnvis.models import Model, Architecture
 from app.nnvis.rests.protected_resource import ProtectedResource
 
-
-LOSS_NAMES = {
-        'none': None,
-        'logloss': 'Logloss',
-        'mse': 'Mean Squared Error'
-        }
-
-OPTIMIZER_NAMES = {
-        'none': None,
-        'adam': 'Adam',
-        'sgd': 'Gradient Descent'
-        }
+from app.nnvis.train.losses import get_loss
+from app.nnvis.train.optimizers import get_optimizer
 
 
 def model_to_dict(model):
     if model.training_params is not None:
         params = json.loads(model.training_params)
+        params['loss'] = get_loss(params['loss'])['name']
+
+        opt = get_optimizer(params['optimizer'])
+        params['optimizer'] = opt['name']
+        params['optimizer_params'] = [
+            {
+                'name': p['name'],
+                'value': params['optimizer_params'][p['id']]
+            }
+            for p in opt['params']
+        ]
     else:
         params = {
                 'loss': 'none',
@@ -38,8 +39,8 @@ def model_to_dict(model):
         'description': model.description,
         'valid_loss': model.validation_loss,
         'train_loss': model.training_loss,
-        'loss': LOSS_NAMES[params['loss']],
-        'optimizer': OPTIMIZER_NAMES[params['optimizer']],
+        'loss': params['loss'],
+        'optimizer': params['optimizer'],
         'optimizer_params': params['optimizer_params'],
         'batch_size': params['batch_size'],
         'nepochs': params['nepochs']

@@ -55,7 +55,8 @@
                 <mat-form-field>
                     <mat-select placeholder="Loss function" required
                                 (selectionChange)="onLossChange($event.value)">
-                        <mat-option *ngFor="let l of losses" [value]="l.value">
+                        <mat-option *ngFor="let l of trainParams.listLosses()"
+                                    [value]="l.id">
                             {{ l.name }}
                         </mat-option>
                     </mat-select>
@@ -74,20 +75,20 @@
         <mat-form-field>
             <mat-select placeholder="Optimizer" required
                         (selectionChange)="onOptimizerChange($event.value)">
-                <mat-option *ngFor="let o of optimizers" [value]="o.value">
+                <mat-option *ngFor="let o of trainParams.listOptimizers()"
+                            [value]="o.id">
                     {{ o.name }}
                 </mat-option>
             </mat-select>
         </mat-form-field>
         <div *ngIf="optimizer">
             <h5>Set optimizer params</h5>
-            <mat-form-field *ngFor="let param of optimizerParamsSets[optimizer]">
+            <mat-form-field *ngFor="let param of optimizer.params">
                 <input matInput
                        required
                        type="number" step="any" min="0"
                        [placeholder]="param.name"
-                       [value]="param.default"
-                       (input)="onParamChange(param.value, $event.target.value)">
+                       [(ngModel)]="param.value">
             </mat-form-field>
         </div>
         <div class="centered step-buttons">
@@ -104,8 +105,21 @@
                 <div>Selected dataset: {{ selectedDatasetName }}</div>
                 <div>Selected batch size: {{ batchSize }}</div>
                 <div>Selected num. of epochs: {{ nepochs }}</div>
-                <div>Selected optimizer: {{ optimizerName }}</div>
-                <div>Selected loss function: {{ lossName }}</div>
+                <ng-container *ngIf="optimizer; else noOpt">
+                    <div>Selected optimizer: {{ optimizer.name }}</div>
+                    <div *ngFor="let param of optimizer.params">
+                        {{ param.name }}: {{ param.value }}
+                    </div>
+                </ng-container>
+                <ng-template #noOpt>
+                    <div class="error-param">No optimizer selected</div>
+                </ng-template>
+                <ng-container *ngIf="loss; else noLoss">
+                    <div>Selected loss function: {{ loss.name }}</div>
+                </ng-container>
+                <ng-template #noLoss>
+                    <div class="error-param">No loss selected</div>
+                </ng-template>
             </div>
         </div>
         <div class="centered">
