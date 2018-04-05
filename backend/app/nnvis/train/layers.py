@@ -7,7 +7,6 @@ from app.utils import NnvisException
 def _get_activation(node):
     activation = node['params']['activation']
     if activation == 'None':
-        print('none activation')
         return tf.identity
     elif activation == 'Sigmoid':
         return tf.sigmoid
