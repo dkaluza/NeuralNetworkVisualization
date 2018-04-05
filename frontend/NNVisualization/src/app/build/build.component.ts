@@ -29,6 +29,7 @@ export class BuildComponent implements OnInit {
     constructor(private selArchService: SelectedArchitectureService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
+        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
     }
 
     ngOnInit() {
