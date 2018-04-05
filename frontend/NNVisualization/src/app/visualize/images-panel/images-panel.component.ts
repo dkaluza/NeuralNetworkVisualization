@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Image } from '../image.model';
 import { MatTableDataSource } from '@angular/material';
 import { VisualizeService } from '../visualize.service';
 import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
+
 
 @Component({
     selector: 'app-images-panel',
@@ -12,22 +13,24 @@ import { SelectedArchitectureService } from '../../selected-architecture/selecte
 export class ImagesPanelComponent implements OnInit {
 
     placeholder_img = 'api/static/placeholder2.jpg';
-    currentImage: Image;
+    currentImage: Image; // = new Image(-1, -1, '', '', -1);
     currentImageVis = '';
     currentAlgorithm = 0;
     currentImageId = 0;
+    currentImageName: any;
     imagesList: Image[] = [];
-    // image1: Image;
-    // image2: Image;
+
     displayedColumns = ['class_number', 'class_name', 'score'];
     dataSource = new MatTableDataSource();
 
     constructor(private visualizeService: VisualizeService,
-                private selectedService: SelectedArchitectureService) {
+                private selectedService: SelectedArchitectureService,
+                private cd: ChangeDetectorRef) {
+
     }
 
     ngOnInit() {
-
+        this.onGetDataset();
     }
 
     onGetNextImage() {
@@ -39,6 +42,8 @@ export class ImagesPanelComponent implements OnInit {
             index %= this.imagesList.length;
         }
         this.currentImage = this.imagesList[index];
+        this.currentImageName = this.currentImage.imageName;
+        console.log(this.currentImageName);
         this.onGetImage(this.currentImage);
     }
 
@@ -51,6 +56,8 @@ export class ImagesPanelComponent implements OnInit {
             index += this.imagesList.length;
         }
         this.currentImage = this.imagesList[index];
+        this.currentImageName = this.currentImage.imageName;
+        console.log(this.currentImageName);
         this.onGetImage(this.currentImage);
     }
 
@@ -58,17 +65,20 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.imagesList = [];
         this.visualizeService.getDataset(model.id).subscribe(response => {
-            const minLength = Math.min(30, response['images'].length);
-            for (let i = 0; i < minLength; i++) {
+            const len = response['images'].length;
+            for (let i = 0; i < len; i++) {
                 const im = response['images'][i];
                 const image = new Image(im.id, im.dataset_id, im.name, im.relative_path, im.label);
                 this.imagesList.push(image);
             }
+            // this looks like wierd hack but it is needed for ng-select to detect changes
+            // ng-select developers claim it's faster this way
+            this.imagesList = [...this.imagesList];
         });
     }
 
     onSelectorSelect(image) {
-        this.currentImage = image.value;
+        this.currentImage = image;
         this.onGetImage(this.currentImage);
     }
 
@@ -92,7 +102,6 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.visualizeService.doInference(model.id, this.currentImage.imageId)
             .subscribe(response => {
-                console.log(response);
                 const scores = [];
                 for (let i = 0; i < response['class_scores'].length; i++) {
                     const score = response['class_scores'][i];
@@ -105,5 +114,4 @@ export class ImagesPanelComponent implements OnInit {
                 this.dataSource = new MatTableDataSource(scores);
             });
     }
-
 }

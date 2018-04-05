@@ -30,3 +30,17 @@ img {
     overflow: auto;
     max-height: 500px;
 }
+
+
+.ng-select {
+    display: block;
+    min-height: 500px;
+    min-width: 300px;
+}
+
+
+.select_group {
+    display: block;
+    min-height: 500px;
+    min-width: 300px;
+}
