@@ -1,3 +1,38 @@
-<p>
-  trained-models works!
-</p>
+<div fxLayout="row"
+     fxLayoutAlign="space-around">
+    <div fxFlex="50"
+         fxLayout="column"
+         fxLayoutAlign="center stretch">
+        <div class="filter-header">
+            <mat-form-field>
+                <input matInput
+                       (keyup)="applyFilter(archDataSource, $event.target.value)"
+                       placeholder="Filter">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-table #archs
+                       [dataSource]="modelDataSource">
+                <ng-container matColumnDef="position">
+                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                    <mat-cell *matCellDef="let elem"> {{elem.name}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="archName">
+                    <mat-cell *matCellDef="let elem"> {{elem.archName}} </mat-cell>
+                </ng-container>
+                <mat-header-row *matHeaderRowDef=""></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"
+                         (click)="selectModel(row)"
+                         [class.selected-row]="row.id === selctedModelID">
+                </mat-row>
+            </mat-table>
+        </div>
+    </div>
+    <div fxFlex="50"
+         fxLayout="column"
+         fxLayoutAlign="center stretch">
+        <h1>BLEH</h1>
+    </div>
+</div>
