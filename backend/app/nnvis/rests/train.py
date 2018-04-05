@@ -6,8 +6,8 @@ from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Dataset, Architecture, Model
 from app.nnvis.train.train import TrainThread
 
-from app.nnvis.train.losses import list_losses
-from app.nnvis.train.optimizers import list_optimizers
+from app.nnvis.train.losses import LOSSES_LIST
+from app.nnvis.train.optimizers import OPTIMIZERS_LIST
 
 
 ARGS_LIST = [
@@ -77,9 +77,9 @@ class TrainModel(ProtectedResource):
 
 class ListLosses(ProtectedResource):
     def get(self):
-        return list_losses()
+        return LOSSES_LIST
 
 
 class ListOptimizers(ProtectedResource):
     def get(self):
-        return list_optimizers()
+        return OPTIMIZERS_LIST

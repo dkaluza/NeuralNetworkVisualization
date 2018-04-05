@@ -7,8 +7,7 @@ def _loss(name, id):
     return {'name': name, 'id': id}
 
 
-def list_losses():
-    return [
+LOSSES_LIST = [
         _loss('Logloss', 'logloss'),
         _loss('Mean squared error', 'mse'),
         _loss('Absolute difference', 'abs_diff'),
@@ -17,8 +16,9 @@ def list_losses():
 
 
 def get_loss(id):
-    return list(filter(lambda loss: loss['id'] == id,
-                       list_losses()))[0]
+    return list(filter(
+        lambda loss: loss['id'] == id,
+        LOSSES_LIST))[0]
 
 
 def _calculate_logloss(y, pred):

@@ -16,13 +16,12 @@ def _optimizer(name, id, params):
             }
 
 
-def list_optimizers():
-    return [
+OPTIMIZERS_LIST = [
         _optimizer('Adam', 'adam',
                    [('Learning rate', 'lr', 0.001),
                     ('Beta 1', 'beta1', 0.9),
                     ('Beta 2', 'beta2', 0.999),
-                    ('Epsilon', 'eps', 1e-8)]),
+                    ('Epsilon', 'epsilon', 1e-8)]),
         _optimizer('Gradient descent', 'sgd',
                    [('Learning rate', 'lr', 0.1)]),
         _optimizer('Momentum', 'momentum',
@@ -43,8 +42,9 @@ def list_optimizers():
 
 
 def get_optimizer(id):
-    return list(filter(lambda opt: opt['id'] == id,
-                       list_optimizers()))[0]
+    return list(filter(
+        lambda opt: opt['id'] == id,
+        OPTIMIZERS_LIST))[0]
 
 
 def _adam(params):
