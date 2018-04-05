@@ -1,15 +1,21 @@
-<mat-horizontal-stepper linear class="training-params">
+<mat-horizontal-stepper linear
+                        class="training-params">
+    <mat-step>
+        <ng-template matStepLabel>Currently trained models</ng-template>
+        <app-trained-models></app-trained-models>
+    </mat-step>
     <mat-step [completed]="isFirstStepCompleted()">
         <ng-template matStepLabel>Select dataset</ng-template>
         <div class="filter-header">
             <mat-form-field>
                 <input matInput
-                      (keyup)="applyFilter(datasetDataSource, $event.target.value)"
-                      placeholder="Filter">
+                       (keyup)="applyFilter(datasetDataSource, $event.target.value)"
+                       placeholder="Filter">
             </mat-form-field>
         </div>
         <div>
-            <mat-table #archs [dataSource]="datasetDataSource">
+            <mat-table #archs
+                       [dataSource]="datasetDataSource">
                 <ng-container matColumnDef="position">
                     <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
                 </ng-container>
@@ -18,7 +24,8 @@
                 </ng-container>
 
                 <mat-header-row *matHeaderRowDef=""></mat-header-row>
-                <mat-row mat-button *matRowDef="let row; columns: displayedColumns;"
+                <mat-row mat-button
+                         *matRowDef="let row; columns: displayedColumns;"
                          (click)="selectDataset(row)"
                          [class.selected-dataset]="row.id === selectedDatasetId">
                 </mat-row>
@@ -27,17 +34,20 @@
         <div class="centered step-buttons">
             <button mat-raised-button
                     [disabled]="!isFirstStepCompleted()"
-                    color="accent" matStepperNext>Next</button>
+                    color="accent"
+                    matStepperNext>Next</button>
         </div>
     </mat-step>
     <mat-step [completed]="isSecondStepCompleted()">
         <ng-template matStepLabel>Select parameters</ng-template>
-        <div fxLayout="column" fxLayoutGap="20px">
+        <div fxLayout="column"
+             fxLayoutGap="20px">
             <div fxFlex>
                 <mat-form-field>
                     <input matInput
                            required
-                           type="number" min="1"
+                           type="number"
+                           min="1"
                            placeholder="Number of epochs"
                            [(ngModel)]="nepochs">
                 </mat-form-field>
@@ -46,14 +56,16 @@
                 <mat-form-field>
                     <input matInput
                            required
-                           type="number" min="1"
+                           type="number"
+                           min="1"
                            placeholder="Batch size"
                            [(ngModel)]="batchSize">
                 </mat-form-field>
             </div>
             <div fxFlex>
                 <mat-form-field>
-                    <mat-select placeholder="Loss function" required
+                    <mat-select placeholder="Loss function"
+                                required
                                 (selectionChange)="onLossChange($event.value)">
                         <mat-option *ngFor="let l of trainParams.listLosses()"
                                     [value]="l.id">
@@ -64,16 +76,20 @@
             </div>
         </div>
         <div class="centered step-buttons">
-            <button mat-raised-button color="accent" matStepperPrevious>Back</button>
+            <button mat-raised-button
+                    color="accent"
+                    matStepperPrevious>Back</button>
             <button mat-raised-button
                     [disabled]="!isSecondStepCompleted()"
-                    color="accent" matStepperNext>Next</button>
+                    color="accent"
+                    matStepperNext>Next</button>
         </div>
     </mat-step>
     <mat-step [completed]="isThirdStepCompleted()">
         <ng-template matStepLabel>Select optimizer</ng-template>
         <mat-form-field>
-            <mat-select placeholder="Optimizer" required
+            <mat-select placeholder="Optimizer"
+                        required
                         (selectionChange)="onOptimizerChange($event.value)">
                 <mat-option *ngFor="let o of trainParams.listOptimizers()"
                             [value]="o.id">
@@ -86,16 +102,21 @@
             <mat-form-field *ngFor="let param of optimizer.params">
                 <input matInput
                        required
-                       type="number" step="any" min="0"
+                       type="number"
+                       step="any"
+                       min="0"
                        [placeholder]="param.name"
                        [(ngModel)]="param.value">
             </mat-form-field>
         </div>
         <div class="centered step-buttons">
-            <button mat-raised-button color="accent" matStepperPrevious>Back</button>
+            <button mat-raised-button
+                    color="accent"
+                    matStepperPrevious>Back</button>
             <button mat-raised-button
                     [disabled]="!isThirdStepCompleted()"
-                    color="accent" matStepperNext>Next</button>
+                    color="accent"
+                    matStepperNext>Next</button>
         </div>
     </mat-step>
     <mat-step>
@@ -123,10 +144,14 @@
             </div>
         </div>
         <div class="centered">
-            <button class="train-button" mat-button (click)="onTrain()">Train!</button>
+            <button class="train-button"
+                    mat-button
+                    (click)="onTrain()">Train!</button>
         </div>
         <div class="centered step-buttons">
-            <button mat-raised-button color="accent" matStepperPrevious>Back</button>
+            <button mat-raised-button
+                    color="accent"
+                    matStepperPrevious>Back</button>
         </div>
     </mat-step>
 </mat-horizontal-stepper>
