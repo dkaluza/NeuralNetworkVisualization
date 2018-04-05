@@ -4,7 +4,7 @@ import { MaterialImportsModule } from '../material-imports.module';
 import { TrainComponent } from './train.component';
 import { TrainedModelsComponent } from './trained-models/trained-models.component';
 import { FormsModule } from '@angular/forms';
-
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 export { TrainComponent };
 
@@ -13,7 +13,8 @@ export { TrainComponent };
     imports: [
         CommonModule,
         MaterialImportsModule,
-        FormsModule
+        FormsModule,
+        FlexLayoutModule
     ],
     declarations: [
         TrainComponent,

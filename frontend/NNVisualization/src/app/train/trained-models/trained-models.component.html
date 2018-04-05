@@ -1,5 +1,5 @@
 <div fxLayout="row"
-     fxLayoutAlign="space-around">
+     fxLayoutAlign="space-around center">
     <div fxFlex="50"
          fxLayout="column"
          fxLayoutAlign="center stretch">
@@ -29,10 +29,12 @@
                 </mat-row>
             </mat-table>
         </div>
-    </div>
-    <div fxFlex="50"
-         fxLayout="column"
-         fxLayoutAlign="center stretch">
-        <h1>BLEH</h1>
+        <div class="centered step-buttons">
+            <button mat-raised-button
+                    color="accent"
+                    matStepperNext>
+                    Train new model
+            </button>
+        </div>
     </div>
 </div>

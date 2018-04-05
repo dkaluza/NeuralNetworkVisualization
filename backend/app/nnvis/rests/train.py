@@ -3,7 +3,7 @@ from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
 from app.nnvis.rests.protected_resource import ProtectedResource
-from app.nnvis.models import Dataset, Architecture, Model
+from app.nnvis.models import Dataset, Architecture, Model, TrainingHistory
 from app.nnvis.train.train import TrainThread
 
 from app.nnvis.train.losses import LOSSES_LIST
@@ -11,19 +11,41 @@ from app.nnvis.train.optimizers import OPTIMIZERS_LIST
 
 
 ARGS_LIST = [
-        'dataset_id',
-        'loss',
-        'optimizer',
-        'nepochs',
-        'batch_size',
-        ]
+    'dataset_id',
+    'loss',
+    'optimizer',
+    'nepochs',
+    'batch_size',
+    'optimizer_params'
+]
+
+
+def training_history_to_dict(history):
+
+    return {
+        'id': history.id,
+        'model_name': history.model.name,
+        'arch_name': history.model.architecture.name,
+        'valid_loss': history.validation_loss,
+        'train_loss': history.training_loss,
+        'batch_size': history.batch_size,
+        'number_of_epochs': history.number_of_epochs
+    }
+
+
+class CurrentlyTrainedModels(ProtectedResource):
+    def get(self):
+        trainedModels = TrainingHistory.query \
+            .filter(TrainingHistory.model.user_id == get_current_user(),
+                    TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
+        return [training_history_to_dict(history) for history in trainedModels], 200
 
 
 class TrainNewModel(ProtectedResource):
 
     def post(self, arch_id):
         arch = Architecture.query \
-                .filter_by(user_id=get_current_user(), id=arch_id)
+            .filter_by(user_id=get_current_user(), id=arch_id)
         if arch is None:
             abort(403, message='This Architecture doesn\'t exists')
 
@@ -53,12 +75,12 @@ class TrainNewModel(ProtectedResource):
                 optparams[param['id']] = float(param['value'])
 
             params = {
-                    'nepochs': int(args['nepochs']),
-                    'batch_size': int(args['batch_size']),
-                    'loss': args['loss']['id'],
-                    'optimizer': args['optimizer']['id'],
-                    'optimizer_params': optparams
-                    }
+                'nepochs': int(args['nepochs']),
+                'batch_size': int(args['batch_size']),
+                'loss': args['loss'],
+                'optimizer': args['optimizer'],
+                'optimizer_params': optparams
+            }
             thread1 = TrainThread(model.arch_id, model.id,
                                   model.dataset_id, params)
             thread1.start()
