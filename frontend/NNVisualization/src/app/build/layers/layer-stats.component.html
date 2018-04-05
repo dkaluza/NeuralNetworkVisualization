@@ -2,55 +2,55 @@
     <ng-template ngSwitchCase="fc">
         <app-layer-fc
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-fc>
     </ng-template>
     <ng-template ngSwitchCase="conv">
         <app-layer-conv
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-conv>
     </ng-template>
     <ng-template ngSwitchCase="input">
         <app-layer-input
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-input>
     </ng-template>
     <ng-template ngSwitchCase="pool">
         <app-layer-pool
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-pool>
     </ng-template>
     <ng-template ngSwitchCase="dropout">
         <app-layer-dropout
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-dropout>
     </ng-template>
     <ng-template ngSwitchCase="batch_norm">
         <app-layer-batch-norm
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-batch-norm>
     </ng-template>
     <ng-template ngSwitchCase="add">
         <app-layer-add
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-add>
     </ng-template>
     <ng-template ngSwitchCase="concat">
         <app-layer-concat
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-concat>
     </ng-template>
     <ng-template ngSwitchCase="softmax">
         <app-layer-softmax
             [layer]="layer"
-            (changed)="onNodeUpdate($event)">
+            (changed)="emitNodeUpdate($event)">
         </app-layer-softmax>
     </ng-template>
     <ng-template ngSwitchDefault>

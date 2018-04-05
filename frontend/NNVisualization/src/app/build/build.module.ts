@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -12,9 +12,6 @@ import { LayerStatsModule } from './layers/layer-stats.module';
 import { BuildComponent } from './build.component';
 import { VisArchComponent } from './vis-arch/vis-arch.component';
 
-import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
-import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
-
 export { BuildComponent };
 
 @NgModule({
@@ -23,7 +20,7 @@ export { BuildComponent };
         BuildComponent
     ],
     imports: [
-        BrowserModule,
+        CommonModule,
         LayerStatsModule,
         FormsModule,
         ReactiveFormsModule,
@@ -34,9 +31,5 @@ export { BuildComponent };
         FlexLayoutModule
     ],
     exports: [BuildComponent],
-    providers: [
-        SelectedArchitectureService,
-        GenericDialogsService
-    ]
 })
 export class BuildModule { }
