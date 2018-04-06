@@ -11,6 +11,7 @@ import { HeaderComponent } from './header/header.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { ManageComponent } from './manage/manage.component';
 import { TrainComponent } from './train/train.component';
+import { TrainParamsService } from './train/train-params.serivce';
 import { ImagesPanelComponent } from './visualize/images-panel/images-panel.component';
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
@@ -141,7 +142,9 @@ export function RestangularConfigFactory(RestangularProvider,
         AuthenticationWithoutLoginService,
         AuthGuard,
         JwtHelper,
-        GenericDialogsService],
+        GenericDialogsService,
+        TrainParamsService
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule {

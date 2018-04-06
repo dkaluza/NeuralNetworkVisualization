@@ -28,7 +28,7 @@ def _get_padding(node):
 
 
 def _build_input_op(node, input_ops, is_training):
-    shape = node['params']['outputShape']
+    shape = node['params']['shape']
     shape = [d if d > 0 else None for d in shape]
     inputId = node['params']['inputId']
     op = tf.placeholder(tf.float32, shape=shape,
@@ -110,20 +110,32 @@ def _build_batch_norm_op(node, input_ops, is_training):
         return tf.identity(op, name='logits')
 
 
+def _build_add_op(node, input_ops, is_training):
+    with tf.name_scope(node['id']):
+        return tf.add_n(input_ops, name='logits')
+
+
+def _build_concat_op(node, input_ops, is_training):
+    with tf.name_scope(node['id']):
+        axis = int(node['params']['axis'])
+        return tf.concat(input_ops, axis=axis, name='logits')
+
+
 def build_op(node, map_op, inputs, is_training):
     input_ops = [map_op[v] for v in inputs]
 
-    if node['layerType'] == 'input':
-        return _build_input_op(node, input_ops, is_training)
-    elif node['layerType'] == 'fc':
-        return _build_fc_op(node, input_ops, is_training)
-    elif node['layerType'] == 'conv':
-        return _build_conv_op(node, input_ops, is_training)
-    elif node['layerType'] == 'pool':
-        return _build_pool_op(node, input_ops, is_training)
-    elif node['layerType'] == 'dropout':
-        return _build_dropout_op(node, input_ops, is_training)
-    elif node['layerType'] == 'batch_norm':
-        return _build_batch_norm_op(node, input_ops, is_training)
-    else:
+    ops = {
+        'input': _build_input_op,
+        'fc': _build_fc_op,
+        'conv': _build_conv_op,
+        'pool': _build_pool_op,
+        'dropout': _build_dropout_op,
+        'batch_norm': _build_batch_norm_op,
+        'add': _build_add_op,
+        'concat': _build_concat_op
+    }
+    op = ops.get(node['layerType'])
+    if op is None:
         raise NnvisException('Unknown type of layer')
+
+    return op(node, input_ops, is_training)

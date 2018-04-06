@@ -6,13 +6,7 @@ import { SelectedArchitectureService, ErrorInfo } from '../../selected-architect
 import { ArchNode, ArchLink } from '../../selected-architecture/architecture';
 import { ToolboxLayer, layerTemplates } from './toolbox-layers';
 
-import { Layer } from '../layers/layer/layer';
-import { FullyConnectedLayer } from '../layers/fully-connected/fully-connected';
-import { ConvLayer } from '../layers/conv/conv';
-import { InputLayer } from '../layers/input/input';
-import { PoolLayer } from '../layers/pool/pool';
-import { DropoutLayer } from '../layers/dropout/dropout';
-import { BatchNormLayer } from '../layers/batch-norm/batch-norm';
+import { Layer, toolboxLayerToLayer } from '../layers/layer-stats.module';
 
 interface GraphNode {
     id: string;
@@ -184,26 +178,7 @@ export class VisArchComponent implements OnInit, OnChanges {
         id += 1;
         this.selArchService.graph.addNode(id);
 
-        switch (layer.id) {
-            case 'fc':
-                this.layers.set(id, new FullyConnectedLayer(id, layer.shortcut));
-                break;
-            case 'conv':
-                this.layers.set(id, new ConvLayer(id, layer.shortcut));
-                break;
-            case 'input':
-                this.layers.set(id, new InputLayer(id, layer.shortcut));
-                break;
-            case 'pool':
-                this.layers.set(id, new PoolLayer(id, layer.shortcut));
-                break;
-            case 'dropout':
-                this.layers.set(id, new DropoutLayer(id, layer.shortcut));
-                break;
-            case 'batch_norm':
-                this.layers.set(id, new BatchNormLayer(id, layer.shortcut));
-                break;
-        }
+        this.layers.set(id, toolboxLayerToLayer(layer, id));
 
         this.nodes.push({
             id: String(id),
