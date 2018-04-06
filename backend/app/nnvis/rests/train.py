@@ -15,8 +15,7 @@ ARGS_LIST = [
     'loss',
     'optimizer',
     'nepochs',
-    'batch_size',
-    'optimizer_params'
+    'batch_size'
 ]
 
 
@@ -29,6 +28,7 @@ def training_history_to_dict(history):
         'valid_loss': history.validation_loss,
         'train_loss': history.training_loss,
         'batch_size': history.batch_size,
+        'current_epoch': history.current_epoch,
         'number_of_epochs': history.number_of_epochs
     }
 
@@ -78,8 +78,8 @@ class TrainNewModel(ProtectedResource):
             params = {
                 'nepochs': int(args['nepochs']),
                 'batch_size': int(args['batch_size']),
-                'loss': args['loss'],
-                'optimizer': args['optimizer'],
+                'loss': args['loss']['id'],
+                'optimizer': args['optimizer']['id'],
                 'optimizer_params': optparams
             }
             thread1 = TrainThread(model.arch_id, model.id,

@@ -131,8 +131,8 @@ class TrainingHistory(db.Model, CRUD):
         self.batch_size = batch_size
         self.current_epoch = current_epoch
         self.number_of_epochs = number_of_epochs
-        self.validation_loss = valid_loss
-        self.training_loss = train_loss
+        self.validation_loss = validation_loss
+        self.training_loss = training_loss
 
     def __repr__(self):
         return '<Training {id} model {model_id}>'.format(id=self.id, name=self.model_id)

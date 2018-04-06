@@ -124,10 +124,10 @@ class TrainThread(threading.Thread):
 
                 print('starting training')
 
-                training_history = TrainingHistory(seld._model_id, self._batch_size, 0,
-                                                   self.__nepochs, self._training_loss,
+                training_history = TrainingHistory(self._model_id, self._batch_size, 0,
+                                                   self._nepochs, self._training_loss,
                                                    self._validation_loss)
-                training_history.save()
+                training_history.add()
                 start_time = time.time()
                 with self._tfmodel.get_graph().as_default():
                     saver = tf.train.Saver()
@@ -171,7 +171,7 @@ class TrainThread(threading.Thread):
                 Model.query.get(self._model_id).delete()
                 raise
 
-    def __update_history(current_epoch):
+    def __update_history(self, current_epoch):
         training_history.training_loss = self._training_loss
         training_history.current_epoch = current_epoch
         training_history.update()
