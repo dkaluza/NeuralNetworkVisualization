@@ -35,9 +35,10 @@ def training_history_to_dict(history):
 
 class CurrentlyTrainedModels(ProtectedResource):
     def get(self):
-        trainedModels = TrainingHistory.query \
-            .filter(TrainingHistory.model.user_id == get_current_user(),
-                    TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
+        models_subquery = Model.query.join(Model.architecture).filter(
+            Architecture.user_id == get_current_user()).subquery()
+        trainedModels = TrainingHistory.query.join(models_subquery, TrainingHistory.model) \
+            .filter(TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
         return [training_history_to_dict(history) for history in trainedModels], 200
 
 
