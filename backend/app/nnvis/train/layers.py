@@ -33,7 +33,9 @@ def _build_input_op(node, input_ops, is_training):
     inputId = node['params']['inputId']
     op = tf.placeholder(tf.float32, shape=shape,
                         name='input/{0}'.format(inputId))
-    return tf.identity(op, name='{0}/logits'.format(node['id']))
+    # add new name for logits tensor
+    tf.identity(op, name='{0}/logits'.format(node['id']))
+    return op
 
 
 def _build_fc_op(node, input_ops, is_training):
@@ -43,7 +45,8 @@ def _build_fc_op(node, input_ops, is_training):
         op = layers.fully_connected(
                 x, num_outputs=node['params']['numOutputs'],
                 activation_fn=tf.identity)
-        op = tf.identity(op, name='logits')
+        # add new name for logits tensor
+        tf.identity(op, name='logits')
         return _get_activation(node)(op, name=node['params']['activation'])
 
 
@@ -60,7 +63,8 @@ def _build_conv_op(node, input_ops, is_training):
                 stride=strides,
                 padding=_get_padding(node),
                 activation_fn=tf.identity)
-        op = tf.identity(op, name='logits')
+        # add new name for logits tensor
+        tf.identity(op, name='logits')
         return _get_activation(node)(op, name=node['params']['activation'])
 
 
@@ -85,7 +89,9 @@ def _build_pool_op(node, input_ops, is_training):
         else:
             raise NnvisException('Unkown pool: {}'
                                  .format(node['params']['pool']))
-        return tf.identity(pool_op, name='logits')
+        # add new name for logits tensor
+        tf.identity(pool_op, name='logits')
+        return pool_op
 
 
 def _build_dropout_op(node, input_ops, is_training):
@@ -94,7 +100,9 @@ def _build_dropout_op(node, input_ops, is_training):
     keep_prob = tf.where(is_training, keep_prob, 1.0)
     with tf.name_scope(node['id']):
         op = layers.dropout(x, keep_prob=keep_prob)
-        return tf.identity(op, name='logits')
+        # add new name for logits tensor
+        tf.identity(op, name='logits')
+        return op
 
 
 def _build_batch_norm_op(node, input_ops, is_training):
@@ -107,7 +115,9 @@ def _build_batch_norm_op(node, input_ops, is_training):
                 scale=node['params']['scale'],
                 is_training=is_training
                 )
-        return tf.identity(op, name='logits')
+        # add new name for logits tensor
+        tf.identity(op, name='logits')
+        return op
 
 
 def _build_add_op(node, input_ops, is_training):
@@ -125,9 +135,9 @@ def _build_softmax_op(node, input_ops, is_training):
     x = input_ops[0]
     axis = int(node['params']['axis'])
     with tf.name_scope(node['id']):
-        x = tf.identity(x, name='logits')
-        s = tf.nn.softmax(x, axis=axis)
-        return s
+        # add new name for lofits tensor
+        tf.identity(x, name='logits')
+        return tf.nn.softmax(x, axis=axis)
 
 
 def build_op(node, map_op, inputs, is_training):
