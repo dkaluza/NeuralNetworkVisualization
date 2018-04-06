@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Image } from '../image.model';
 import { MatTableDataSource } from '@angular/material';
 import { VisualizeService } from '../visualize.service';
@@ -17,15 +17,14 @@ export class ImagesPanelComponent implements OnInit {
     currentImageVis = '';
     currentAlgorithm = 0;
     currentImageId = 0;
-    currentImageName: any;
+    currentImageName: string = '';
     imagesList: Image[] = [];
 
     displayedColumns = ['class_number', 'class_name', 'score'];
     dataSource = new MatTableDataSource();
 
     constructor(private visualizeService: VisualizeService,
-                private selectedService: SelectedArchitectureService,
-                private cd: ChangeDetectorRef) {
+                private selectedService: SelectedArchitectureService) {
 
     }
 
@@ -43,7 +42,6 @@ export class ImagesPanelComponent implements OnInit {
         }
         this.currentImage = this.imagesList[index];
         this.currentImageName = this.currentImage.imageName;
-        console.log(this.currentImageName);
         this.onGetImage(this.currentImage);
     }
 
@@ -57,7 +55,6 @@ export class ImagesPanelComponent implements OnInit {
         }
         this.currentImage = this.imagesList[index];
         this.currentImageName = this.currentImage.imageName;
-        console.log(this.currentImageName);
         this.onGetImage(this.currentImage);
     }
 
