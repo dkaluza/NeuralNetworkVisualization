@@ -1,10 +1,7 @@
 <div fxLayout="row" fxLayoutAlign="center">
 
     <div fxLayout="column" class="infernece">
-        <div fxLayout="column"
-             fxLayoutAlign="center">
-            <button mat-button (click)="onGetDataset()">load dataset</button>
-        </div>
+
         <div fxLayout="column"
              fxLayoutAlign="center">
             <button mat-button (click)="onInference()">inference</button>
@@ -34,6 +31,7 @@
             </mat-table>
         </div>
 
+
     </div>
 
     <div fxLayout="column" class="input-image">
@@ -49,7 +47,8 @@
                      class="img-responsive">
             </ng-template>
         </div>
-        <div fxLayout="row"
+        <div class="select_group"
+             fxLayout="row"
              fxLayoutAlign="center">
             <div fxLayoutAlign="left">
                 <button mat-icon-button class="icon-button" (click)="onGetPreviousImage()">
@@ -57,15 +56,14 @@
                 </button>
             </div>
 
-            <div fxLayoutAlign="center">
-                <mat-form-field>
-                    <mat-select placeholder="Choose image" (change)="onSelectorSelect($event)">
-                        <mat-option *ngFor="let image of imagesList" [value]="image">
-                            {{ image.imageName }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
+            <ng-select [items]="imagesList"
+                       [virtualScroll]="true"
+                       bindLabel="imageName"
+                       bindValue="imageName"
+                       placeholder="Select image"
+                       (add)="onSelectorSelect($event)"
+                       [(ngModel)]="currentImageName">
+            </ng-select>
 
             <div fxLayoutAlign="right">
                 <button mat-icon-button class="icon-button" (click)="onGetNextImage()">
