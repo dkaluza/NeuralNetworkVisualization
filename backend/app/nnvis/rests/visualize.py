@@ -32,7 +32,16 @@ class Inference(ProtectedResource):
 
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
 
-        predictions = output_op.eval(feed_dict={x: [image_input]}, session=sess)
+        feed_dict = {
+                x: [image_input]
+                }
+        try:
+            is_training = graph.get_tensor_by_name('is_training:0')
+            feed_dict[is_training] = False
+        except KeyError:
+            pass
+
+        predictions = output_op.eval(feed_dict=feed_dict, session=sess)
         predictions = predictions[0]
 
         sess.close()
@@ -61,8 +70,17 @@ class Visualize(ProtectedResource):
         alg_class = visualize_utils.algorithms_register[alg_id]
         vis_algorithm = alg_class(graph, sess, y, x)
 
+        feed_dict = {
+                neuron_selector: int(image.label)
+                }
+        try:
+            is_training = graph.get_tensor_by_name('is_training:0')
+            feed_dict[is_training] = False
+        except KeyError:
+            pass
+
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
+        image_output = vis_algorithm.GetMask(image_input, feed_dict=feed_dict)
 
         sess.close()
 
