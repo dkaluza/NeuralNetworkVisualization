@@ -6,26 +6,23 @@
         <div class="filter-header">
             <mat-form-field>
                 <input matInput
-                       (keyup)="applyFilter(archDataSource, $event.target.value)"
+                       (keyup)="applyFilter(historyDataSource, $event.target.value)"
                        placeholder="Filter">
             </mat-form-field>
         </div>
         <div>
-            <mat-table #archs
-                       [dataSource]="modelDataSource">
-                <ng-container matColumnDef="position">
-                    <mat-cell *matCellDef="let elem"> {{elem.position}} </mat-cell>
+            <mat-table #history
+                       [dataSource]="historyDataSource">
+
+                <ng-container *ngFor="let column of displayedColumns"
+                              [matColumnDef]="column.property">
+                    <mat-header-cell *matHeaderCellDef> {{column.header}} </mat-header-cell>
+                    <mat-cell *matCellDef="let elem"> {{elem[column.property]}} </mat-cell>
                 </ng-container>
-                <ng-container matColumnDef="name">
-                    <mat-cell *matCellDef="let elem"> {{elem.name}} </mat-cell>
-                </ng-container>
-                <ng-container matColumnDef="archName">
-                    <mat-cell *matCellDef="let elem"> {{elem.archName}} </mat-cell>
-                </ng-container>
-                <mat-header-row *matHeaderRowDef=""></mat-header-row>
-                <mat-row *matRowDef="let row; columns: displayedColumns;"
-                         (click)="selectModel(row)"
-                         [class.selected-row]="row.id === selctedModelID">
+                <mat-header-row *matHeaderRowDef="displayedColumnsIds"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumnsIds;"
+                         (click)="selectHistory(row)"
+                         [class.selected-row]="row.id === selctedHistoryID">
                 </mat-row>
             </mat-table>
         </div>

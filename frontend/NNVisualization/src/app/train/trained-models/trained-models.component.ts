@@ -4,9 +4,11 @@ import { Restangular } from 'ngx-restangular';
 
 interface Element {
     position: number;
-    name: string;
+    modelName: string;
     id: number;
     archName: string;
+    currentEpoch: number;
+    numberOfEpochs: number;
 }
 
 @Component({
@@ -15,12 +17,34 @@ interface Element {
     styleUrls: ['./trained-models.component.css']
 })
 export class TrainedModelsComponent implements OnInit {
-    displayedColumns = ['position', 'name', 'archName'];
-    modelDataSource;
+    displayedColumns = [
+        {
+            property: 'position',
+            header: 'Position'
+        },
+        {
+            property: 'modelName',
+            header: 'Model name'
+        },
+        {
+            property: 'archName',
+            header: 'Architecture name'
+        },
+        {
+            property: 'currentEpoch',
+            header: 'Current epoch'
+        },
+        {
+            property: 'numberOfEpochs',
+            header: 'Number of epochs'
+        }];
+    displayedColumnsIds = this.displayedColumns.map(elem => elem.property);
+    historyDataSource: MatTableDataSource<Element>;
+    selctedHistoryID: number;
 
 
     constructor(private restangular: Restangular) {
-        this.modelDataSource = new MatTableDataSource<Element>([]);
+        this.historyDataSource = new MatTableDataSource<Element>([]);
     }
 
     ngOnInit() {
@@ -30,16 +54,22 @@ export class TrainedModelsComponent implements OnInit {
     private _updateModelList(): void {
         this.restangular.all('list_trained_models')
             .getList().subscribe(_models => {
-                const modelElems = [];
+                const historyElems = [];
                 for (let i = 0; i < _models.length; i += 1) {
-                    modelElems.push({
+                    historyElems.push({
                         position: i + 1,
-                        name: _models[i].name,
+                        modelName: _models[i].model_name,
                         id: _models[i].id,
-                        archName: _models[i].archName
+                        archName: _models[i].arch_name,
+                        currentEpoch: _models[i].current_epoch,
+                        numberOfEpochs: _models[i].number_of_epochs
                     });
                 }
-                this.modelDataSource = new MatTableDataSource<Element>(modelElems);
+                this.historyDataSource = new MatTableDataSource<Element>(historyElems);
             });
+    }
+
+    selectHistory(row: Element) {
+        this.selctedHistoryID = row.id;
     }
 }

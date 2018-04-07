@@ -151,7 +151,7 @@ class TrainThread(threading.Thread):
                             print('[Epoch {e}] Time = {t}'
                                   .format(e=e, t=end_epoch - start_epoch))
 
-                            self.__update_history(e + 1)
+                            self.__update_history(training_history, e + 1)
 
                         print('finished training')
                         self._training_loss /= float(self._nepochs)
@@ -171,7 +171,7 @@ class TrainThread(threading.Thread):
                 Model.query.get(self._model_id).delete()
                 raise
 
-    def __update_history(self, current_epoch):
+    def __update_history(self, training_history, current_epoch):
         training_history.training_loss = self._training_loss
         training_history.current_epoch = current_epoch
         training_history.update()
