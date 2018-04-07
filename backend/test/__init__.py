@@ -1,6 +1,6 @@
-# running tests: "python -m unittest discover" in the backend folder
-
 from app import create_app
+from app.nnvis import views
+
 from test_config import TEST_DB_FILENAME
 from test.utils import add_testuser
 import os
