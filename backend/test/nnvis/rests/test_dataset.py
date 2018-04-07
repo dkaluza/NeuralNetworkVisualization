@@ -1,14 +1,14 @@
-from test import test_app
-from test.utils import login, response_json, authorized_post
-from test_config import TMP_FOLDER, LABELS_FILENAME
+from test import NNvisTestCase
+from test.utils import response_json, authorized_post
+from test_config import LABELS_FILENAME
 
-from app.nnvis.models import Dataset, Image, User
+from app.nnvis.models import Dataset, Image
 
 import zipfile
 import csv
-import unittest
 import os
 from io import BytesIO, StringIO
+
 
 def create_labels(colnames, *rows):
     labelfile = StringIO()
@@ -20,8 +20,10 @@ def create_labels(colnames, *rows):
 
     return labelfile.getvalue()
 
+
 def bad_zipfile():
     return (BytesIO(b'test'), 'bad.zip')
+
 
 def good_zipfile_noimgs():
     retfile = BytesIO()
@@ -32,6 +34,7 @@ def good_zipfile_noimgs():
 
     retfile.seek(0)
     return (retfile, 'noimg.zip')
+
 
 def good_zipfile_imgs():
     retfile = BytesIO()
@@ -52,19 +55,11 @@ def good_zipfile_imgs():
     return (retfile, 'imgs.zip')
 
 DATASET_NAME = 'testname'
-DATASET_LABELS = ['class1','class2']
+DATASET_LABELS = ['class1', 'class2']
 DATASET_DESCRIPTION = 'testdesc'
 
-class UploadNewDatasetTest(unittest.TestCase):
 
-    def setUp(self):
-        self.client = test_app.test_client()
-        self.access_token = login(self.client)
-        Dataset.query.delete()
-        Image.query.delete()
-
-    def tearDown(self):
-        pass
+class UploadNewDatasetTest(NNvisTestCase):
 
     def test_nofile(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
