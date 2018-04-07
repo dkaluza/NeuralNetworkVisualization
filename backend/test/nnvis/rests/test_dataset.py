@@ -88,29 +88,21 @@ class UploadNewDatasetTest(unittest.TestCase):
         self.assertEqual(rv.status_code, 400)
         self.assertEqual(rjson['message'], 'Name for new dataset required')
 
-    def test_nolabel(self):
-        rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-            name=DATASET_NAME,
-            description=DATASET_DESCRIPTION,
-            file=bad_zipfile()
-        ), mimetype='multipart/form-data')
-
-        rjson = response_json(rv)
-
-        self.assertEqual(rv.status_code, 400)
-        self.assertEqual(rjson['message'], 'Labels for new dataset required')
-
     def test_bad_zipfile(self):
-        rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-            name=DATASET_NAME,
-            description=DATASET_DESCRIPTION,
-            file=bad_zipfile()
-        ), mimetype='multipart/form-data')
+        try:
+            _ = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
+                name=DATASET_NAME,
+                description=DATASET_DESCRIPTION,
+                file=bad_zipfile()
+            ), mimetype='multipart/form-data')
+        except zipfile.BadZipfile as e:
+            self.assertTrue(True)
+            return
 
-        rjson = response_json(rv)
+        self.fail()
 
-        self.assertEqual(rv.status_code, 500)
-        self.assertEqual(rjson['message'], 'File is not a zip file')
+        # self.assertEqual(rv.status_code, 500)
+        # self.assertEqual(rjson['message'], 'File is not a zip file')
 
     def test_zipfile_noimgs(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
@@ -120,10 +112,10 @@ class UploadNewDatasetTest(unittest.TestCase):
         ), mimetype='multipart/form-data')
 
         self.assertEqual(rv.status_code, 201)
-        self._assertDatasetCreated()
+        ds_id = self._assertDatasetCreated(labels=False)
         self.assertEqual(len(Image.query.all()), 0)
 
-        dataset_folder = os.path.join(test_app.config['DATASET_FOLDER'], DATASET_NAME)
+        dataset_folder = os.path.join(test_app.config['DATASET_FOLDER'], str(ds_id))
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
         self.assertEqual(len(dataset_files), 1)
@@ -135,13 +127,16 @@ class UploadNewDatasetTest(unittest.TestCase):
             self.assertEqual(len(rows), 1)
             self.assertEqual(rows[0], ['image', 'label'])
 
-    def _assertDatasetCreated(self):
+    def _assertDatasetCreated(self, labels=True):
         datasets = Dataset.query.all()
         self.assertEqual(len(datasets), 1)
         ds = datasets[0]
         self.assertEqual(ds.name, DATASET_NAME)
-        self.assertEqual(eval('[' + ds.labels + ']'), DATASET_LABELS)
+        if labels:
+            self.assertEqual(eval('[' + ','.join(map(lambda s: "'{}'".format(s), ds.labels.split(','))) + ']'), DATASET_LABELS)
         self.assertEqual(ds.description, DATASET_DESCRIPTION)
+
+        return ds.id
 
     def _assertImagesCreated(self):
         images = Image.query.all()
@@ -171,10 +166,10 @@ class UploadNewDatasetTest(unittest.TestCase):
         ), mimetype='multipart/form-data')
 
         self.assertEqual(rv.status_code, 201)
-        self._assertDatasetCreated()
+        ds_id = self._assertDatasetCreated()
         self._assertImagesCreated()
 
-        dataset_folder = os.path.join(test_app.config['DATASET_FOLDER'], DATASET_NAME)
+        dataset_folder = os.path.join(test_app.config['DATASET_FOLDER'], str(ds_id))
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
         self.assertEqual(len(dataset_files), 4)
