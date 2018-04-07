@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
 import { Restangular } from 'ngx-restangular';
+import { GenericDialogsService } from '../../generic-dialogs/generic-dialogs.service';
 
 interface Element {
     position: number;
@@ -41,9 +42,10 @@ export class TrainedModelsComponent implements OnInit {
     displayedColumnsIds = this.displayedColumns.map(elem => elem.property);
     historyDataSource: MatTableDataSource<Element>;
     selctedHistoryID: number;
+    private historyUpdateSocket: WebSocket;
 
-
-    constructor(private restangular: Restangular) {
+    constructor(private restangular: Restangular,
+        private genericDialogs: GenericDialogsService) {
         this.historyDataSource = new MatTableDataSource<Element>([]);
     }
 
@@ -70,6 +72,31 @@ export class TrainedModelsComponent implements OnInit {
     }
 
     selectHistory(row: Element) {
-        this.selctedHistoryID = row.id;
+        if (row.id !== this.selctedHistoryID) {
+            this.selctedHistoryID = row.id;
+            this._connectToWebSocket(this.selctedHistoryID);
+        }
+    }
+
+    private _connectToWebSocket(id: number) {
+        if (this.historyUpdateSocket) {
+            this.historyUpdateSocket.close();
+        }
+        try {
+            this.historyUpdateSocket = new WebSocket('ws://' + location.host +
+                '/api/currently_training/' + id);
+            this.historyUpdateSocket.onmessage = event => {
+                const data = JSON.parse(event.data);
+                console.log(data); // TODO: on error listener
+            };
+        } catch (e) {
+            this.genericDialogs.createWarning(e.message, 'Error');
+        }
+    }
+
+    applyFilter(dataSource, filterValue: string) {
+        filterValue = filterValue.trim();
+        filterValue = filterValue.toLowerCase();
+        dataSource.filter = filterValue;
     }
 }
