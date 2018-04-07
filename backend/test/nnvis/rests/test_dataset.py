@@ -101,9 +101,6 @@ class UploadNewDatasetTest(unittest.TestCase):
 
         self.fail()
 
-        # self.assertEqual(rv.status_code, 500)
-        # self.assertEqual(rjson['message'], 'File is not a zip file')
-
     def test_zipfile_noimgs(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
             name=DATASET_NAME,
