@@ -17,7 +17,6 @@ def login(test_client, username, password):
         'password': password
     }))
 
-    print(rv.status)
     assert rv.status == '200 OK'
     return response_json(rv)['access_token']
 
