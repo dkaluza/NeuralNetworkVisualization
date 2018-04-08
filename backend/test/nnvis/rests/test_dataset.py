@@ -125,7 +125,7 @@ class UploadNewDatasetTest(unittest.TestCase):
         ds = datasets[0]
         self.assertEqual(ds.name, DATASET_NAME)
         if labels:
-            self.assertEqual(eval('[' + ','.join(map(lambda s: "'{}'".format(s), ds.labels.split(','))) + ']'), DATASET_LABELS)
+            self.assertEqual(ds.labels.split(','), DATASET_LABELS)
         self.assertEqual(ds.description, DATASET_DESCRIPTION)
 
         return ds.id
