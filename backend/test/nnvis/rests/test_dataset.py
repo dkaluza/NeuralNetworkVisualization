@@ -89,17 +89,12 @@ class UploadNewDatasetTest(unittest.TestCase):
         self.assertEqual(rjson['message'], 'Name for new dataset required')
 
     def test_bad_zipfile(self):
-        try:
+        with self.assertRaises(zipfile.BadZipfile):
             _ = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
                 name=DATASET_NAME,
                 description=DATASET_DESCRIPTION,
                 file=bad_zipfile()
             ), mimetype='multipart/form-data')
-        except zipfile.BadZipfile as e:
-            self.assertTrue(True)
-            return
-
-        self.fail()
 
     def test_zipfile_noimgs(self):
         rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
