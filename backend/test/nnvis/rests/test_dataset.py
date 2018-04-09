@@ -29,7 +29,8 @@ def good_zipfile_noimgs():
     retfile = BytesIO()
     labelfilestr = create_labels(['image', 'label'])
 
-    with zipfile.ZipFile(retfile, mode="x", compression=zipfile.ZIP_DEFLATED) as thezip:
+    with zipfile.ZipFile(
+            retfile, mode="x", compression=zipfile.ZIP_DEFLATED) as thezip:
         thezip.writestr(LABELS_FILENAME, labelfilestr)
 
     retfile.seek(0)
@@ -45,7 +46,8 @@ def good_zipfile_imgs():
         ['69.jpg', 'class1']
     )
 
-    with zipfile.ZipFile(retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
+    with zipfile.ZipFile(
+            retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
         thezip.writestr(LABELS_FILENAME, labelfilestr)
         thezip.writestr('01.jpg', 'eeeeeagbdfvdfdgfbdafd')
         thezip.writestr('02.jpg', 'raboerijbaoeribriribv')
@@ -62,10 +64,12 @@ DATASET_DESCRIPTION = 'testdesc'
 class UploadNewDatasetTest(NNvisTestCase):
 
     def test_nofile(self):
-        rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-            name=DATASET_NAME,
-            description=DATASET_DESCRIPTION
-        ), mimetype='multipart/form-data')
+        rv = authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    name=DATASET_NAME,
+                    description=DATASET_DESCRIPTION),
+                mimetype='multipart/form-data')
 
         rjson = response_json(rv)
 
@@ -73,10 +77,12 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(rjson['message'], 'No dataset file attached')
 
     def test_noname(self):
-        rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-            description=DATASET_DESCRIPTION,
-            file=bad_zipfile()
-        ), mimetype='multipart/form-data')
+        rv = authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    description=DATASET_DESCRIPTION,
+                    file=bad_zipfile()),
+                mimetype='multipart/form-data')
 
         rjson = response_json(rv)
 
@@ -85,30 +91,36 @@ class UploadNewDatasetTest(NNvisTestCase):
 
     def test_bad_zipfile(self):
         with self.assertRaises(zipfile.BadZipfile):
-            _ = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-                name=DATASET_NAME,
-                description=DATASET_DESCRIPTION,
-                file=bad_zipfile()
-            ), mimetype='multipart/form-data')
+            authorized_post(
+                    self.client, '/upload_dataset', self.access_token,
+                    data=dict(
+                        name=DATASET_NAME,
+                        description=DATASET_DESCRIPTION,
+                        file=bad_zipfile()),
+                    mimetype='multipart/form-data')
 
     def test_zipfile_noimgs(self):
-        rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-            name=DATASET_NAME,
-            description=DATASET_DESCRIPTION,
-            file=good_zipfile_noimgs()
-        ), mimetype='multipart/form-data')
+        rv = authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    name=DATASET_NAME,
+                    description=DATASET_DESCRIPTION,
+                    file=good_zipfile_noimgs()),
+                mimetype='multipart/form-data')
 
         self.assertEqual(rv.status_code, 201)
         ds_id = self._assertDatasetCreated(labels=False)
         self.assertEqual(len(Image.query.all()), 0)
 
-        dataset_folder = os.path.join(test_app.config['DATASET_FOLDER'], str(ds_id))
+        dataset_folder = os.path.join(
+                self.app.config['DATASET_FOLDER'], str(ds_id))
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
         self.assertEqual(len(dataset_files), 1)
         self.assertEqual(dataset_files[0], LABELS_FILENAME)
 
-        with open(os.path.join(dataset_folder, LABELS_FILENAME), mode='r', newline='') as csvf:
+        with open(os.path.join(dataset_folder, LABELS_FILENAME),
+                  mode='r', newline='') as csvf:
             labelsreader = csv.reader(csvf, delimiter=',')
             rows = list(labelsreader)
             self.assertEqual(len(rows), 1)
@@ -146,17 +158,20 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(images[2].label, '0')
 
     def test_zipfile_someimgs(self):
-        rv = authorized_post(self.client, '/upload_dataset', self.access_token, data=dict(
-            name=DATASET_NAME,
-            description=DATASET_DESCRIPTION,
-            file=good_zipfile_imgs()
-        ), mimetype='multipart/form-data')
+        rv = authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    name=DATASET_NAME,
+                    description=DATASET_DESCRIPTION,
+                    file=good_zipfile_imgs()),
+                mimetype='multipart/form-data')
 
         self.assertEqual(rv.status_code, 201)
         ds_id = self._assertDatasetCreated()
         self._assertImagesCreated()
 
-        dataset_folder = os.path.join(test_app.config['DATASET_FOLDER'], str(ds_id))
+        dataset_folder = os.path.join(
+                self.app.config['DATASET_FOLDER'], str(ds_id))
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
         self.assertEqual(len(dataset_files), 4)
@@ -165,7 +180,8 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(dataset_files[2], '69.jpg')
         self.assertEqual(dataset_files[3], LABELS_FILENAME)
 
-        with open(os.path.join(dataset_folder, LABELS_FILENAME), mode='r', newline='') as csvf:
+        with open(os.path.join(dataset_folder, LABELS_FILENAME),
+                  mode='r', newline='') as csvf:
             labelsreader = csv.reader(csvf, delimiter=',')
             rows = list(labelsreader)
             self.assertEqual(len(rows), 4)
