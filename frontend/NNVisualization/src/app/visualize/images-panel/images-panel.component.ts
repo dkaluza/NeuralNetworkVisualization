@@ -112,7 +112,9 @@ export class ImagesPanelComponent implements OnInit {
                         'score': (score.score * 100).toFixed(2)
                     });
                 }
-                this.dataSource = new MatTableDataSource(scores);
+                const scores2 = scores.sort((n1, n2) => n2.score - n1.score);
+                const scores3 = scores2.slice(0, 10);
+                this.dataSource = new MatTableDataSource(scores3);
             });
     }
 
@@ -135,7 +137,6 @@ export class ImagesPanelComponent implements OnInit {
     onGetAlgorithms() {
         this.imagesList = [];
         this.visualizeService.getAlgorithms().subscribe(response => {
-            console.log(response['algorithms']);
             const len = response['algorithms'].length;
             for (let i = 0; i < len; i++) {
                 const a = response['algorithms'][i];
