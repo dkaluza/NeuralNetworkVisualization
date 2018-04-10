@@ -15,7 +15,11 @@ from zipfile import ZipFile
 
 SUPPORTED_EXTENSIONS = [
     'jpg',
-    'png'
+    'JPG',
+    'png',
+    'PNG',
+    'JPEG',
+    'jpeg',
 ]
 
 
