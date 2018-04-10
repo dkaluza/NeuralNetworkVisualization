@@ -1,6 +1,6 @@
 <div fxLayout="row" fxLayoutAlign="center">
 
-    <div fxLayout="column" class="infernece">
+    <div fxLayout="column" class="inference">
 
         <div fxLayout="column"
              fxLayoutAlign="center">
@@ -86,14 +86,30 @@
             </ng-template>
         </div>
 
-        <div fxLayout="row"
-             fxLayoutAlign="center">
+        <div fxLayout="row" fxLayoutAlign="center">
+            <div fxLayout="column" fxLayoutAlign="center">
+                <div fxLayout="row" fxLayoutAlign="center" class="my_form">
 
-            <div fxLayout="column"
-                 fxLayoutAlign="center">
-                <button mat-button (click)="onVisualize()">visualize</button>
+                    <app-nav-algorithms></app-nav-algorithms>
+                </div>
+                <div fxLayout="row" fxLayoutAlign="center" class="my_form">
+                    <div fxLayoutAlign="left">
+                        <mat-form-field>
+                            <mat-select placeholder="Choose postprocessing" (change)="onSelectPostprocessing($event)">
+                                <mat-option *ngFor="let postprocessing of visualizeService.postprocessingList"
+                                            [value]="postprocessing.postprocessingId">
+                                    {{ postprocessing.postprocessingName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div fxLayout="row"
+                     fxLayoutAlign="center">
+                    <button mat-button (click)="onVisualize()">visualize</button>
+                </div>
+
             </div>
-
         </div>
     </div>
 </div>

@@ -1,8 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Image } from '../image.model';
 import { MatTableDataSource } from '@angular/material';
 import { VisualizeService } from '../visualize.service';
 import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
+import { Postprocessing } from '../postprocessing.model';
+import { Algorithm } from '../algorithm.model';
 
 
 @Component({
@@ -13,10 +15,8 @@ import { SelectedArchitectureService } from '../../selected-architecture/selecte
 export class ImagesPanelComponent implements OnInit {
 
     placeholder_img = 'api/static/placeholder2.jpg';
-    currentImage: Image; // = new Image(-1, -1, '', '', -1);
+    currentImage: Image;
     currentImageVis = '';
-    currentAlgorithm = 0;
-    currentImageId = 0;
     currentImageName: any;
     imagesList: Image[] = [];
 
@@ -24,13 +24,14 @@ export class ImagesPanelComponent implements OnInit {
     dataSource = new MatTableDataSource();
 
     constructor(private visualizeService: VisualizeService,
-                private selectedService: SelectedArchitectureService,
-                private cd: ChangeDetectorRef) {
+                private selectedService: SelectedArchitectureService) {
 
     }
 
     ngOnInit() {
         this.onGetDataset();
+        this.onGetPostprocessing();
+        this.onGetAlgorithms();
     }
 
     onGetNextImage() {
@@ -92,7 +93,7 @@ export class ImagesPanelComponent implements OnInit {
 
     onVisualize() {
         const model = this.selectedService.model;
-        this.visualizeService.getImageVis(model.id, 0, this.currentImage.imageId)
+        this.visualizeService.getImageVis(model.id, this.currentImage.imageId)
             .subscribe(response => {
                 this.currentImageVis = response['image_path'];
             });
@@ -113,5 +114,34 @@ export class ImagesPanelComponent implements OnInit {
                 }
                 this.dataSource = new MatTableDataSource(scores);
             });
+    }
+
+    onSelectPostprocessing(event) {
+        this.visualizeService.currentPostprocessing = event.value;
+    }
+
+    onGetPostprocessing() {
+        this.imagesList = [];
+        this.visualizeService.getPostprcessing().subscribe(response => {
+            const len = response['postprocessing'].length;
+            for (let i = 0; i < len; i++) {
+                const p = response['postprocessing'][i];
+                const postprocessing = new Postprocessing(p.id, p.name);
+                this.visualizeService.postprocessingList.push(postprocessing);
+            }
+        });
+    }
+
+    onGetAlgorithms() {
+        this.imagesList = [];
+        this.visualizeService.getAlgorithms().subscribe(response => {
+            console.log(response['algorithms']);
+            const len = response['algorithms'].length;
+            for (let i = 0; i < len; i++) {
+                const a = response['algorithms'][i];
+                const algorithm = new Algorithm(a.id, a.name);
+                this.visualizeService.algorithmsList.push(algorithm);
+            }
+        });
     }
 }
