@@ -18,6 +18,14 @@ import json
 import shutil
 
 
+def safe_add_is_training(feed_dict, graph, train):
+    try:
+        is_training = graph.get_tensor_by_name('is_training:0')
+        feed_dict[is_training] = train
+    except KeyError:
+        pass
+
+
 # inference/<int:model_id>/<int:image_id>
 class Inference(ProtectedResource):
     def get(self, model_id, image_id):
@@ -35,11 +43,7 @@ class Inference(ProtectedResource):
         feed_dict = {
                 x: [image_input]
                 }
-        try:
-            is_training = graph.get_tensor_by_name('is_training:0')
-            feed_dict[is_training] = False
-        except KeyError:
-            pass
+        safe_add_is_training(feed_dict, graph, False)
 
         predictions = output_op.eval(feed_dict=feed_dict, session=sess)
         predictions = predictions[0]
@@ -73,11 +77,7 @@ class Visualize(ProtectedResource):
         feed_dict = {
                 neuron_selector: int(image.label)
                 }
-        try:
-            is_training = graph.get_tensor_by_name('is_training:0')
-            feed_dict[is_training] = False
-        except KeyError:
-            pass
+        safe_add_is_training(feed_dict, graph, False)
 
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
         image_output = vis_algorithm.GetMask(image_input, feed_dict=feed_dict)
