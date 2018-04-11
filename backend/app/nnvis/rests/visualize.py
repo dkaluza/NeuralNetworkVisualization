@@ -55,29 +55,22 @@ class Visualize(ProtectedResource):
         if postprocessing_id not in visualize_utils.postprocessing_register:
             return {'errormsg': "Bad postprocessing id"}, 400
 
-        # get image
         image = Image.query.get(image_id)
         image_path = image.full_path()
 
-        # get model
         model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
 
-        # get algorithm
         alg_class = visualize_utils.algorithms_register[alg_id]
         vis_algorithm = alg_class(graph, sess, y, x)
 
-        # load image data
         original_image = visualize_utils.load_image(image_path, x.shape.as_list()[1:])
 
-        # preprocess image data
         image_input = visualize_utils.preprocess(original_image)
 
-        # run algorithm
         image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
         sess.close()
 
-        # get postprocessing
         if not on_image:
             original_image = None
         postproc_class = alg_class.postprocessings[postprocessing_id]
