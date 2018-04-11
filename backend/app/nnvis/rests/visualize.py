@@ -1,21 +1,13 @@
 import os
+import shutil
 
 from flask import current_app as app
 
-from app.nnvis.rests.protected_resource import ProtectedResource
+from app.nnvis.models import Dataset
 from app.nnvis.models import Image
 from app.nnvis.models import Model
-from app.nnvis.models import Dataset
-
-# from app.vis_tools.utils import algorithms_register
-# from app.vis_tools.utils import visualize_saliency
-# from app.vis_tools.utils import inference
-# from app.vis_tools.utils import NumpyEncoder
-
+from app.nnvis.rests.protected_resource import ProtectedResource
 from app.vis_tools import visualize_utils
-
-import json
-import shutil
 
 
 # inference/<int:model_id>/<int:image_id>
@@ -26,7 +18,6 @@ class Inference(ProtectedResource):
 
         model = Model.query.get(model_id)
         graph, sess, x, *_ = visualize_utils.load_model(model)
-
 
         output_op = graph.get_tensor_by_name('output:0')
 
@@ -48,9 +39,12 @@ class Inference(ProtectedResource):
 
 # visualize/<int:model_id>/<int:alg_id>/<int:image_id>
 class Visualize(ProtectedResource):
-    def get(self, model_id, alg_id, image_id):
+    def get(self, model_id, alg_id, image_id, postprocessing_id):
         if alg_id not in visualize_utils.algorithms_register:
             return {'errormsg': "Bad algorithm id"}, 400
+
+        if postprocessing_id not in visualize_utils.postprocessing_register:
+            return {'errormsg': "Bad postprocessing id"}, 400
 
         image = Image.query.get(image_id)
         image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
@@ -66,9 +60,19 @@ class Visualize(ProtectedResource):
 
         sess.close()
 
-        image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_gray_pos)
-        image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
+        postproc_class = visualize_utils.postprocessing_register[postprocessing_id]
+
+        postproc = postproc_class()
+        image_output = postproc.process(image_input, image_output)
+
+        print(image_output.shape)
+
+
+        sufix = '_' + alg_class.__name__ + '_' + postproc_class.__name__ + '.png'
+        image_output_path = image_path.rsplit('.', 1)[0] + sufix
+
+        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_rgb)
+        image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + sufix
         return {'image_path': image_path}
 
 
@@ -95,4 +99,13 @@ class ImageList(ProtectedResource):
 
 class Algorithms(ProtectedResource):
     def get(self):
-        return {alg_class.__name__: alg_id for alg_id, alg_class in visualize_utils.algorithms_register}
+        return {'algorithms': [{'id': a_id, 'name': a_name.__name__}
+                               for a_id, a_name
+                               in visualize_utils.algorithms_register.items()]}
+
+
+class Postprocessing(ProtectedResource):
+    def get(self):
+        return {'postprocessing': [{'id': p_id, 'name': p_name.__name__}
+                                   for p_id, p_name
+                                   in visualize_utils.postprocessing_register.items()]}
