@@ -49,12 +49,14 @@ def create_image(fname, labelsdict, dataset_id):
 
 def unzip_validate_archive(path, file, dataset_id):
     labels_filename = app.config['LABELS_FILENAME']
+    classmap_filename = app.config['CLASSMAP_FILENAME']
     try:
         os.makedirs(path, exist_ok=True)
         archive = ZipFile(file)
         archive.extractall(path)
 
         labelsdf = pd.read_csv(os.path.join(path, labels_filename))
+        classmapdf = pd.read_csv(os.path.join(path, classmap_filename))
 
         cols = labelsdf.columns
         label_list = sorted(labelsdf[cols[1]].unique().tolist())

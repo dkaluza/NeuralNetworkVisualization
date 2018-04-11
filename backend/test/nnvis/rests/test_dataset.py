@@ -1,6 +1,6 @@
 from test import NNvisTestCase
 from test.utils import response_json, authorized_post
-from test_config import LABELS_FILENAME
+from test_config import LABELS_FILENAME, CLASSMAP_FILENAME
 
 from app.nnvis.models import Dataset, Image
 
@@ -10,7 +10,7 @@ import os
 from io import BytesIO, StringIO
 
 
-def create_labels(colnames, *rows):
+def create_csv(colnames, *rows):
     labelfile = StringIO()
     labelfilewriter = csv.writer(labelfile, delimiter=',')
     labelfilewriter.writerow(colnames)
@@ -27,11 +27,13 @@ def bad_zipfile():
 
 def good_zipfile_noimgs():
     retfile = BytesIO()
-    labelfilestr = create_labels(['image', 'label'])
+    labelfilestr = create_csv(['image', 'label'])
+    classfilestr = create_csv(['class_number', 'class_name'])
 
     with zipfile.ZipFile(
             retfile, mode="x", compression=zipfile.ZIP_DEFLATED) as thezip:
         thezip.writestr(LABELS_FILENAME, labelfilestr)
+        thezip.writestr(CLASSMAP_FILENAME, classfilestr)
 
     retfile.seek(0)
     return (retfile, 'noimg.zip')
@@ -39,16 +41,22 @@ def good_zipfile_noimgs():
 
 def good_zipfile_imgs():
     retfile = BytesIO()
-    labelfilestr = create_labels(
+    labelfilestr = create_csv(
         ['image', 'label'],
-        ['01.jpg', 'class1'],
-        ['02.jpg', 'class2'],
-        ['69.jpg', 'class1']
+        ['01.jpg', '0'],
+        ['02.jpg', '1'],
+        ['69.jpg', '0']
+    )
+    classfilestr = create_csv(
+        ['class_number', 'class_name'],
+        ['0', 'class1'],
+        ['1', 'class2']
     )
 
     with zipfile.ZipFile(
             retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
         thezip.writestr(LABELS_FILENAME, labelfilestr)
+        thezip.writestr(CLASSMAP_FILENAME, classfilestr)
         thezip.writestr('01.jpg', 'eeeeeagbdfvdfdgfbdafd')
         thezip.writestr('02.jpg', 'raboerijbaoeribriribv')
         thezip.writestr('69.jpg', 'bcvnxm,zxzxnbnnnneeef')
