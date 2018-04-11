@@ -11,14 +11,14 @@ from io import BytesIO, StringIO
 
 
 def create_csv(colnames, *rows):
-    labelfile = StringIO()
-    labelfilewriter = csv.writer(labelfile, delimiter=',')
-    labelfilewriter.writerow(colnames)
+    f = StringIO()
+    fwriter = csv.writer(f, delimiter=',')
+    fwriter.writerow(colnames)
 
     for r in rows:
-        labelfilewriter.writerow(r)
+        fwriter.writerow(r)
 
-    return labelfile.getvalue()
+    return f.getvalue()
 
 
 def bad_zipfile():
@@ -127,12 +127,24 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(len(dataset_files), 1)
         self.assertEqual(dataset_files[0], LABELS_FILENAME)
 
-        with open(os.path.join(dataset_folder, LABELS_FILENAME),
-                  mode='r', newline='') as csvf:
-            labelsreader = csv.reader(csvf, delimiter=',')
-            rows = list(labelsreader)
-            self.assertEqual(len(rows), 1)
-            self.assertEqual(rows[0], ['image', 'label'])
+        self._assertCsvContent(
+            os.path.join(dataset_folder, LABELS_FILENAME),
+            [['image', 'label']]
+        )
+
+        self._assertCsvContent(
+            os.path.join(dataset_folder, CLASSMAP_FILENAME),
+            [['class_number', 'class_name']]
+        )
+
+    def _assertCsvContent(self, fpath, expected_content):
+        with open(fpath, mode='r', newline='') as csvf:
+            freader = csv.reader(csvf, delimiter=',')
+            rows = list(freader)
+            self.assertEqual(len(rows), len(expected_content))
+
+            for row, expected_row in zip(rows, expected_content):
+                self.assertEqual(row, expected_row)
 
     def _assertDatasetCreated(self, labels=True):
         datasets = Dataset.query.all()
@@ -188,12 +200,21 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(dataset_files[2], '69.jpg')
         self.assertEqual(dataset_files[3], LABELS_FILENAME)
 
-        with open(os.path.join(dataset_folder, LABELS_FILENAME),
-                  mode='r', newline='') as csvf:
-            labelsreader = csv.reader(csvf, delimiter=',')
-            rows = list(labelsreader)
-            self.assertEqual(len(rows), 4)
-            self.assertEqual(rows[0], ['image', 'label'])
-            self.assertEqual(rows[1], ['01.jpg', 'class1'])
-            self.assertEqual(rows[2], ['02.jpg', 'class2'])
-            self.assertEqual(rows[3], ['69.jpg', 'class1'])
+        self._assertCsvContent(
+            os.path.join(dataset_folder, LABELS_FILENAME),
+            [
+                ['image', 'label'],
+                ['01.jpg', 'class1'],
+                ['02.jpg', 'class2'],
+                ['69.jpg', 'class1']
+            ]
+        )
+
+        self._assertCsvContent(
+            os.path.join(dataset_folder, CLASSMAP_FILENAME),
+            [
+                ['class_number', 'class_name'],
+                ['0', 'class1'],
+                ['1', 'class2']
+            ]
+        )

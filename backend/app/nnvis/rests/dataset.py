@@ -48,6 +48,13 @@ def create_image(fname, labelsdict, dataset_id):
 
 
 def unzip_validate_archive(path, file, dataset_id):
+
+    def _assert_labels_are_consecutive_numbers(nparray, permitted_vals=None):
+        for i, classnum in enumerate(nparray):
+            if permitted_vals:
+                _assert(classnum in permitted_vals, "Data point has a class number without a corresponding name mapping")
+            _assert(int(classnum) == i, "Class numbers must be a consecutive numbers starting from 0")
+
     labels_filename = app.config['LABELS_FILENAME']
     classmap_filename = app.config['CLASSMAP_FILENAME']
     try:
@@ -55,14 +62,20 @@ def unzip_validate_archive(path, file, dataset_id):
         archive = ZipFile(file)
         archive.extractall(path)
 
-        labelsdf = pd.read_csv(os.path.join(path, labels_filename))
         classmapdf = pd.read_csv(os.path.join(path, classmap_filename))
+        ccols = classmapdf.columns
+        classnums = sorted(map(int, classmapdf[ccols[0]].tolist()))
+        _assert_labels_are_consecutive_numbers(classnums)
 
-        cols = labelsdf.columns
-        label_list = sorted(labelsdf[cols[1]].unique().tolist())
-        classname_to_index = {l: i for i, l in enumerate(label_list)}
-        labelsdict = pd.Series(labelsdf[cols[1]].map(classname_to_index).values,
-                               index=labelsdf[cols[0]]).to_dict()
+        label_list = classmapdf.sort_values([ccols[0]])[ccols[1]].tolist()
+
+        labelsmapdf = pd.read_csv(os.path.join(path, labels_filename))
+        lcols = labelsmapdf.columns
+        labelsmap_vals = labelsmapdf[lcols[1]].values
+        _assert_labels_are_consecutive_numbers(labelsmap_vals, permitted_vals=classnums)
+
+        labelsdict = pd.Series(labelsmap_vals,
+                               index=labelsmapdf[lcols[0]]).to_dict()
 
         images = []
 
@@ -71,8 +84,8 @@ def unzip_validate_archive(path, file, dataset_id):
             if check_supported_extension(entry.name):
                 image = create_image(entry.name, labelsdict, dataset_id)
                 images.append(image)
-            elif entry.name != labels_filename:
-                raise NnvisException('Unexpected file found in archive')
+            else:
+                _assert(entry.name == labels_filename or entry.name == classmap_filename, 'Unexpected file found in archive')
 
         db.session.bulk_save_objects(images)
         db.session.commit()
