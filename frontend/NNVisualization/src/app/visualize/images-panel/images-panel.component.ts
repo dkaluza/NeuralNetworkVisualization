@@ -44,7 +44,6 @@ export class ImagesPanelComponent implements OnInit {
         }
         this.currentImage = this.imagesList[index];
         this.currentImageName = this.currentImage.imageName;
-        console.log(this.currentImageName);
         this.onGetImage(this.currentImage);
     }
 
@@ -58,7 +57,6 @@ export class ImagesPanelComponent implements OnInit {
         }
         this.currentImage = this.imagesList[index];
         this.currentImageName = this.currentImage.imageName;
-        console.log(this.currentImageName);
         this.onGetImage(this.currentImage);
     }
 
