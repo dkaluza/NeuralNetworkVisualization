@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
 import { Restangular } from 'ngx-restangular';
 import { GenericDialogsService } from '../../generic-dialogs/generic-dialogs.service';
+import { IOSocketService } from '../../iosocket/iosocket.service';
 
 interface Element {
     position: number;
@@ -42,15 +43,19 @@ export class TrainedModelsComponent implements OnInit {
     displayedColumnsIds = this.displayedColumns.map(elem => elem.property);
     historyDataSource: MatTableDataSource<Element>;
     selctedHistoryID: number;
-    private historyUpdateSocket: WebSocket;
+    private historyUpdateSocket: any;
 
     constructor(private restangular: Restangular,
-        private genericDialogs: GenericDialogsService) {
+        private genericDialogs: GenericDialogsService,
+        private iosockets: IOSocketService) {
         this.historyDataSource = new MatTableDataSource<Element>([]);
     }
 
     ngOnInit() {
         this._updateModelList();
+    }
+    OnDestroy() {
+
     }
 
     private _updateModelList(): void {
@@ -82,16 +87,13 @@ export class TrainedModelsComponent implements OnInit {
         if (this.historyUpdateSocket) {
             this.historyUpdateSocket.close();
         }
-        try {
-            this.historyUpdateSocket = new WebSocket('ws://' + location.host +
-                '/api/currently_training/' + id);
-            this.historyUpdateSocket.onmessage = event => {
-                const data = JSON.parse(event.data);
-                console.log(data); // TODO: on error listener
-            };
-        } catch (e) {
-            this.genericDialogs.createWarning(e.message, 'Error');
-        }
+        const socket =
+            this.historyUpdateSocket = this.iosockets
+                .newSocket('/currently_training', id);
+        this.historyUpdateSocket.on('new_epoch', data => {
+            console.log(data); // TODO: on error listener
+        });
+
     }
 
     applyFilter(dataSource, filterValue: string) {

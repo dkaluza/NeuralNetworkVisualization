@@ -34,7 +34,7 @@ import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-a
 import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service';
 import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
 import { DatasetsComponent } from './datasets/datasets.component';
-
+import { IOSocketService } from './iosocket/iosocket.service';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: 'manage', pathMatch: 'full' },
@@ -143,7 +143,8 @@ export function RestangularConfigFactory(RestangularProvider,
         AuthGuard,
         JwtHelper,
         GenericDialogsService,
-        TrainParamsService
+        TrainParamsService,
+        IOSocketService
     ],
     bootstrap: [AppComponent]
 })

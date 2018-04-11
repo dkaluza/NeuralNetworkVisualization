@@ -42,6 +42,10 @@ class CurrentlyTrainedModels(ProtectedResource):
         return [training_history_to_dict(history) for history in trainedModels], 200
 
 
+def handle_currently_training_connection():
+    print("Connection ")
+
+
 class TrainNewModel(ProtectedResource):
 
     def post(self, arch_id):
