@@ -3,6 +3,7 @@ from test.utils import response_json, authorized_post
 from test_config import LABELS_FILENAME, CLASSMAP_FILENAME
 
 from app.nnvis.models import Dataset, Image
+from app.utils import NnvisException
 
 import zipfile
 import csv
@@ -37,6 +38,58 @@ def good_zipfile_noimgs():
 
     retfile.seek(0)
     return (retfile, 'noimg.zip')
+
+
+def good_zipfile_unmapped_classes():
+    retfile = BytesIO()
+    labelfilestr = create_csv(
+        ['image', 'label'],
+        ['01.jpg', '0'],
+        ['02.jpg', '1'],
+        ['69.jpg', '2']
+    )
+    classfilestr = create_csv(
+        ['class_number', 'class_name'],
+        ['0', 'class1'],
+        ['1', 'class2']
+    )
+
+    with zipfile.ZipFile(
+            retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
+        thezip.writestr(LABELS_FILENAME, labelfilestr)
+        thezip.writestr(CLASSMAP_FILENAME, classfilestr)
+        thezip.writestr('01.jpg', 'eeeeeagbdfvdfdgfbdafd')
+        thezip.writestr('02.jpg', 'raboerijbaoeribriribv')
+        thezip.writestr('69.jpg', 'bcvnxm,zxzxnbnnnneeef')
+
+    retfile.seek(0)
+    return (retfile, 'imgs.zip')
+
+
+def good_zipfile_bad_classes():
+    retfile = BytesIO()
+    labelfilestr = create_csv(
+        ['image', 'label'],
+        ['01.jpg', '0'],
+        ['02.jpg', '2'],
+        ['69.jpg', '0']
+    )
+    classfilestr = create_csv(
+        ['class_number', 'class_name'],
+        ['0', 'class1'],
+        ['2', 'class2']
+    )
+
+    with zipfile.ZipFile(
+            retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
+        thezip.writestr(LABELS_FILENAME, labelfilestr)
+        thezip.writestr(CLASSMAP_FILENAME, classfilestr)
+        thezip.writestr('01.jpg', 'eeeeeagbdfvdfdgfbdafd')
+        thezip.writestr('02.jpg', 'raboerijbaoeribriribv')
+        thezip.writestr('69.jpg', 'bcvnxm,zxzxnbnnnneeef')
+
+    retfile.seek(0)
+    return (retfile, 'imgs.zip')
 
 
 def good_zipfile_imgs():
@@ -107,6 +160,30 @@ class UploadNewDatasetTest(NNvisTestCase):
                         file=bad_zipfile()),
                     mimetype='multipart/form-data')
 
+    def test_zipfile_unmapped_classes(self):
+        with self.assertRaises(NnvisException):
+            authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    name=DATASET_NAME,
+                    description=DATASET_DESCRIPTION,
+                    file=good_zipfile_unmapped_classes()),
+                mimetype='multipart/form-data'
+            )
+
+
+    def test_zipfile_bad_classes(self):
+        with self.assertRaises(NnvisException):
+            authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    name=DATASET_NAME,
+                    description=DATASET_DESCRIPTION,
+                    file=good_zipfile_bad_classes()),
+                mimetype='multipart/form-data'
+            )
+
+
     def test_zipfile_noimgs(self):
         rv = authorized_post(
                 self.client, '/upload_dataset', self.access_token,
@@ -124,8 +201,9 @@ class UploadNewDatasetTest(NNvisTestCase):
                 self.app.config['DATASET_FOLDER'], str(ds_id))
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
-        self.assertEqual(len(dataset_files), 1)
+        self.assertEqual(len(dataset_files), 2)
         self.assertEqual(dataset_files[0], LABELS_FILENAME)
+        self.assertEqual(dataset_files[1], CLASSMAP_FILENAME)
 
         self._assertCsvContent(
             os.path.join(dataset_folder, LABELS_FILENAME),
@@ -194,19 +272,20 @@ class UploadNewDatasetTest(NNvisTestCase):
                 self.app.config['DATASET_FOLDER'], str(ds_id))
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
-        self.assertEqual(len(dataset_files), 4)
+        self.assertEqual(len(dataset_files), 5)
         self.assertEqual(dataset_files[0], '02.jpg')
         self.assertEqual(dataset_files[1], '01.jpg')
         self.assertEqual(dataset_files[2], '69.jpg')
         self.assertEqual(dataset_files[3], LABELS_FILENAME)
+        self.assertEqual(dataset_files[4], CLASSMAP_FILENAME)
 
         self._assertCsvContent(
             os.path.join(dataset_folder, LABELS_FILENAME),
             [
                 ['image', 'label'],
-                ['01.jpg', 'class1'],
-                ['02.jpg', 'class2'],
-                ['69.jpg', 'class1']
+                ['01.jpg', '0'],
+                ['02.jpg', '1'],
+                ['69.jpg', '0']
             ]
         )
 

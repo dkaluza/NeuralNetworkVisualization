@@ -51,9 +51,11 @@ def unzip_validate_archive(path, file, dataset_id):
 
     def _assert_labels_are_consecutive_numbers(nparray, permitted_vals=None):
         for i, classnum in enumerate(nparray):
-            if permitted_vals:
-                _assert(classnum in permitted_vals, "Data point has a class number without a corresponding name mapping")
             _assert(int(classnum) == i, "Class numbers must be a consecutive numbers starting from 0")
+
+    def _assert_labels_in_set(nparray, permitted_vals):
+        for classnum in nparray:
+            _assert(classnum in permitted_vals, "Data point has a class number without a corresponding name mapping")
 
     labels_filename = app.config['LABELS_FILENAME']
     classmap_filename = app.config['CLASSMAP_FILENAME']
@@ -72,7 +74,7 @@ def unzip_validate_archive(path, file, dataset_id):
         labelsmapdf = pd.read_csv(os.path.join(path, labels_filename))
         lcols = labelsmapdf.columns
         labelsmap_vals = labelsmapdf[lcols[1]].values
-        _assert_labels_are_consecutive_numbers(labelsmap_vals, permitted_vals=classnums)
+        _assert_labels_in_set(labelsmap_vals, classnums)
 
         labelsdict = pd.Series(labelsmap_vals,
                                index=labelsmapdf[lcols[0]]).to_dict()
