@@ -11,6 +11,7 @@ from app.utils import NnvisException
 import os
 import shutil
 import pandas as pd
+import numpy as np
 from zipfile import ZipFile
 
 SUPPORTED_EXTENSIONS = [
@@ -49,9 +50,9 @@ def create_image(fname, labelsdict, dataset_id):
 
 def unzip_validate_archive(path, file, dataset_id):
 
-    def _assert_labels_are_consecutive_numbers(nparray, permitted_vals=None):
+    def _assert_labels_are_consecutive_numbers(nparray):
         for i, classnum in enumerate(nparray):
-            _assert(int(classnum) == i, "Class numbers must be a consecutive numbers starting from 0")
+            _assert(classnum == i, "Class numbers must be a consecutive numbers starting from 0")
 
     def _assert_labels_in_set(nparray, permitted_vals):
         for classnum in nparray:
@@ -66,13 +67,15 @@ def unzip_validate_archive(path, file, dataset_id):
 
         classmapdf = pd.read_csv(os.path.join(path, classmap_filename))
         ccols = classmapdf.columns
-        classnums = sorted(map(int, classmapdf[ccols[0]].tolist()))
+        classmapdf[ccols[0]] = classmapdf[ccols[0]].astype(np.int32)
+        classnums = sorted(classmapdf[ccols[0]].tolist())
         _assert_labels_are_consecutive_numbers(classnums)
 
         label_list = classmapdf.sort_values([ccols[0]])[ccols[1]].tolist()
 
         labelsmapdf = pd.read_csv(os.path.join(path, labels_filename))
         lcols = labelsmapdf.columns
+        labelsmapdf[lcols[1]] = labelsmapdf[lcols[1]].astype(np.int32)
         labelsmap_vals = labelsmapdf[lcols[1]].values
         _assert_labels_in_set(labelsmap_vals, classnums)
 
