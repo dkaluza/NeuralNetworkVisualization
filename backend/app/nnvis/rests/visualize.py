@@ -65,9 +65,6 @@ class Visualize(ProtectedResource):
         postproc = postproc_class()
         image_output = postproc.process(image_input, image_output)
 
-        print(image_output.shape)
-
-
         sufix = '_' + alg_class.__name__ + '_' + postproc_class.__name__ + '.png'
         image_output_path = image_path.rsplit('.', 1)[0] + sufix
 

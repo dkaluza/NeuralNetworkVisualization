@@ -2,8 +2,8 @@ import tensorflow as tf
 import json
 import numpy as np
 
-from .vanillasaliency import GradientSaliency
-from .guidedbackpropagation import GuidedBackprop
+from app.vis_tools.algorithms.vanillasaliency import GradientSaliency
+from app.vis_tools.algorithms.guidedbackpropagation import GuidedBackprop
 
 algorithms_register = {
     0: GradientSaliency,
