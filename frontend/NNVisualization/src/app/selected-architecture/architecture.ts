@@ -4,6 +4,7 @@ export interface ArchNode {
     id: string;
     label: string;
     layerType: string;
+    shareWeightsFrom: number;
     params: any;
 }
 

@@ -129,6 +129,15 @@ export class SelectedArchitectureService {
         };
     }
 
+    private _correctGraphInfo(): ErrorInfo {
+        return { value: true, nodeIds: [], message: '' };
+    }
+
+    private _wrongGraphInfo(nodes: number[], message: string): ErrorInfo {
+        return { value: false, nodeIds: nodes, message: message };
+    }
+
+
     private _checkInputIds(silence: boolean): ErrorInfo {
         const inputs = this._graph.getGraphInputs();
         const inputIds = inputs.map(n => {
@@ -148,18 +157,10 @@ export class SelectedArchitectureService {
                 if (!silence) {
                     this.genericDialogs.createWarning(message);
                 }
-                return {
-                    value: false,
-                    nodeIds: inputs,
-                    message: message
-                };
+                return this._wrongGraphInfo(inputs, message);
             }
         }
-        return {
-            value: true,
-            nodeIds: [],
-            message: ''
-        };
+        return this._correctGraphInfo();
     }
 
     private _checkNumOfInputs(silence: boolean): ErrorInfo {
@@ -205,17 +206,9 @@ export class SelectedArchitectureService {
             if (!silence) {
                 this.genericDialogs.createWarning(message);
             }
-            return {
-                value: false,
-                nodeIds: outputs,
-                message: message
-            };
+            return this._wrongGraphInfo(outputs, message);
         }
-        return {
-            value: true,
-            nodeIds: [],
-            message: ''
-        };
+        return this._correctGraphInfo();
     }
 
     private _checkForLoop(silence: boolean): ErrorInfo {
@@ -225,17 +218,9 @@ export class SelectedArchitectureService {
             if (!silence) {
                 this.genericDialogs.createWarning(message);
             }
-            return {
-                value: false,
-                nodeIds: loop,
-                message: message
-            };
+            return this._wrongGraphInfo(loop, message);
         }
-        return {
-            value: true,
-            nodeIds: [],
-            message: ''
-        };
+        return this._correctGraphInfo();
     }
 
     private _checkShapes(silence: boolean): ErrorInfo {
@@ -245,28 +230,42 @@ export class SelectedArchitectureService {
         for (const n of sorted) {
             const layer = this._currentNodes.get(n);
             const inputs = [];
+
             this._graph.getNodeInputs(n).forEach(v => {
                 inputs.push(shapes.get(v));
             });
             if (layer.validateInputShapes(inputs)) {
                 shapes.set(n, layer.calculateOutputShape(inputs));
+                layer.inputShapes = inputs;
             } else {
                 const message = 'Node ' + n + ' has incorrect inputs: ' + inputs;
                 if (!silence) {
                     this.genericDialogs.createWarning(message);
                 }
-                return {
-                    value: false,
-                    nodeIds: [n],
-                    message: message
-                };
+                return this._wrongGraphInfo([n], message);
             }
         }
 
-        return {
-            value: true,
-            nodeIds: [],
-            message: ''
-        };
+        return this._correctGraphInfo();
+    }
+
+    private _checkSharingWeights(silence: boolean): ErrorInfo {
+        for (const node of this._graph.nodes) {
+            const nodeLayer = this._currentNodes.get(node);
+            if (nodeLayer.shareWeightsFrom !== undefined) {
+                let message = '';
+
+                const sharedId = nodeLayer.shareWeightsFrom;
+                const sharedLayer = this._currentNodes.get(sharedId);
+                if (nodeLayer.canShareWeightFrom(sharedLayer)) {
+                    message = 'Node ' + node + ' can\'t share weights from ' + sharedId;
+                    if (!silence) {
+                        this.genericDialogs.createWarning(message);
+                    }
+                    return this._wrongGraphInfo([node], message);
+                }
+            }
+        }
+        return this._correctGraphInfo();
     }
 }

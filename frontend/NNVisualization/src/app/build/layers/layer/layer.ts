@@ -1,15 +1,20 @@
+import { ArchNode } from '../../../selected-architecture/architecture';
+
 export abstract class Layer {
     private _id: number;
     private _label: string;
     private _layerType: string;
+    private _shareWeightsFrom: number;
 
-    constructor(id: number, label: string, layerType: string) {
+    protected _inputShapes: number[][];
+
+    constructor(id: number, label: string, layerType: string,
+                shareFrom?: number) {
         this._id = id;
         this._label = label;
         this._layerType = layerType;
-    }
-
-    ngOnInit() {
+        this._shareWeightsFrom = shareFrom;
+        this._inputShapes = undefined;
     }
 
     get id(): number {
@@ -28,18 +33,41 @@ export abstract class Layer {
         this._label = label;
     }
 
+    get shareWeightsFrom(): number {
+        return this._shareWeightsFrom;
+    }
+
+    set shareWeightsFrom(id: number) {
+        this._shareWeightsFrom = id;
+    }
+
+    get inputShapes(): number[][] {
+        return this._inputShapes;
+    }
+
+    set inputShapes(shapes: number[][]) {
+        this._inputShapes = shapes;
+    }
+
     abstract addAttributes(dict);
+
+    // default is that you can't share weights
+    //     needs to be overwritten to share weights
+    canShareWeightFrom(layer: Layer): boolean {
+        return false;
+    }
 
     // assumes that value is already valid number array
     strToArray(value: string): number[] {
         return value.split(',').map(Number);
     }
 
-    toDict() {
+    toDict(): ArchNode {
         const dict = {
             id: String(this._id),
             label: this._label,
             layerType: this._layerType,
+            shareWeightsFrom: this._shareWeightsFrom,
             params: {
             }
         };

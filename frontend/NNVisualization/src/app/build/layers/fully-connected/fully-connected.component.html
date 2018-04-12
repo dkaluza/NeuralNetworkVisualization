@@ -25,4 +25,9 @@
             </mat-option>
         </mat-select>
     </mat-form-field>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="Share weights from"
+                        type="number" min="1"
+                        [(ngModel)]="layer.shareWeightsFrom">
+    </mat-form-field>
 </div>
