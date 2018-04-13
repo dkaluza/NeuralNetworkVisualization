@@ -121,6 +121,8 @@ export class SelectedArchitectureService {
         if (!error.value) { return error; }
         error = this._checkShapes(silence);
         if (!error.value) { return error; }
+        error = this._checkSharingWeights(silence);
+        if (!error.value) { return error; }
 
         return {
             value: true,
@@ -252,12 +254,12 @@ export class SelectedArchitectureService {
     private _checkSharingWeights(silence: boolean): ErrorInfo {
         for (const node of this._graph.nodes) {
             const nodeLayer = this._currentNodes.get(node);
-            if (nodeLayer.shareWeightsFrom !== undefined) {
+            if (nodeLayer.shareWeightsFrom) {
                 let message = '';
 
                 const sharedId = nodeLayer.shareWeightsFrom;
                 const sharedLayer = this._currentNodes.get(sharedId);
-                if (nodeLayer.canShareWeightFrom(sharedLayer)) {
+                if (!nodeLayer.canShareWeightFrom(sharedLayer)) {
                     message = 'Node ' + node + ' can\'t share weights from ' + sharedId;
                     if (!silence) {
                         this.genericDialogs.createWarning(message);

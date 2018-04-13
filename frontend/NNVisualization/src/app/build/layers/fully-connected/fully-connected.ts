@@ -65,6 +65,10 @@ export class FullyConnectedLayer extends Layer {
     }
 
     canShareWeightFrom(layer: Layer): boolean {
+        if (!layer) {
+            return false;
+        }
+
         if (layer.layerType !== 'fc') {
             return false;
         }

@@ -51,6 +51,7 @@
     <mat-form-field class="node-element">
         <input matInput placeholder="Share weights from"
                         type="number" min="1"
-                        [(ngModel)]="layer.shareWeightsFrom">
+                        [(ngModel)]="layer.shareWeightsFrom"
+                        (input)="onChange()">
     </mat-form-field>
 </div>

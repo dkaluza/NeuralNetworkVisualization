@@ -154,6 +154,9 @@ export class ConvLayer extends Layer {
         }
 
     canShareWeightFrom(layer: Layer): boolean {
+        if (!layer) {
+            return false;
+        }
 
         if (layer.layerType !== 'conv') {
             return false;
