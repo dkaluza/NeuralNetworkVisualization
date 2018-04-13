@@ -38,11 +38,17 @@ class TFModel:
 
         outputs = {id: [] for id in ids}
         inputs = {id: [] for id in ids}
+        shared = {}
         num_inputs = {id: 0 for id in ids}
         for link in links:
             outputs[int(link['source'])].append(int(link['target']))
             inputs[int(link['target'])].append(int(link['source']))
             num_inputs[int(link['target'])] += 1
+
+        for id in ids:
+            sharedId = nodes[id]['shareWeightsFrom']
+            if sharedId != 0:
+                shared[id] = sharedId
 
         graph = tf.Graph()
         with graph.as_default():
@@ -50,15 +56,20 @@ class TFModel:
 
             map_op = {}
             for id in ids:
-                if num_inputs[id] == 0 and id not in map_op:
+                if num_inputs[id] == 0 and\
+                   shared.get(id) is None and\
+                   id not in map_op:
                     stack = [id]
                     while stack:
                         v = stack.pop()
                         map_op[v] = build_op(nodes[v], map_op,
                                              inputs[v], self._is_training)
+                        for k in list(shared.keys()):
+                            if shared[k] == v:
+                                shared[k] = None
                         for u in outputs[v]:
                             num_inputs[u] -= 1
-                            if num_inputs[u] == 0:
+                            if num_inputs[u] == 0 and shared.get(u) is None:
                                 stack.append(u)
 
         for v in ids:

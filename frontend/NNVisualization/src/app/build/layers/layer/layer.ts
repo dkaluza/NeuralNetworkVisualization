@@ -67,10 +67,13 @@ export abstract class Layer {
             id: String(this._id),
             label: this._label,
             layerType: this._layerType,
-            shareWeightsFrom: this._shareWeightsFrom,
+            shareWeightsFrom: 0,
             params: {
             }
         };
+        if (this._shareWeightsFrom) {
+            dict.shareWeightsFrom = this._shareWeightsFrom;
+        }
         dict.params = this.addAttributes(dict.params);
         return dict;
     }
