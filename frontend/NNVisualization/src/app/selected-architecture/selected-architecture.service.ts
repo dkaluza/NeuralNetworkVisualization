@@ -265,6 +265,19 @@ export class SelectedArchitectureService {
                         this.genericDialogs.createWarning(message);
                     }
                     return this._wrongGraphInfo([node], message);
+                } else if (!this._graph.doesLinkExist(sharedId, node)) {
+                    // check if this connection creates a loop in graph
+                    this._graph.addLink(sharedId, node);
+                    const isLoop = this._graph.checkForLoop().length > 0;
+                    this._graph.removeLink(sharedId, node);
+
+                    if (isLoop) {
+                        message = 'Node ' + node + ' can\'t share weights from ' + sharedId + ' (looping)';
+                        if (!silence) {
+                            this.genericDialogs.createWarning(message);
+                        }
+                        return this._wrongGraphInfo([node], message);
+                    }
                 }
             }
         }

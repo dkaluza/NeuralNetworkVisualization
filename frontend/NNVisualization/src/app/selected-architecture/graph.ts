@@ -45,6 +45,13 @@ export class Graph {
         this._links.set(source, this._links.get(source).filter(n => (n !== target)));
     }
 
+    doesLinkExist(source: number, target: number): boolean {
+        if (!this._links.has(source)) {
+            return false;
+        }
+        return !this._links.get(source).every(n => n !== target);
+    }
+
     get nodes(): number[] {
         return this._nodes;
     }
