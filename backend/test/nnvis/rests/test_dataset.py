@@ -92,33 +92,23 @@ def good_zipfile_bad_classes():
     return (retfile, 'imgs.zip')
 
 
-def good_zipfile_imgs():
+def good_zipfile_imgs(labels_content, classmap_content):
     retfile = BytesIO()
-    labelfilestr = create_csv(
-        ['image', 'label'],
-        ['01.jpg', '0'],
-        ['02.jpg', '1'],
-        ['69.jpg', '0']
-    )
-    classfilestr = create_csv(
-        ['class_number', 'class_name'],
-        ['0', 'class1'],
-        ['1', 'class2']
-    )
+    labelfilestr = create_csv(*labels_content)
+    classfilestr = create_csv(*classmap_content)
 
     with zipfile.ZipFile(
             retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
         thezip.writestr(LABELS_FILENAME, labelfilestr)
         thezip.writestr(CLASSMAP_FILENAME, classfilestr)
-        thezip.writestr('01.jpg', 'eeeeeagbdfvdfdgfbdafd')
-        thezip.writestr('02.jpg', 'raboerijbaoeribriribv')
-        thezip.writestr('69.jpg', 'bcvnxm,zxzxnbnnnneeef')
+        for l in labels_content[1:]:
+            thezip.writestr(l[0], 'raboerijbaoeribriribv')
 
     retfile.seek(0)
     return (retfile, 'imgs.zip')
 
+
 DATASET_NAME = 'testname'
-DATASET_LABELS = ['class1', 'class2']
 DATASET_DESCRIPTION = 'testdesc'
 
 
@@ -194,7 +184,7 @@ class UploadNewDatasetTest(NNvisTestCase):
                 mimetype='multipart/form-data')
 
         self.assertEqual(rv.status_code, 201)
-        ds_id = self._assertDatasetCreated(labels=False)
+        ds_id = self._assertDatasetCreated()
         self.assertEqual(len(Image.query.all()), 0)
 
         dataset_folder = os.path.join(
@@ -224,13 +214,13 @@ class UploadNewDatasetTest(NNvisTestCase):
             for row, expected_row in zip(rows, expected_content):
                 self.assertEqual(row, expected_row)
 
-    def _assertDatasetCreated(self, labels=True):
+    def _assertDatasetCreated(self, labels=None):
         datasets = Dataset.query.all()
         self.assertEqual(len(datasets), 1)
         ds = datasets[0]
         self.assertEqual(ds.name, DATASET_NAME)
         if labels:
-            self.assertEqual(ds.labels.split(','), DATASET_LABELS)
+            self.assertEqual(ds.labels.split(','), labels)
         self.assertEqual(ds.description, DATASET_DESCRIPTION)
 
         return ds.id
@@ -251,21 +241,55 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(images[1].relative_path, '01.jpg')
         self.assertEqual(images[2].relative_path, '69.jpg')
 
-        self.assertEqual(images[0].label, '1')
+        self.assertEqual(images[0].label, '10')
         self.assertEqual(images[1].label, '0')
-        self.assertEqual(images[2].label, '0')
+        self.assertEqual(images[2].label, '2')
 
     def test_zipfile_someimgs(self):
+        labels_content = [
+            ['image', 'label'],
+            ['01.jpg', '0'],
+            ['02.jpg', '10'],
+            ['69.jpg', '2']
+        ]
+        classmap_content = [
+            ['class_number', 'class_name'],
+            ['0', 'class0'],
+            ['1', 'class1'],
+            ['2', 'class2'],
+            ['3', 'class3'],
+            ['4', 'class4'],
+            ['5', 'class5'],
+            ['6', 'class6'],
+            ['7', 'class7'],
+            ['8', 'class8'],
+            ['9', 'class9'],
+            ['10', 'class10'],
+        ]
+
         rv = authorized_post(
                 self.client, '/upload_dataset', self.access_token,
                 data=dict(
                     name=DATASET_NAME,
                     description=DATASET_DESCRIPTION,
-                    file=good_zipfile_imgs()),
+                    file=good_zipfile_imgs(labels_content, classmap_content)),
                 mimetype='multipart/form-data')
-
         self.assertEqual(rv.status_code, 201)
-        ds_id = self._assertDatasetCreated()
+        ds_id = self._assertDatasetCreated(
+            labels=[
+                'class0',
+                'class1',
+                'class2',
+                'class3',
+                'class4',
+                'class5',
+                'class6',
+                'class7',
+                'class8',
+                'class9',
+                'class10',
+            ]
+        )
         self._assertImagesCreated()
 
         dataset_folder = os.path.join(
@@ -281,19 +305,10 @@ class UploadNewDatasetTest(NNvisTestCase):
 
         self._assertCsvContent(
             os.path.join(dataset_folder, LABELS_FILENAME),
-            [
-                ['image', 'label'],
-                ['01.jpg', '0'],
-                ['02.jpg', '1'],
-                ['69.jpg', '0']
-            ]
+            labels_content
         )
 
         self._assertCsvContent(
             os.path.join(dataset_folder, CLASSMAP_FILENAME),
-            [
-                ['class_number', 'class_name'],
-                ['0', 'class1'],
-                ['1', 'class2']
-            ]
+            classmap_content
         )
