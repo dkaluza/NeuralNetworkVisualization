@@ -4,6 +4,15 @@ import tensorflow.contrib.layers as layers
 from app.utils import NnvisException
 
 
+def _get_reuse(node):
+    reuse = node['shareWeightsFrom'] != 0
+    if reuse:
+        scope = str(node['shareWeightsFrom'])
+    else:
+        scope = str(node['id'])
+    return reuse, scope
+
+
 def _get_activation(node):
     activation = node['params']['activation']
     if activation == 'None':
@@ -42,12 +51,7 @@ def _build_fc_op(node, input_ops, is_training):
     x = input_ops[0]
     x = layers.flatten(x)
     with tf.name_scope(node['id']):
-        reuse = node['shareWeightsFrom'] != 0
-        scope = None
-        if reuse:
-            scope = str(node['shareWeightsFrom'])
-        else:
-            scope = str(node['id'])
+        reuse, scope = _get_reuse(node)
         op = layers.fully_connected(
                 x, num_outputs=node['params']['numOutputs'],
                 activation_fn=tf.identity,
@@ -65,12 +69,7 @@ def _build_conv_op(node, input_ops, is_training):
     strides = node['params']['strides']
 
     with tf.name_scope(node['id']):
-        reuse = node['shareWeightsFrom'] != 0
-        scope = None
-        if reuse:
-            scope = str(node['shareWeightsFrom'])
-        else:
-            scope = str(node['id'])
+        reuse, scope = _get_reuse(node)
         op = layers.conv2d(
                 x, num_outputs=num_filters,
                 kernel_size=kernel_size,
