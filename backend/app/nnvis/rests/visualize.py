@@ -1,6 +1,10 @@
 import os
+import json
+import shutil
+from io import BytesIO
 
 from flask import current_app as app
+from flask import send_file
 
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
@@ -13,9 +17,6 @@ from app.nnvis.models import Dataset
 # from app.vis_tools.utils import NumpyEncoder
 
 from app.vis_tools import visualize_utils
-
-import json
-import shutil
 
 
 def safe_add_is_training(feed_dict, graph, train):
@@ -51,7 +52,7 @@ class Inference(ProtectedResource):
         sess.close()
 
         dataset = Dataset.query.get(model.dataset_id)
-        class_names = dataset.labels.split(',')
+        class_names = dataset.labels.split(',') 
         scores = [{'class_number': class_number,
                    'class_name': class_names[class_number],
                    'score': str(score)}
@@ -80,14 +81,15 @@ class Visualize(ProtectedResource):
         safe_add_is_training(feed_dict, graph, False)
 
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        image_output = vis_algorithm.GetMask(image_input, feed_dict=feed_dict)
+        saliency = vis_algorithm.GetMask(image_input, feed_dict=feed_dict)
 
         sess.close()
 
-        image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_gray_pos)
-        image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        return {'image_path': image_path}
+        ret = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
+        # image_url = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
+        # return {'image_path': image_path}
+        # WHAT DO
+        return send_file(ret, mimetype='image/png')
 
 
 # /image/<string:image_id>
@@ -101,6 +103,7 @@ class Images(ProtectedResource):
             shutil.copyfile(image_db_path, image_path)
         image_url = 'api/static/' + image.relative_path
         return {'image_path': image_url}
+        # WHAT DO
 
 
 # /images/<int:model_id>

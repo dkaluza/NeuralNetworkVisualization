@@ -91,7 +91,8 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.visualizeService.getImageVis(model.id, 0, this.currentImage.imageId)
             .subscribe(response => {
-                this.currentImageVis = response['image_path'];
+                // let b = new Blob([response], {type: 'image/png'});
+                this._createImgFromBlob(response);
             });
     }
 
@@ -110,5 +111,14 @@ export class ImagesPanelComponent implements OnInit {
                 }
                 this.dataSource = new MatTableDataSource(scores);
             });
+    }
+
+    _createImgFromBlob(img: Blob) {
+        let reader = new FileReader();
+        reader.addEventListener("load", () => {
+            this.currentImageVis = reader.result;
+        }, false);
+
+        reader.readAsDataURL(img);
     }
 }

@@ -1,4 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
+import { ResponseContentType } from '@angular/http';
 import { Restangular } from 'ngx-restangular';
 import { Algorithm } from './algorithm.model';
 
@@ -23,7 +24,9 @@ export class VisualizeService implements OnInit {
 
     getImageVis(model_id: number, alg_id: number, image_id: number) {
         return this.restangular.one('visualize/' + model_id.toString() + '/'
-            + this.currentAlgorithm.toString() + '/' + image_id.toString()).get();
+            + this.currentAlgorithm.toString() + '/' + image_id.toString())
+            .withHttpConfig({'responseType': 'blob'})
+            .get();
     }
 
     doInference(model_id: number, image_id: number) {
