@@ -18,7 +18,7 @@ interface Element {
     templateUrl: './trained-models.component.html',
     styleUrls: ['./trained-models.component.css']
 })
-export class TrainedModelsComponent implements OnInit {
+export class TrainedModelsComponent implements OnInit, OnDestroy {
     displayedColumns = [
         {
             property: 'position',
@@ -54,8 +54,10 @@ export class TrainedModelsComponent implements OnInit {
     ngOnInit() {
         this._updateModelList();
     }
-    OnDestroy() {
-
+    ngOnDestroy() {
+        if (this.historyUpdateSocket) {
+            this.historyUpdateSocket.close();
+        }
     }
 
     private _updateModelList(): void {
@@ -93,7 +95,9 @@ export class TrainedModelsComponent implements OnInit {
         this.historyUpdateSocket.on('new_epoch', data => {
             console.log(data); // TODO: on error listener
         });
-
+        this.historyUpdateSocket.on('error', error => {
+            this.genericDialogs.createWarning(error, 'Websocket error');
+        });
     }
 
     applyFilter(dataSource, filterValue: string) {

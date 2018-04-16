@@ -1,3 +1,5 @@
+from eventlet import monkey_patch
+monkey_patch(os=True, select=True, socket=True, time=True, psycopg=True)
 from flask import Flask
 from flask_socketio import SocketIO
 
@@ -9,10 +11,11 @@ from app import create_app
 app = create_app('config')
 app.app_context().push()
 
-socketio = SocketIO(app, logger=True, path="/socketio")
+socketio = SocketIO(app, logger=True, path="/socketio",
+                    message_queue='amqp://')
 register_socketsio_events(socketio)
 
 if __name__ == '__main__':
-    socketio.run(app, log_output=True,
+    socketio.run(app, log_output=True, debug=True,
                  host=app.config['HOST'],
                  port=app.config['PORT'])

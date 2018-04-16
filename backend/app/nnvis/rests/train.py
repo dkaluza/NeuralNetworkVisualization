@@ -1,7 +1,11 @@
 from flask import request
 from flask_restful import abort
-from flask_jwt_extended import get_current_user
+from flask_jwt_extended import get_current_user, jwt_required
+from flask_socketio import emit, SocketIO
 
+from collections import defaultdict
+
+from app import db
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Dataset, Architecture, Model, TrainingHistory
 from app.nnvis.train.train import TrainThread
@@ -33,17 +37,55 @@ def training_history_to_dict(history):
     }
 
 
+def get_user_models_history(user_id):
+    models_subquery = Model.query.join(Model.architecture).filter(
+        Architecture.user_id == user_id).subquery()
+    return TrainingHistory.query.join(
+        models_subquery, TrainingHistory.model)
+
+
 class CurrentlyTrainedModels(ProtectedResource):
     def get(self):
-        models_subquery = Model.query.join(Model.architecture).filter(
-            Architecture.user_id == get_current_user()).subquery()
-        trainedModels = TrainingHistory.query.join(models_subquery, TrainingHistory.model) \
+        trainedModels = get_user_models_history(get_current_user()) \
             .filter(TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
         return [training_history_to_dict(history) for history in trainedModels], 200
 
 
+history_emiters = defaultdict(list)
+
+
+@db.event.listens_for(TrainingHistory, "after_update")
+def history_update_handler(mapper, connection, target):
+    print(history_emiters[target.id])
+    emiters = history_emiters[target.id]
+    for emiter in emiters:
+        emiter()
+    if target.current_epoch == target.number_of_epochs:
+        history_emiters[target.id] = []
+
+
+@jwt_required
 def handle_currently_training_connection():
-    print("Connection ")
+    user_id = get_current_user()
+    history_id = int(request.args.get('id'))
+    history = get_user_models_history(user_id).filter(
+        TrainingHistory.id == history_id).first()
+    if history is None:
+        return False
+        # TODO custom error sending
+
+    sid = request.sid
+    namespace = request.namespace
+
+    def event():
+        socketio = SocketIO(message_queue='amqp://')
+        history = get_user_models_history(user_id).filter(
+            TrainingHistory.id == history_id).first()
+        socketio.emit('new_epoch', training_history_to_dict(history), room=sid,
+                      namespace=namespace)
+
+    emit('new_epoch', training_history_to_dict(history))
+    history_emiters[history_id].append(event)
 
 
 class TrainNewModel(ProtectedResource):
