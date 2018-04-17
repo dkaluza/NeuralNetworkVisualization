@@ -192,8 +192,8 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
         self.assertEqual(len(dataset_files), 2)
-        self.assertEqual(dataset_files[0], LABELS_FILENAME)
-        self.assertEqual(dataset_files[1], CLASSMAP_FILENAME)
+        self.assertIn(LABELS_FILENAME, dataset_files)
+        self.assertIn(CLASSMAP_FILENAME, dataset_files)
 
         self._assertCsvContent(
             os.path.join(dataset_folder, LABELS_FILENAME),
@@ -233,17 +233,20 @@ class UploadNewDatasetTest(NNvisTestCase):
         for image in images:
             self.assertEqual(image.dataset_id, ds_id)
 
-        self.assertEqual(images[0].name, '02')
-        self.assertEqual(images[1].name, '01')
-        self.assertEqual(images[2].name, '69')
+        image_names = map(lambda x: x.name, images)
+        self.assertIn('02', image_names)
+        self.assertIn('01', image_names)
+        self.assertIn('69', image_names)
 
-        self.assertEqual(images[0].relative_path, '02.jpg')
-        self.assertEqual(images[1].relative_path, '01.jpg')
-        self.assertEqual(images[2].relative_path, '69.jpg')
+        image_paths = map(lambda x: x.relative_path, images)
+        self.assertIn('02.jpg', image_paths)
+        self.assertIn('01.jpg', image_paths)
+        self.assertIn('69.jpg', image_paths)
 
-        self.assertEqual(images[0].label, '10')
-        self.assertEqual(images[1].label, '0')
-        self.assertEqual(images[2].label, '2')
+        image_labels = map(lambda x: x.label, images)
+        self.assertIn('10', image_labels)
+        self.assertIn('0', image_labels)
+        self.assertIn('2', image_labels)
 
     def test_zipfile_someimgs(self):
         labels_content = [
@@ -297,11 +300,11 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
         self.assertEqual(len(dataset_files), 5)
-        self.assertEqual(dataset_files[0], '02.jpg')
-        self.assertEqual(dataset_files[1], '01.jpg')
-        self.assertEqual(dataset_files[2], '69.jpg')
-        self.assertEqual(dataset_files[3], LABELS_FILENAME)
-        self.assertEqual(dataset_files[4], CLASSMAP_FILENAME)
+        self.assertIn('02.jpg', dataset_files)
+        self.assertIn('01.jpg', dataset_files)
+        self.assertIn('69.jpg', dataset_files)
+        self.assertIn(LABELS_FILENAME, dataset_files)
+        self.assertIn(CLASSMAP_FILENAME, dataset_files)
 
         self._assertCsvContent(
             os.path.join(dataset_folder, LABELS_FILENAME),
