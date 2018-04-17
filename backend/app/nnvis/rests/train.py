@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user, jwt_required
-from flask_socketio import emit, SocketIO
+from flask_socketio import emit, SocketIO, join_room
 
 from collections import defaultdict
 
@@ -24,7 +24,7 @@ ARGS_LIST = [
 
 
 def training_history_to_dict(history):
-
+    # TODO difrent dict method for listed models history
     return {
         'id': history.id,
         'model_name': history.model.name,
@@ -37,6 +37,27 @@ def training_history_to_dict(history):
     }
 
 
+socketio = SocketIO(message_queue='amqp://')
+
+# TODO after insert
+
+
+@db.event.listens_for(TrainingHistory, 'after_update')
+def history_update_handler(mapper, connection, target):
+    socketio.emit('new_epoch', training_history_to_dict(target),
+                  room='new_epoch' + str(target.id),
+                  namespace='/currently_training')
+
+    user_id = target.model.architecture.user_id
+    trainedModels = get_user_models_history(user_id) \
+        .filter(TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
+
+    socketio.emit('list_update', [training_history_to_dict(history)
+                                  for history in trainedModels],
+                  room='list_update' + str(user_id),
+                  namespace='/list_trained_models')
+
+
 def get_user_models_history(user_id):
     models_subquery = Model.query.join(Model.architecture).filter(
         Architecture.user_id == user_id).subquery()
@@ -44,24 +65,14 @@ def get_user_models_history(user_id):
         models_subquery, TrainingHistory.model)
 
 
-class CurrentlyTrainedModels(ProtectedResource):
-    def get(self):
-        trainedModels = get_user_models_history(get_current_user()) \
-            .filter(TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
-        return [training_history_to_dict(history) for history in trainedModels], 200
+@jwt_required
+def handle_list_trained_models_connection():
+    trainedModels = get_user_models_history(get_current_user()) \
+        .filter(TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
 
-
-history_emiters = defaultdict(list)
-
-
-@db.event.listens_for(TrainingHistory, "after_update")
-def history_update_handler(mapper, connection, target):
-    print(history_emiters[target.id])
-    emiters = history_emiters[target.id]
-    for emiter in emiters:
-        emiter()
-    if target.current_epoch == target.number_of_epochs:
-        history_emiters[target.id] = []
+    emit('list_update', [training_history_to_dict(history)
+                         for history in trainedModels])
+    join_room('list_update' + str(get_current_user()))
 
 
 @jwt_required
@@ -74,18 +85,8 @@ def handle_currently_training_connection():
         return False
         # TODO custom error sending
 
-    sid = request.sid
-    namespace = request.namespace
-
-    def event():
-        socketio = SocketIO(message_queue='amqp://')
-        history = get_user_models_history(user_id).filter(
-            TrainingHistory.id == history_id).first()
-        socketio.emit('new_epoch', training_history_to_dict(history), room=sid,
-                      namespace=namespace)
-
     emit('new_epoch', training_history_to_dict(history))
-    history_emiters[history_id].append(event)
+    join_room('new_epoch' + str(history_id))
 
 
 class TrainNewModel(ProtectedResource):

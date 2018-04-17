@@ -15,7 +15,8 @@ from app.nnvis.rests.visualize import (Inference, Visualize, Images,
                                        ImageList, Algorithms)
 from app.nnvis.rests.train import (TrainNewModel, TrainModel,
                                    ListLosses, ListOptimizers,
-                                   CurrentlyTrainedModels, handle_currently_training_connection)
+                                   handle_currently_training_connection,
+                                   handle_list_trained_models_connection)
 from app.nnvis.rests.user import AuthenticationTask
 
 api = Api(nnvis)
@@ -41,7 +42,6 @@ api.add_resource(Algorithms, 'list_algorithms')
 
 api.add_resource(TrainNewModel, 'train_new_model/<int:arch_id>')
 api.add_resource(TrainModel, 'train_model/<int:model_id>')
-api.add_resource(CurrentlyTrainedModels, 'list_trained_models')
 
 api.add_resource(AuthenticationTask, 'authenticate')
 
@@ -52,3 +52,5 @@ api.add_resource(ListOptimizers, 'list_optimizers')
 def register_socketsio_events(socketio):
     socketio.on_event('connect', handle_currently_training_connection,
                       namespace='/currently_training')
+    socketio.on_event('connect', handle_list_trained_models_connection,
+                      namespace='/list_trained_models')

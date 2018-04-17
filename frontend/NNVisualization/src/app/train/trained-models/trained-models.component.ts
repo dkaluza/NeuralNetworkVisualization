@@ -13,6 +13,16 @@ interface Element {
     numberOfEpochs: number;
 }
 
+interface SelectedHistory {
+    modelName: string;
+    archName: string;
+    batchSize: number;
+    currentEpoch: number;
+    numberOfEpochs: number;
+    trainingLoss: number;
+    validationLoss: number;
+}
+
 @Component({
     selector: 'app-trained-models',
     templateUrl: './trained-models.component.html',
@@ -42,8 +52,10 @@ export class TrainedModelsComponent implements OnInit, OnDestroy {
         }];
     displayedColumnsIds = this.displayedColumns.map(elem => elem.property);
     historyDataSource: MatTableDataSource<Element>;
-    selctedHistoryID: number;
-    private historyUpdateSocket: any;
+    selectedHistoryID: number;
+    selectedHistory: SelectedHistory;
+    private selectedHistoryUpdateSocket: any;
+    private historyListSocket: any;
 
     constructor(private restangular: Restangular,
         private genericDialogs: GenericDialogsService,
@@ -52,52 +64,77 @@ export class TrainedModelsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this._updateModelList();
-    }
-    ngOnDestroy() {
-        if (this.historyUpdateSocket) {
-            this.historyUpdateSocket.close();
-        }
+        this._connectToHistoryListSocket();
     }
 
-    private _updateModelList(): void {
-        this.restangular.all('list_trained_models')
-            .getList().subscribe(_models => {
-                const historyElems = [];
-                for (let i = 0; i < _models.length; i += 1) {
-                    historyElems.push({
-                        position: i + 1,
-                        modelName: _models[i].model_name,
-                        id: _models[i].id,
-                        archName: _models[i].arch_name,
-                        currentEpoch: _models[i].current_epoch,
-                        numberOfEpochs: _models[i].number_of_epochs
-                    });
-                }
-                this.historyDataSource = new MatTableDataSource<Element>(historyElems);
-            });
-    }
-
-    selectHistory(row: Element) {
-        if (row.id !== this.selctedHistoryID) {
-            this.selctedHistoryID = row.id;
-            this._connectToWebSocket(this.selctedHistoryID);
-        }
-    }
-
-    private _connectToWebSocket(id: number) {
-        if (this.historyUpdateSocket) {
-            this.historyUpdateSocket.close();
-        }
-        const socket =
-            this.historyUpdateSocket = this.iosockets
-                .newSocket('/currently_training', id);
-        this.historyUpdateSocket.on('new_epoch', data => {
-            console.log(data); // TODO: on error listener
+    private _connectToHistoryListSocket() {
+        this._closeSocket(this.historyListSocket);
+        this.historyListSocket = this.iosockets.newSocket('list_trained_models');
+        this.historyListSocket.on('list_update', data => {
+            this._updateHistoriesList(data);
         });
-        this.historyUpdateSocket.on('error', error => {
+        this.historyListSocket.on('error', error => {
             this.genericDialogs.createWarning(error, 'Websocket error');
         });
+    }
+
+    private _updateHistoriesList(histories): void {
+        const historyElems = [];
+        for (let i = 0; i < histories.length; i += 1) {
+            historyElems.push({
+                position: i + 1,
+                modelName: histories[i].model_name,
+                id: histories[i].id,
+                archName: histories[i].arch_name,
+                currentEpoch: histories[i].current_epoch,
+                numberOfEpochs: histories[i].number_of_epochs
+            });
+        }
+        this.historyDataSource = new MatTableDataSource<Element>(historyElems);
+    }
+
+    private _closeSocket(socket) {
+        if (socket && socket.connected) {
+            socket.close();
+        }
+    }
+
+    ngOnDestroy() {
+        this._closeSocket(this.selectedHistoryUpdateSocket);
+        this._closeSocket(this.historyListSocket);
+    }
+
+
+    selectHistory(row: Element) {
+        if (row.id !== this.selectedHistoryID) {
+            this.selectedHistoryID = row.id;
+            this._connectToSelectedHistorySocket(this.selectedHistoryID);
+        }
+    }
+
+    private _connectToSelectedHistorySocket(id: number) {
+        this._closeSocket(this.selectedHistoryUpdateSocket);
+        this.selectedHistoryUpdateSocket = this.iosockets
+            .newSocket('currently_training', id);
+        this.selectedHistoryUpdateSocket.on('new_epoch', data => {
+            this._updateSelectedHistory(data);
+        });
+        this.selectedHistoryUpdateSocket.on('error', error => {
+            this.genericDialogs.createWarning(error, 'Websocket error');
+        });
+    }
+
+    private _updateSelectedHistory(data) {
+        this.selectedHistory = {
+            modelName: data.model_name,
+            archName: data.arch_name,
+            batchSize: data.batch_size,
+            currentEpoch: data.current_epoch,
+            numberOfEpochs: data.number_of_epochs,
+            trainingLoss: data.train_loss,
+            validationLoss: data.valid_loss
+        };
+
     }
 
     applyFilter(dataSource, filterValue: string) {

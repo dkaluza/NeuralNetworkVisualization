@@ -8,7 +8,7 @@ export class IOSocketService {
     constructor(private authService: AuthenticationService) { }
 
     newSocket(url: string, id?: number): any {
-        return io(location.host + url, {
+        return io(location.host + '/' + url, {
             path: '/api/socketio',
             transportOptions: {
                 polling: {

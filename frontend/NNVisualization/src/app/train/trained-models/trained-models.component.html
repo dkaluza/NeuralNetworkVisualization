@@ -22,7 +22,7 @@
                 <mat-header-row *matHeaderRowDef="displayedColumnsIds"></mat-header-row>
                 <mat-row *matRowDef="let row; columns: displayedColumnsIds;"
                          (click)="selectHistory(row)"
-                         [class.selected-row]="row.id === selctedHistoryID">
+                         [class.selected-row]="row.id === selectedHistoryID">
                 </mat-row>
             </mat-table>
         </div>
@@ -33,5 +33,18 @@
                     Train new model
             </button>
         </div>
+    </div>
+    <div fxFlex="30%"
+         fxLayout="column"
+         fxLayoutAlign="start center"
+         *ngIf="selectedHistory">
+        <h2>Current training statistics</h2>
+        <h4>Model name: {{ selectedHistory.modelName }}</h4>
+        <h4>Architecture name: {{ selectedHistory.archName }}</h4>
+        <h4>Batch size: {{ selectedHistory.batchSize }}</h4>
+        <h4>Current epoch: {{ selectedHistory.currentEpoch }}</h4>
+        <h4>Num. of epochs: {{ selectedHistory.numberOfEpochs }}</h4>
+        <h4>Training loss: {{ selectedHistory.trainingLoss }}</h4>
+        <h4>Validation loss: {{ selectedHistory.validationLoss }}</h4>
     </div>
 </div>
