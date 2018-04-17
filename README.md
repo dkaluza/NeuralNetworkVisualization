@@ -26,7 +26,24 @@ To build the gpu-enabled environment, do
 ./environment/env.sh start -gpu
 ```
 
-From inside the container, start the frontend or backend with their respective start.sh scripts or run both with utils/run.sh
+## Running the app
+
+The app consists of two servers - a Flask backend and one that serves the Angular web app.
+
+To run the backend only: (available at localhost:5000, not outside of the container though)
+```
+./backend/start.sh
+```
+
+To run the frontend only: (available at localhost:4200)
+```
+./frontend/start.sh
+```
+
+To run both simultaneously: (backend available at localhost:4200/api proxy)
+```
+./utils/run.sh
+```
 
 ## Other environment utilities
 

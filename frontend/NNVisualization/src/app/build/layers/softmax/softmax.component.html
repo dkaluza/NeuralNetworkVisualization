@@ -1,0 +1,16 @@
+<div class="node-container">
+    <div class="node-header">
+        <span><strong>ID: {{ layer.id }}</strong></span>
+    </div>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="Label"
+                        [(ngModel)]="layer.label"
+                        (input)="onChange(true)">
+    </mat-form-field>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="Axis"
+                        type="number" min="-1"
+                        [(ngModel)]="layer.axis"
+                        (input)="onChange()">
+    </mat-form-field>
+</div>

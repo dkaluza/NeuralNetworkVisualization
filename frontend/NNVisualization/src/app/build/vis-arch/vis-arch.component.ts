@@ -6,13 +6,7 @@ import { CurrentArchService, ErrorInfo } from '../current-arch.service';
 import { ArchNode, ArchLink } from '../../selected-architecture/architecture';
 import { ToolboxLayer, layerTemplates } from './toolbox-layers';
 
-import { Layer } from '../layers/layer/layer';
-import { FullyConnectedLayer } from '../layers/fully-connected/fully-connected';
-import { ConvLayer } from '../layers/conv/conv';
-import { InputLayer } from '../layers/input/input';
-import { PoolLayer } from '../layers/pool/pool';
-import { DropoutLayer } from '../layers/dropout/dropout';
-import { BatchNormLayer } from '../layers/batch-norm/batch-norm';
+import { Layer, toolboxLayerToLayer } from '../layers/layer-stats.module';
 
 interface GraphNode {
     id: string;
@@ -173,32 +167,12 @@ export class VisArchComponent implements OnInit, OnChanges {
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
         const layerType: ToolboxLayer = event.value;
-        let layer: Layer;
 
         // find smallest free id
         let id = this.currentArch.nodes.reduce((p, n) => (n > p ? n : p), 0);
         id += 1;
 
-        switch (layerType.id) {
-            case 'fc':
-                layer = new FullyConnectedLayer(id, layerType.shortcut);
-                break;
-            case 'conv':
-                layer = new ConvLayer(id, layerType.shortcut);
-                break;
-            case 'input':
-                layer = new InputLayer(id, layerType.shortcut);
-                break;
-            case 'pool':
-                layer = new PoolLayer(id, layerType.shortcut);
-                break;
-            case 'dropout':
-                layer = new DropoutLayer(id, layerType.shortcut);
-                break;
-            case 'batch_norm':
-                layer = new BatchNormLayer(id, layerType.shortcut);
-                break;
-        }
+        const layer = toolboxLayerToLayer(layerType, id);
 
         this.currentArch.addNode(layer.toDict());
         this._updateView();
