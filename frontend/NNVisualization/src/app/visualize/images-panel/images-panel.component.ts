@@ -82,7 +82,7 @@ export class ImagesPanelComponent implements OnInit {
     onGetImage(image: Image) {
         this.visualizeService.getImage(image.imageId)
             .subscribe(response => {
-                this.currentImage.display_path = response['image_path'];
+                this._parseb64(response['img'], (result) => { this.currentImage.display_path = result });
             });
         this.currentImageVis = '';
     }
@@ -91,8 +91,7 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.visualizeService.getImageVis(model.id, 0, this.currentImage.imageId)
             .subscribe(response => {
-                // let b = new Blob([response], {type: 'image/png'});
-                this._createImgFromBlob(response);
+                this._parseb64(response['img'], (result) => { this.currentImageVis = result });
             });
     }
 
@@ -113,12 +112,34 @@ export class ImagesPanelComponent implements OnInit {
             });
     }
 
-    _createImgFromBlob(img: Blob) {
+    _parseb64(b64_img, callback) {
+        let b = this._b64toBlob(b64_img, 'image/png');
         let reader = new FileReader();
         reader.addEventListener("load", () => {
-            this.currentImageVis = reader.result;
+            callback(reader.result);
         }, false);
 
-        reader.readAsDataURL(img);
+        reader.readAsDataURL(b);
+    }
+
+    _b64toBlob(base64Data, contentType) {
+        contentType = contentType || '';
+        let sliceSize = 1024;
+        let byteCharacters = atob(base64Data);
+        let bytesLength = byteCharacters.length;
+        let slicesCount = Math.ceil(bytesLength / sliceSize);
+        let byteArrays = new Array(slicesCount);
+
+        for (let sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+            let begin = sliceIndex * sliceSize;
+            let end = Math.min(begin + sliceSize, bytesLength);
+
+            let bytes = new Array(end - begin);
+            for (let offset = begin, i = 0 ; offset < end; ++i, ++offset) {
+                bytes[i] = byteCharacters[offset].charCodeAt(0);
+            }
+            byteArrays[sliceIndex] = new Uint8Array(bytes);
+        }
+        return new Blob(byteArrays, { type: contentType });
     }
 }

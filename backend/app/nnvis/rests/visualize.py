@@ -1,6 +1,7 @@
 import os
 import json
 import shutil
+import base64
 from io import BytesIO
 
 from flask import current_app as app
@@ -31,7 +32,8 @@ def safe_add_is_training(feed_dict, graph, train):
 class Inference(ProtectedResource):
     def get(self, model_id, image_id):
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
+        ds = Dataset.query.get(image.dataset_id)
+        image_path = os.path.join(ds.path, image.relative_path)
 
         model = Model.query.get(model_id)
         graph, sess, x, *_ = visualize_utils.load_model(model)
@@ -67,7 +69,8 @@ class Visualize(ProtectedResource):
             return {'errormsg': "Bad algorithm id"}, 400
 
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
+        ds = Dataset.query.get(image.dataset_id)
+        image_path = os.path.join(ds.path, image.relative_path)
 
         model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
@@ -85,25 +88,20 @@ class Visualize(ProtectedResource):
 
         sess.close()
 
-        ret = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
-        # image_url = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        # return {'image_path': image_path}
-        # WHAT DO
-        return send_file(ret, mimetype='image/png')
+        img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
+        img_b64 = base64.b64encode(img_stream.getvalue()).decode()
+        return {'img': img_b64}
 
 
 # /image/<string:image_id>
 class Images(ProtectedResource):
     def get(self, image_id):
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
         dataset = Dataset.query.get(image.dataset_id)
-        image_db_path = os.path.join(dataset.path, image.relative_path)
-        if not os.path.isfile(image_path):
-            shutil.copyfile(image_db_path, image_path)
-        image_url = 'api/static/' + image.relative_path
-        return {'image_path': image_url}
-        # WHAT DO
+        img_path = os.path.join(dataset.path, image.relative_path)
+        with open(img_path, 'rb') as img_f:
+            img_b64 = base64.b64encode(img_f.read()).decode()
+        return {'img': img_b64}
 
 
 # /images/<int:model_id>
@@ -116,4 +114,6 @@ class ImageList(ProtectedResource):
 
 class Algorithms(ProtectedResource):
     def get(self):
-        return {alg_class.__name__: alg_id for alg_id, alg_class in visualize_utils.algorithms_register}
+        return {
+            'algs': {alg_class.__name__: alg_id for alg_id, alg_class in visualize_utils.algorithms_register.items()}
+        }
