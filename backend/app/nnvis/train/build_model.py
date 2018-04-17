@@ -2,6 +2,39 @@ import tensorflow as tf
 from app.nnvis.train.layers import build_op
 
 
+class FindUnion:
+    def __init__(self, size):
+        self._size = size
+        self._tab = list(range(0, size + 1))
+        self._sizes = [1] * (size + 1)
+
+    def find(self, elem):
+        felem = elem
+        while felem != self._tab[felem]:
+            felem = self._tab[felem]
+
+        temp = elem
+        while self._tab[temp] != felem:
+            nextElem = self._tab[temp]
+            self._tab[temp] = felem
+            temp = nextElem
+
+        return felem
+
+    def union(self, elem1, elem2):
+        felem1 = self.find(elem1)
+        felem2 = self.find(elem2)
+
+        if felem1 == felem2:
+            return
+        if self._sizes[felem1] <= self._sizes[felem2]:
+            self._sizes[felem2] += self._sizes[felem1]
+            self._tab[felem1] = felem2
+        else:
+            self._sizes[felem1] += self._sizes[felem2]
+            self._tab[felem2] = felem1
+
+
 class TFModel:
     def __init__(self, nodes, links):
         self._nodes = {int(node['id']): node for node in nodes}
@@ -38,17 +71,19 @@ class TFModel:
 
         outputs = {id: [] for id in ids}
         inputs = {id: [] for id in ids}
-        shared = {}
+        findunion = FindUnion(len(ids))
+        for id in ids:
+            sharedId = nodes[id]['shareWeightsFrom']
+            if sharedId != 0:
+                findunion.union(id, sharedId)
+        for id in ids:
+            nodes[id]['weightId'] = findunion.find(id)
+
         num_inputs = {id: 0 for id in ids}
         for link in links:
             outputs[int(link['source'])].append(int(link['target']))
             inputs[int(link['target'])].append(int(link['source']))
             num_inputs[int(link['target'])] += 1
-
-        for id in ids:
-            sharedId = nodes[id]['shareWeightsFrom']
-            if sharedId != 0:
-                shared[id] = sharedId
 
         graph = tf.Graph()
         with graph.as_default():
@@ -56,20 +91,15 @@ class TFModel:
 
             map_op = {}
             for id in ids:
-                if num_inputs[id] == 0 and\
-                   shared.get(id) is None and\
-                   id not in map_op:
+                if num_inputs[id] == 0 and id not in map_op:
                     stack = [id]
                     while stack:
                         v = stack.pop()
                         map_op[v] = build_op(nodes[v], map_op,
                                              inputs[v], self._is_training)
-                        for k in list(shared.keys()):
-                            if shared[k] == v:
-                                shared[k] = None
                         for u in outputs[v]:
                             num_inputs[u] -= 1
-                            if num_inputs[u] == 0 and shared.get(u) is None:
+                            if num_inputs[u] == 0:
                                 stack.append(u)
 
         for v in ids:
