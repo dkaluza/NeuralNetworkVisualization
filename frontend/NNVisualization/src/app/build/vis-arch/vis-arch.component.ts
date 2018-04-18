@@ -6,7 +6,7 @@ import { CurrentArchService, ErrorInfo } from '../current-arch.service';
 import { ArchNode, ArchLink } from '../../selected-architecture/architecture';
 import { ToolboxLayer, layerTemplates } from './toolbox-layers';
 
-import { Layer, toolboxLayerToLayer } from '../layers/layer-stats.module';
+import { Layer } from '../layers/layer-stats.module';
 
 interface GraphNode {
     id: string;
@@ -167,14 +167,8 @@ export class VisArchComponent implements OnInit, OnChanges {
 
     onLayerDrop(event: { value: ToolboxLayer}): void {
         const layerType: ToolboxLayer = event.value;
+        const id = this.currentArch.addNodeFromToolboxLayer(layerType);
 
-        // find smallest free id
-        let id = this.currentArch.nodes.reduce((p, n) => (n > p ? n : p), 0);
-        id += 1;
-
-        const layer = toolboxLayerToLayer(layerType, id);
-
-        this.currentArch.addNode(layer.toDict());
         this._updateView();
         this.nodeSelected.emit(id);
     }

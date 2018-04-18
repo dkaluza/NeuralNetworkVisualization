@@ -3,9 +3,10 @@ import { Injectable } from '@angular/core';
 import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 import { Architecture, ArchLink, ArchNode } from '../selected-architecture/architecture';
 
-import { Layer, archNodeToLayer } from '../build/layers/layer-stats.module';
+import { Layer, archNodeToLayer, toolboxLayerToLayer } from '../build/layers/layer-stats.module';
 import { InputLayer } from './layers/input/input';
 import { Graph } from './graph';
+import { ToolboxLayer } from './vis-arch/toolbox-layers';
 
 export interface ErrorInfo {
     value: boolean;
@@ -21,9 +22,7 @@ export class CurrentArchService {
     private _architectureId: number;
 
     constructor(private genericDialogs: GenericDialogsService) {
-        this._layers = new Map;
-        this._graph = new Graph();
-        this._architectureId = undefined;
+        this._resetCurrentArch();
     }
 
     get layers(): Map<number, Layer> {
@@ -42,12 +41,37 @@ export class CurrentArchService {
         return this._architectureId;
     }
 
+    private _resetCurrentArch() {
+        this._layers = new Map;
+        this._graph = new Graph();
+        this._architectureId = undefined;
+    }
+
     addNode(node: ArchNode) {
         this._layers.set(
             Number(node.id),
             archNodeToLayer(node)
         );
         this._graph.addNode(Number(node.id));
+    }
+
+    // creates new node from ToolboxLayer
+    //   return id of newly created node
+    addNodeFromToolboxLayer(layerType: ToolboxLayer): number {
+        // find id that is not taken yet
+        const id = this._graph.nodes.reduce(
+            (curMax, nId) => (nId > curMax ? nId : curMax),
+            0
+        ) + 1;
+
+        const layer = toolboxLayerToLayer(layerType, id);
+        this._layers.set(
+            layer.id,
+            layer
+        );
+        this._graph.addNode(layer.id);
+
+        return id;
     }
 
     removeNode(id: number) {
@@ -80,9 +104,7 @@ export class CurrentArchService {
                 architecture.links
             );
         } else {
-            this._architectureId = undefined;
-            this._layers = new Map;
-            this._graph = new Graph();
+            this._resetCurrentArch();
         }
     }
 
