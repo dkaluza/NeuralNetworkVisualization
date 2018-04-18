@@ -1,9 +1,12 @@
 from app import db
+from app.utils import NnvisException
 
 from flask import current_app as app
 from datetime import datetime
 from shutil import rmtree
 import os
+import shutil
+import json
 from werkzeug.security import generate_password_hash
 
 
@@ -49,18 +52,36 @@ class Architecture(db.Model, CRUD):
         return '<Archtecture {id} {name} of user {user_id}>'.format(
                 id=self.id, name=self.name, user_id=self.user_id)
 
+    def to_dict(self):
+        if self.last_used is not None:
+            last_used = self.last_used.strftime('%Y-%m-%d')
+        else:
+            last_used = 'None'
+        return {
+                'id': self.id,
+                'name': self.name,
+                'description': self.description,
+                'architecture': json.loads(self.graph),
+                'last_used': last_used,
+                'last_modified': self.last_modified.strftime('%Y-%m-%d')
+                }
+
+    def get_folder_path(self):
+        return os.path.join(app.config['WEIGHTS_DIR'],
+                            '{id}'.format(id=self.id))
+
     def add(self):
         super().add()
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}'.format(id=self.id))
-        os.makedirs(path)
+        os.makedirs(self.get_folder_path())
 
     def delete(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}'.format(id=self.id))
+        path = self.get_folder_path()
         if os.path.isdir(path):
-            os.rmdir(path)
+            shutil.rmtree(path)
         super().delete()
+
+    def get_meta_file_path(self):
+        return os.path.join(self.get_folder_path(), 'graph.meta')
 
 
 class Model(db.Model, CRUD):
@@ -111,6 +132,23 @@ class Model(db.Model, CRUD):
         if os.path.isdir(path):
             rmtree(path, True)
         super().delete()
+
+    def get_data_file_path(self):
+        model_folder = self.weights_path
+        model_files = os.listdir(model_folder)
+        data = list(filter(lambda x: '.data' in x, model_files))
+        if len(data) != 1:
+            raise NnvisException('Wrong model folder format')
+        return os.path.join(self.weights_path, data[0])
+
+    def get_index_file_path(self):
+        model_folder = self.weights_path
+        model_files = os.listdir(model_folder)
+        index = list(filter(lambda x: '.index' in x, model_files))
+        if len(index) != 1:
+            raise NnvisException('Wrong model folder format')
+        return os.path.join(self.weights_path, index[0])
+
 
 
 class Dataset(db.Model, CRUD):

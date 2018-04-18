@@ -1,4 +1,6 @@
 import tensorflow as tf
+import os
+
 from app.nnvis.train.layers import build_op
 
 
@@ -88,3 +90,9 @@ class TFModel:
 
     def get_is_training(self):
         return self._is_training
+
+    def save_graph(self, path):
+        saver_path = os.path.join(path, 'graph.meta')
+        with self._graph.as_default():
+            saver = tf.train.Saver()
+            saver.export_meta_graph(saver_path)
