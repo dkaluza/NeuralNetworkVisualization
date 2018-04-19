@@ -22,6 +22,7 @@ RUN     apt-get update -y \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
     && apt-get install -y nodejs \
     && apt-get install rabbitmq-server -y --allow-unauthenticated \
+    && mkdir /var/run/rabbitmq \
     && service rabbitmq-server start \
     && rabbitmq-plugins enable rabbitmq_management \
     && service rabbitmq-server restart
