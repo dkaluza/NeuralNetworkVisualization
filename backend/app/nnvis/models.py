@@ -5,9 +5,11 @@ from flask import current_app as app
 from datetime import datetime
 from shutil import rmtree
 import os
-import shutil
 import json
 from werkzeug.security import generate_password_hash
+
+from app.nnvis.train.losses import get_loss
+from app.nnvis.train.optimizers import get_optimizer
 
 
 class CRUD():
@@ -70,6 +72,9 @@ class Architecture(db.Model, CRUD):
         return os.path.join(app.config['WEIGHTS_DIR'],
                             '{id}'.format(id=self.id))
 
+    def get_meta_file_path(self):
+        return os.path.join(self.get_folder_path(), 'graph.meta')
+
     def add(self):
         super().add()
         os.makedirs(self.get_folder_path())
@@ -77,11 +82,8 @@ class Architecture(db.Model, CRUD):
     def delete(self):
         path = self.get_folder_path()
         if os.path.isdir(path):
-            shutil.rmtree(path)
+            rmtree(path)
         super().delete()
-
-    def get_meta_file_path(self):
-        return os.path.join(self.get_folder_path(), 'graph.meta')
 
 
 class Model(db.Model, CRUD):
@@ -117,38 +119,62 @@ class Model(db.Model, CRUD):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{arch}/{model}/'.format(
-                                arch=self.arch_id, model=self.id)
-                            )
-        self.weights_path = path
+        self.weights_path = os.path.join(
+                app.config['WEIGHTS_DIR'],
+                str(self.arch_id),
+                str(self.id))
         super().add()
 
     def delete(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{arch}/{model}/'.format(
-                                arch=self.arch_id, model=self.id)
-                            )
-        if os.path.isdir(path):
-            rmtree(path, True)
+        if os.path.isdir(self.weights_path):
+            rmtree(self.weights_path, True)
         super().delete()
 
     def get_data_file_path(self):
-        model_folder = self.weights_path
-        model_files = os.listdir(model_folder)
-        data = list(filter(lambda x: '.data' in x, model_files))
-        if len(data) != 1:
-            raise NnvisException('Wrong model folder format')
-        return os.path.join(self.weights_path, data[0])
+        return os.path.join(
+                self.weights_path,
+                'model.ckpt.data-00000-of-00001')
 
     def get_index_file_path(self):
-        model_folder = self.weights_path
-        model_files = os.listdir(model_folder)
-        index = list(filter(lambda x: '.index' in x, model_files))
-        if len(index) != 1:
-            raise NnvisException('Wrong model folder format')
-        return os.path.join(self.weights_path, index[0])
+        return os.path.join(
+                self.weights_path,
+                'model.ckpt.index')
 
+    def to_dict(self):
+        if self.training_params is not None:
+            params = json.loads(self.training_params)
+            params['loss'] = get_loss(params['loss'])['name']
+
+            opt = get_optimizer(params['optimizer'])
+            params['optimizer'] = opt['name']
+            params['optimizer_params'] = [
+                {
+                    'name': p['name'],
+                    'value': params['optimizer_params'][p['id']]
+                }
+                for p in opt['params']
+            ]
+        else:
+            params = {
+                    'loss': 'none',
+                    'optimizer': 'none',
+                    'optimizer_params': None,
+                    'batch_size': None,
+                    'nepochs': None,
+                    }
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'valid_loss': self.validation_loss,
+            'train_loss': self.training_loss,
+            'loss': params['loss'],
+            'optimizer': params['optimizer'],
+            'optimizer_params': params['optimizer_params'],
+            'batch_size': params['batch_size'],
+            'nepochs': params['nepochs']
+        }
 
 
 class Dataset(db.Model, CRUD):

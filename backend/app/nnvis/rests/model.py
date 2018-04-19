@@ -1,7 +1,6 @@
 from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
-import json
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO
 
@@ -9,47 +8,8 @@ from app.utils import NnvisException, fileToB64
 from app.nnvis.models import Model, Architecture
 from app.nnvis.rests.protected_resource import ProtectedResource
 
-from app.nnvis.train.losses import get_loss
-from app.nnvis.train.optimizers import get_optimizer
-
 
 class ModelUtils:
-    def _model_to_dict(self, model):
-        if model.training_params is not None:
-            params = json.loads(model.training_params)
-            params['loss'] = get_loss(params['loss'])['name']
-
-            opt = get_optimizer(params['optimizer'])
-            params['optimizer'] = opt['name']
-            params['optimizer_params'] = [
-                {
-                    'name': p['name'],
-                    'value': params['optimizer_params'][p['id']]
-                }
-                for p in opt['params']
-            ]
-        else:
-            params = {
-                    'loss': 'none',
-                    'optimizer': 'none',
-                    'optimizer_params': None,
-                    'batch_size': None,
-                    'nepochs': None,
-                    }
-
-        return {
-            'id': model.id,
-            'name': model.name,
-            'description': model.description,
-            'valid_loss': model.validation_loss,
-            'train_loss': model.training_loss,
-            'loss': params['loss'],
-            'optimizer': params['optimizer'],
-            'optimizer_params': params['optimizer_params'],
-            'batch_size': params['batch_size'],
-            'nepochs': params['nepochs']
-        }
-
     def _abort_if_model_doesnt_exist(self, model, model_id):
         if model is None:
             message = 'Model {id} doesn\'t exist' \
@@ -68,7 +28,7 @@ class ModelTask(ProtectedResource, ModelUtils):
         model = Model.query.get(model_id)
         self._abort_if_model_doesnt_exist(model, model_id)
         self._abort_if_model_isnt_owned_by_user(model)
-        return self._model_to_dict(model)
+        return model.to_dict()
 
     def delete(self, model_id):
         model = Model.query.get(model_id)
@@ -89,7 +49,7 @@ class ModelTask(ProtectedResource, ModelUtils):
             model.description = args['description']
 
         model.update()
-        return self._model_to_dict(model), 201
+        return model.to_dict(), 201
 
 
 class UploadNewModel(ProtectedResource, ModelUtils):
@@ -109,7 +69,7 @@ class ListAllModels(ProtectedResource, ModelUtils):
             abort(401, message=message)
 
         models = arch.models
-        return [self._model_to_dict(model) for model in models]
+        return [model.to_dict() for model in models]
 
 
 class ExportModel(ProtectedResource, ModelUtils):
