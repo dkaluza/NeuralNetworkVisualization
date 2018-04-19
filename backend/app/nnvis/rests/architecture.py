@@ -71,7 +71,7 @@ class ArchitectureTask(ProtectedResource, ArchitectureUtils):
         arch.last_modified = datetime.utcnow()
 
         arch.update()
-        return arch.to_dict()
+        return arch.to_dict(), 201
 
 
 class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
