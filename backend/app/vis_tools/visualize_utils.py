@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import os
 
+from io import BytesIO
+
 from .vanillasaliency import GradientSaliency
 from .guidedbackpropagation import GuidedBackprop
 
@@ -63,10 +65,10 @@ def load_image(image_path, dst_shape, proc=None):
     return image
 
 
-def save_image(image, image_path, proc=None):
+def save_image(image, proc=None):
     if proc:
         image = proc(image)
-    cv2.imwrite(image_path, image)
+    return BytesIO(cv2.imencode('.png', image)[1].tostring())
 
 
 # mocked for now
