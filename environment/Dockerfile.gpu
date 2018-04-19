@@ -23,9 +23,8 @@ RUN     apt-get update -y \
     && apt-get install -y nodejs \
     && apt-get install rabbitmq-server -y --allow-unauthenticated \
     && mkdir /var/run/rabbitmq \
-    && service rabbitmq-server start \
-    && rabbitmq-plugins enable rabbitmq_management \
-    && service rabbitmq-server restart
+    && rabbitmq-plugins enable rabbitmq_management --offline
+
 
 RUN useradd -ou 0 -g 0 -m node
 
