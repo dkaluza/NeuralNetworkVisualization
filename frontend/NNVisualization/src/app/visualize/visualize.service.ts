@@ -1,5 +1,4 @@
 import { Injectable, OnInit } from '@angular/core';
-import { ResponseContentType } from '@angular/http';
 import { Restangular } from 'ngx-restangular';
 import { Algorithm } from './algorithm.model';
 
