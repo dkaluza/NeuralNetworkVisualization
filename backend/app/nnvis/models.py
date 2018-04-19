@@ -165,6 +165,10 @@ class Image(db.Model, CRUD):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
                 'label': self.label, 'dataset_id': self.dataset_id}
 
+    def full_path(self):
+        ds_path = Dataset.query.get(self.dataset_id).path
+        return os.path.join(ds_path, self.relative_path)
+
 
 class User(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
