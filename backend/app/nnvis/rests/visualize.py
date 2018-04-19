@@ -1,11 +1,4 @@
-import os
-import json
-import shutil
 import base64
-from io import BytesIO
-
-from flask import current_app as app
-from flask import send_file
 
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
@@ -32,8 +25,7 @@ def safe_add_is_training(feed_dict, graph, train):
 class Inference(ProtectedResource):
     def get(self, model_id, image_id):
         image = Image.query.get(image_id)
-        ds = Dataset.query.get(image.dataset_id)
-        image_path = os.path.join(ds.path, image.relative_path)
+        image_path = image.full_path()
 
         model = Model.query.get(model_id)
         graph, sess, x, *_ = visualize_utils.load_model(model)
@@ -54,7 +46,7 @@ class Inference(ProtectedResource):
         sess.close()
 
         dataset = Dataset.query.get(model.dataset_id)
-        class_names = dataset.labels.split(',') 
+        class_names = dataset.labels.split(',')
         scores = [{'class_number': class_number,
                    'class_name': class_names[class_number],
                    'score': str(score)}
@@ -69,8 +61,7 @@ class Visualize(ProtectedResource):
             return {'errormsg': "Bad algorithm id"}, 400
 
         image = Image.query.get(image_id)
-        ds = Dataset.query.get(image.dataset_id)
-        image_path = os.path.join(ds.path, image.relative_path)
+        image_path = image.full_path()
 
         model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
@@ -97,8 +88,7 @@ class Visualize(ProtectedResource):
 class Images(ProtectedResource):
     def get(self, image_id):
         image = Image.query.get(image_id)
-        dataset = Dataset.query.get(image.dataset_id)
-        img_path = os.path.join(dataset.path, image.relative_path)
+        img_path = image.full_path()
         with open(img_path, 'rb') as img_f:
             img_b64 = base64.b64encode(img_f.read()).decode()
         return {'img': img_b64}
