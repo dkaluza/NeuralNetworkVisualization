@@ -81,7 +81,13 @@ class Visualize(ProtectedResource):
 
         img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
         img_b64 = base64.b64encode(img_stream.getvalue()).decode()
-        return {'img': img_b64}
+        return {
+                'byte64': [{
+                    'name': 'img',
+                    'contentType': 'image/png'
+                    }],
+                'img': img_b64
+                }
 
 
 # /image/<string:image_id>
@@ -91,7 +97,13 @@ class Images(ProtectedResource):
         img_path = image.full_path()
         with open(img_path, 'rb') as img_f:
             img_b64 = base64.b64encode(img_f.read()).decode()
-        return {'img': img_b64}
+        return {
+                'byte64': [{
+                    'name': 'img',
+                    'contentType': 'image/png'
+                    }],
+                'img': img_b64
+                }
 
 
 # /images/<int:model_id>
