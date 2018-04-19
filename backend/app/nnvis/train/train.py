@@ -162,6 +162,9 @@ class TrainThread(threading.Thread):
                         print('Validation loss = {loss}'
                               .format(loss=self._validation_loss))
                         print('Validation acc = {acc}'.format(acc=average_acc))
+                        training_history.validation_loss = self._validation_loss
+                        training_history.update()
+
                         print('finished validation')
                         self.__save_model(sess, saver)
                 end_time = time.time()

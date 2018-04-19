@@ -15,9 +15,7 @@ main()
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
 
-    export FLASK_APP="run"
-    export FLASK_DEBUG=1
-    python3 -m flask run
+    python3 run.py
 }
 
 main "$@"

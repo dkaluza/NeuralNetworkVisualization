@@ -1,11 +1,8 @@
 from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user, jwt_required
-from flask_socketio import emit, SocketIO, join_room
+from flask_socketio import emit, join_room
 
-from collections import defaultdict
-
-from app import db
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Dataset, Architecture, Model, TrainingHistory
 from app.nnvis.train.train import TrainThread
@@ -37,34 +34,6 @@ def training_history_to_dict(history):
     }
 
 
-socketio = SocketIO(message_queue='amqp://')
-
-# TODO after insert
-
-
-@db.event.listens_for(TrainingHistory, 'after_update')
-def history_update_handler(mapper, connection, target):
-    socketio.emit('new_epoch', training_history_to_dict(target),
-                  room='new_epoch' + str(target.id),
-                  namespace='/currently_training')
-
-    user_id = target.model.architecture.user_id
-    trainedModels = get_user_models_history(user_id) \
-        .filter(TrainingHistory.current_epoch != TrainingHistory.number_of_epochs)
-
-    socketio.emit('list_update', [training_history_to_dict(history)
-                                  for history in trainedModels],
-                  room='list_update' + str(user_id),
-                  namespace='/list_trained_models')
-
-
-def get_user_models_history(user_id):
-    models_subquery = Model.query.join(Model.architecture).filter(
-        Architecture.user_id == user_id).subquery()
-    return TrainingHistory.query.join(
-        models_subquery, TrainingHistory.model)
-
-
 @jwt_required
 def handle_list_trained_models_connection():
     trainedModels = get_user_models_history(get_current_user()) \
@@ -75,9 +44,18 @@ def handle_list_trained_models_connection():
     join_room('list_update' + str(get_current_user()))
 
 
+def get_user_models_history(user_id):
+    models_subquery = Model.query.join(Model.architecture).filter(
+        Architecture.user_id == user_id).subquery()
+    return TrainingHistory.query.join(
+        models_subquery, TrainingHistory.model)
+
+
 @jwt_required
 def handle_currently_training_connection():
     user_id = get_current_user()
+    if(request.args.get('id') == 'undefined'):
+        return False
     history_id = int(request.args.get('id'))
     history = get_user_models_history(user_id).filter(
         TrainingHistory.id == history_id).first()
