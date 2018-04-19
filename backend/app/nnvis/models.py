@@ -4,7 +4,12 @@ from flask import current_app as app
 from datetime import datetime
 from shutil import rmtree
 import os
+import json
+
 from werkzeug.security import generate_password_hash
+
+from app.nnvis.train.losses import get_loss
+from app.nnvis.train.optimizers import get_optimizer
 
 
 class CRUD():
@@ -59,8 +64,23 @@ class Architecture(db.Model, CRUD):
         path = os.path.join(app.config['WEIGHTS_DIR'],
                             '{id}'.format(id=self.id))
         if os.path.isdir(path):
-            os.rmdir(path)
+            rmtree(path, True)
         super().delete()
+
+    def to_dict(self):
+        if self.last_used is not None:
+            last_used = self.last_used.strftime('%Y-%m-%d')
+        else:
+            last_used = 'None'
+
+        return {
+                'id': self.id,
+                'name': self.name,
+                'description': self.description,
+                'architecture': json.loads(self.graph),
+                'last_used': last_used,
+                'last_modified': self.last_modified.strftime('%Y-%m-%d')
+                }
 
 
 class Model(db.Model, CRUD):
@@ -111,6 +131,42 @@ class Model(db.Model, CRUD):
         if os.path.isdir(path):
             rmtree(path, True)
         super().delete()
+
+    def to_dict(self):
+        if self.training_params is not None:
+            params = json.loads(self.training_params)
+            params['loss'] = get_loss(params['loss'])['name']
+
+            opt = get_optimizer(params['optimizer'])
+            params['optimizer'] = opt['name']
+            params['optimizer_params'] = [
+                {
+                    'name': p['name'],
+                    'value': params['optimizer_params'][p['id']]
+                }
+                for p in opt['params']
+            ]
+        else:
+            params = {
+                    'loss': 'none',
+                    'optimizer': 'none',
+                    'optimizer_params': None,
+                    'batch_size': None,
+                    'nepochs': None,
+                    }
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'valid_loss': self.validation_loss,
+            'train_loss': self.training_loss,
+            'loss': params['loss'],
+            'optimizer': params['optimizer'],
+            'optimizer_params': params['optimizer_params'],
+            'batch_size': params['batch_size'],
+            'nepochs': params['nepochs']
+        }
 
 
 class Dataset(db.Model, CRUD):

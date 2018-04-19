@@ -249,12 +249,12 @@ export class ManageComponent implements OnInit {
             .afterClosed().subscribe(response => {
                 if (response) {
                     const formData = new FormData();
-                    formData['name'] = response['Name'];
-                    formData['file'] = this.importedArchitecture;
+                    formData.append('name', response['Name']);
+                    formData.append('file', this.importedArchitecture);
                     if (response['Description']) {
-                        formData['description'] = response['Description'];
+                        formData.append('desc', response['Description']);
                     }
-                    this.restangular.all('upload_arch').post(formData).subscribe(
+                    this.restangular.all('import_arch').post(formData).subscribe(
                         uploadResponse => {
                             this.genericDialogs.createSuccess(
                                 'Architecture successfully imported');
@@ -279,42 +279,22 @@ export class ManageComponent implements OnInit {
             .afterClosed().subscribe(response => {
                 if (response) {
                     const formData = new FormData();
-                    formData['arch_name'] = response['Architecture name'];
-                    formData['model_name'] = response['Model name'];
-                    formData['file'] = this.importedModel;
+                    formData.append('arch_name', response['Architecture name']);
+                    formData.append('model_name', response['Model name']);
+                    formData.append('file', this.importedModel);
                     if (response['Architecture escription']) {
-                        formData['arch_desc'] = response['Architecture description'];
+                        formData.append('arch_desc', response['Architecture description']);
                     }
                     if (response['Model escription']) {
-                        formData['model_desc'] = response['Model description'];
+                        formData.append('model_desc', response['Model description']);
                     }
-                    this.restangular.all('upload_model').post(formData).subscribe(
+                    this.restangular.all('import_model').post(formData).subscribe(
                         data => {
                             this.genericDialogs.createSuccess(
                                 'Model successfully imported');
                             this._updateArchitectureList();
                             this._selectArchitecture(data.arch);
                         },
-                        error => {
-                            this.genericDialogs.createWarning(error, 'Error');
-                        }
-                    );
-                }
-            });
-    }
-
-    private _importFile(file: File, restUrl: string, onSuccess) {
-        this.genericDialogs.createInputs(['Name', 'Description'])
-            .afterClosed().subscribe(response => {
-                if (response) {
-                    const formData = new FormData();
-                    formData['name'] = response['Name'];
-                    formData['file'] = file;
-                    if (response['Description']) {
-                        formData['description'] = response['Description'];
-                    }
-                    this.restangular.all(restUrl).post(formData).subscribe(
-                        uploadResponse => onSuccess(),
                         error => {
                             this.genericDialogs.createWarning(error, 'Error');
                         }

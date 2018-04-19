@@ -3,10 +3,12 @@ from flask_restful import Api
 from app import nnvis
 from app.nnvis.rests.architecture import (ArchitectureTask,
                                           UploadNewArchitecture,
-                                          ListAllArchitectures)
+                                          ListAllArchitectures,
+                                          ImportArchitecture)
 from app.nnvis.rests.model import (ModelTask,
                                    UploadNewModel,
-                                   ListAllModels)
+                                   ListAllModels,
+                                   ImportModel)
 from app.nnvis.rests.dataset import (DatasetTask,
                                      UploadNewDataset,
                                      ListAllDatasets)
@@ -22,10 +24,12 @@ api = Api(nnvis)
 api.add_resource(ArchitectureTask, 'arch/<int:arch_id>')
 api.add_resource(UploadNewArchitecture, 'upload_arch')
 api.add_resource(ListAllArchitectures, 'list_archs')
+api.add_resource(ImportArchitecture, 'import_arch')
 
 api.add_resource(ModelTask, 'model/<int:model_id>')
 api.add_resource(UploadNewModel, 'upload_model/<int:arch_id>')
 api.add_resource(ListAllModels, 'list_models/<int:arch_id>')
+api.add_resource(ImportModel, 'import_model')
 
 api.add_resource(DatasetTask, 'dataset/<int:dataset_id>')
 api.add_resource(UploadNewDataset, 'upload_dataset')

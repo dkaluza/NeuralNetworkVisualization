@@ -2,26 +2,12 @@ from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
+from flask import current_app as app
 from app.nnvis.models import Architecture, Model
 from app.nnvis.rests.protected_resource import ProtectedResource
 from datetime import datetime
 import json
-
-
-def arch_to_dict(arch):
-    if arch.last_used is not None:
-        last_used = arch.last_used.strftime('%Y-%m-%d')
-    else:
-        last_used = 'None'
-
-    return {
-            'id': arch.id,
-            'name': arch.name,
-            'description': arch.description,
-            'architecture': json.loads(arch.graph),
-            'last_used': last_used,
-            'last_modified': arch.last_modified.strftime('%Y-%m-%d')
-            }
+import os
 
 
 class ArchitectureTask(ProtectedResource):
@@ -46,7 +32,7 @@ class ArchitectureTask(ProtectedResource):
         arch = Architecture.query.get(arch_id)
         self.__abort_if_arch_doesnt_exist(arch, arch_id)
         self.__abort_if_arch_isnt_owned_by_user(arch)
-        return arch_to_dict(arch)
+        return arch.to_dict()
 
     def delete(self, arch_id):
         arch = Architecture.query.get(arch_id)
@@ -74,7 +60,7 @@ class ArchitectureTask(ProtectedResource):
         arch.last_modified = datetime.utcnow()
 
         arch.update()
-        return arch_to_dict(arch), 201
+        return arch.to_dict(), 201
 
 
 class UploadNewArchitecture(ProtectedResource):
@@ -99,10 +85,45 @@ class UploadNewArchitecture(ProtectedResource):
         except Exception as e:
             abort(403, message=e)
 
-        return arch_to_dict(new_arch), 201
+        return new_arch.to_dict(), 201
 
 
 class ListAllArchitectures(ProtectedResource):
     def get(self):
         archs = Architecture.query.filter_by(user_id=get_current_user())
-        return [arch_to_dict(arch) for arch in archs]
+        return [arch.to_dict() for arch in archs]
+
+
+class ImportArchitecture(ProtectedResource):
+    def __verify_postdata(self, data):
+        if 'name' not in data:
+            abort(400, 'Name is required')
+
+    def post(self):
+        if 'file' not in request.files:
+            abort(400, message='No file attached')
+
+        postfile = request.files['file']
+        if postfile.filename == '':
+            abort(400, message='No file attached')
+
+        postdata = request.form
+        self.__verify_postdata(postdata)
+
+        new_arch = Architecture(
+                name=postdata['name'],
+                description=postdata.get('desc'),
+                graph='{\"nodes\": [], \"links\": []}',
+                user_id=get_current_user())
+        try:
+            new_arch.add()
+            path = os.path.join(
+                    app.config['WEIGHTS_DIR'],
+                    str(new_arch.id),
+                    'graph.meta')
+            with open(path, 'wb') as fd:
+                fd.write(postfile.stream.read())
+        except Exception as e:
+            abort(403, message=e)
+
+        return new_arch.to_dict(), 201
