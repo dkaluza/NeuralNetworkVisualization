@@ -103,7 +103,7 @@ class ExportModel(ProtectedResource, ModelUtils):
         zip_b64 = fileToB64(bytestr)
 
         return {
-                'byte64': [{
+                'base64': [{
                     'name': 'file',
                     'contentType': 'application/octet-stream'
                     }],

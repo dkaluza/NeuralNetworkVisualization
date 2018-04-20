@@ -120,7 +120,7 @@ class ExportArchitecture(ProtectedResource, ArchitectureUtils):
                 name=arch.name.replace(' ', '_')
                 )
         return {
-                'byte64': [{
+                'base64': [{
                     'name': 'file',
                     'contentType': 'application/octet-stream'
                     }],

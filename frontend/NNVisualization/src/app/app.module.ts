@@ -104,9 +104,9 @@ export function RestangularConfigFactory(RestangularProvider,
     }
 
     RestangularProvider.addResponseInterceptor((data, operation, what, url, response) => {
-        if ('byte64' in data) {
-            if (data['byte64'] instanceof Array) {
-                for (const field of data['byte64']) {
+        if ('base64' in data) {
+            if (data['base64'] instanceof Array) {
+                for (const field of data['base64']) {
                     const fieldName = field['name'];
                     const contentType = field['contentType'];
                     data[fieldName] = _b64toBlob(data[fieldName], contentType);

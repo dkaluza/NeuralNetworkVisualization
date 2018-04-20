@@ -5,11 +5,7 @@ from app.nnvis.models import Image
 from app.nnvis.models import Model
 from app.nnvis.models import Dataset
 
-# from app.vis_tools.utils import algorithms_register
-# from app.vis_tools.utils import visualize_saliency
-# from app.vis_tools.utils import inference
-# from app.vis_tools.utils import NumpyEncoder
-
+from app.utils import fileToB64
 from app.vis_tools import visualize_utils
 
 
@@ -80,9 +76,9 @@ class Visualize(ProtectedResource):
         sess.close()
 
         img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
-        img_b64 = base64.b64encode(img_stream.getvalue()).decode()
+        img_b64 = fileToB64(img_stream)
         return {
-                'byte64': [{
+                'base64': [{
                     'name': 'img',
                     'contentType': 'image/png'
                     }],
@@ -96,9 +92,9 @@ class Images(ProtectedResource):
         image = Image.query.get(image_id)
         img_path = image.full_path()
         with open(img_path, 'rb') as img_f:
-            img_b64 = base64.b64encode(img_f.read()).decode()
+            img_b64 = fileToB64(img_f)
         return {
-                'byte64': [{
+                'base64': [{
                     'name': 'img',
                     'contentType': 'image/png'
                     }],

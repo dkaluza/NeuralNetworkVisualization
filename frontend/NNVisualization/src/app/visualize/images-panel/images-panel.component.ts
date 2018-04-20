@@ -112,12 +112,12 @@ export class ImagesPanelComponent implements OnInit {
             });
     }
 
-    _parseb64(b64_img, callback) {
+    _parseb64(img_blob, callback) {
         const reader = new FileReader();
         reader.addEventListener('load', () => {
             callback(reader.result);
         }, false);
 
-        reader.readAsDataURL(b64_img);
+        reader.readAsDataURL(img_blob);
     }
 }
