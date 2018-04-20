@@ -13,23 +13,27 @@ from app.nnvis.train.build_model import TFModel
 
 
 class ArchitectureUtils(object):
-    def _save_meta_file(self, arch):
+    @staticmethod
+    def _save_meta_file(arch):
         graph = json.loads(arch.graph)
         tfmodel = TFModel(graph['nodes'], graph['links'])
         tfmodel.save_graph(arch.get_folder_path())
 
-    def _abort_if_arch_doesnt_exist(self, arch, arch_id):
+    @staticmethod
+    def _abort_if_arch_doesnt_exist(arch, arch_id):
         if arch is None:
             message = 'Architecture {id} doesn\'t exist'.format(id=arch_id)
             abort(403, message=message)
 
-    def _abort_if_arch_isnt_owned_by_user(self, arch):
+    @staticmethod
+    def _abort_if_arch_isnt_owned_by_user(arch):
         if arch.user_id != get_current_user():
             message = "Architecture {id} isn't owned by the user".format(
                 id=arch.id)
             abort(401, message=message)
 
-    def _abort_if_models_list_isnt_empty(self, models, arch_id):
+    @staticmethod
+    def _abort_if_models_list_isnt_empty(models, arch_id):
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
                       .format(id=arch_id)

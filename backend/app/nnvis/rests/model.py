@@ -10,13 +10,15 @@ from app.nnvis.rests.protected_resource import ProtectedResource
 
 
 class ModelUtils:
-    def _abort_if_model_doesnt_exist(self, model, model_id):
+    @staticmethod
+    def _abort_if_model_doesnt_exist(model, model_id):
         if model is None:
             message = 'Model {id} doesn\'t exist' \
                       .format(id=model_id)
             abort(403, message=message)
 
-    def _abort_if_model_isnt_owned_by_user(self, model):
+    @staticmethod
+    def _abort_if_model_isnt_owned_by_user(model):
         if model.architecture.user_id != get_current_user():
             message = "Model {id} isn't owned by the user".format(
                 id=model.id)
