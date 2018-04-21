@@ -1,5 +1,3 @@
-import base64
-
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
 from app.nnvis.models import Model

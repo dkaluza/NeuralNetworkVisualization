@@ -1,5 +1,4 @@
 from app import db
-from app.utils import NnvisException
 
 from flask import current_app as app
 from datetime import datetime
