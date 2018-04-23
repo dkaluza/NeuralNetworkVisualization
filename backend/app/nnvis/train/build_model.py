@@ -9,17 +9,18 @@ class FindUnion:
         self._sizes = [1] * (size + 1)
 
     def find(self, elem):
-        felem = elem
-        while felem != self._tab[felem]:
-            felem = self._tab[felem]
+        # representant of elem
+        rep = elem
+        while rep != self._tab[rep]:
+            rep = self._tab[rep]
 
         temp = elem
-        while self._tab[temp] != felem:
+        while self._tab[temp] != rep:
             nextElem = self._tab[temp]
-            self._tab[temp] = felem
+            self._tab[temp] = rep
             temp = nextElem
 
-        return felem
+        return rep
 
     def union(self, elem1, elem2):
         felem1 = self.find(elem1)
