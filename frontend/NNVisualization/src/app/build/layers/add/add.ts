@@ -27,6 +27,10 @@ export class AddLayer extends Layer {
     }
 
     validateInputShapes(shapes: number[][]): boolean {
+        if (shapes.length === 0) {
+            return false;
+        }
+
         for (let i = 1; i < shapes.length; i += 1) {
             if (shapes[0].length !== shapes[i].length ||
                 shapes[0].some((v, j) => v !== shapes[i][j])) {

@@ -1,26 +1,14 @@
 import { BatchNormLayer } from './batch-norm';
+import { testEqualArrays } from '../test-utils';
 
 describe('BatchNormLayer', () => {
     let layer: BatchNormLayer;
-
-    const testEqualArrays = (a1, a2) => {
-        if (a1.length !== a2.length) {
-            return false;
-        }
-        for (let i = 0; i < a1.length; i += 1) {
-            if (a1[i] !== a2[i]) {
-                return false;
-            }
-        }
-        return true;
-    };
 
     beforeEach(() => {
         layer = BatchNormLayer.fromDict({
             id: '1', label: 'label',
             layerType: 'dropout',
             params: {
-                inputShape: '1',
                 decay: 0.999,
                 scale: true,
                 center: false
