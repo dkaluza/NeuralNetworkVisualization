@@ -222,6 +222,11 @@ class TrainingSample(db.Model, CRUD):
         self.label = label
         self.dataset_id = dataset_id
 
+    def __repr__(self):
+        return '<Sample {} id {} of dataset {}'.format(self.name,
+                                                       self.id,
+                                                       self.dataset_id)
+
 
 class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)

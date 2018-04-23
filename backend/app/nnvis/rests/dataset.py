@@ -4,7 +4,7 @@ from flask_jwt_extended import get_current_user
 from flask import current_app as app
 
 from app import db
-from app.nnvis.models import Dataset, Model, Image
+from app.nnvis.models import Dataset, Model, Image, TrainingSample
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.utils import NnvisException
 
@@ -17,6 +17,36 @@ SUPPORTED_EXTENSIONS = [
     'jpg',
     'png'
 ]
+
+
+class TrainingSampleBuilder(object):
+
+    def __init__(self, name, label, dataset_id, db_objs):
+        self.name = name
+        self.label = label
+        self.dataset_id = dataset_id
+        self.db_objs = db_objs
+
+    def add_img(self):
+        pass
+
+    def build(self):
+        new_ts = TrainingSample(
+            name=self.name,
+            label=self.label,
+            dataset_id=self.dataset_id
+        )
+
+        self.db_objs.append(new_ts)
+
+
+class DatasetBuilder(object):
+    """Creates the Image and TrainingSample entries associated with a dataset"""
+    def __init__(self, dataset_id):
+        self.dataset_id = dataset_id
+    
+    def build(self):
+        pass
 
 
 def dataset_to_dict(dataset):
@@ -139,17 +169,19 @@ class UploadNewDataset(ProtectedResource):
                               description=postdata.get('description'),
                               path='',
                               labels='',
+                              imgs_per_sample=0,
                               user_id=get_current_user())
 
         try:
             new_dataset.add()
             new_dataset.path = os.path.join(app.config['DATASET_FOLDER'],
                                             str(new_dataset.id))
-            unique_labels = unzip_validate_archive(
+            unique_labels, imgs_per_sample = unzip_validate_archive(
                                 new_dataset.path,
                                 postfile.stream,
                                 new_dataset.id)
             new_dataset.labels = ','.join(map(str, unique_labels))
+            new_dataset.imgs_per_sample = imgs_per_sample
             new_dataset.update()
         except:
             new_dataset.delete()
