@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { MaterialImportsModule } from './material-imports.module';
 
@@ -10,13 +11,14 @@ import { HeaderComponent } from './header/header.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { ManageComponent } from './manage/manage.component';
 import { TrainComponent } from './train/train.component';
+import { TrainParamsService } from './train/train-params.serivce';
 import { ImagesPanelComponent } from './visualize/images-panel/images-panel.component';
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
 import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
 
-import { BuildModule, BuildComponent } from './build/build.module';
+import { BuildComponent, BuildModule } from './build/build.module';
 
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -25,7 +27,7 @@ import { RestangularModule } from 'ngx-restangular';
 import { LogInDialogComponent } from './header/log-in-dialog/log-in-dialog.component';
 import { AuthenticationGuardService as AuthGuard } from './authentication/authentication-guard.service';
 import { AuthenticationService, AuthenticationWithoutLoginService } from './authentication/authentication.service';
-import { JwtModule, JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
+import { JwtHelperService as JwtHelper, JwtModule } from '@auth0/angular-jwt';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-alert.component';
@@ -80,6 +82,40 @@ export function RestangularConfigFactory(RestangularProvider,
         }
     });
 
+    function _b64toBlob(base64Data, contentType) {
+        contentType = contentType || '';
+        const sliceSize = 1024;
+        const byteCharacters = atob(base64Data);
+        const bytesLength = byteCharacters.length;
+        const slicesCount = Math.ceil(bytesLength / sliceSize);
+        const byteArrays = new Array(slicesCount);
+
+        for (let sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+            const begin = sliceIndex * sliceSize;
+            const end = Math.min(begin + sliceSize, bytesLength);
+
+            const bytes = new Array(end - begin);
+            for (let offset = begin, i = 0 ; offset < end; ++i, ++offset) {
+                bytes[i] = byteCharacters[offset].charCodeAt(0);
+            }
+            byteArrays[sliceIndex] = new Uint8Array(bytes);
+        }
+        return new Blob(byteArrays, { type: contentType });
+    }
+
+    RestangularProvider.addResponseInterceptor((data, operation, what, url, response) => {
+        if ('base64' in data) {
+            if (data['base64'] instanceof Array) {
+                for (const field of data['base64']) {
+                    const fieldName = field['name'];
+                    const contentType = field['contentType'];
+                    data[fieldName] = _b64toBlob(data[fieldName], contentType);
+                }
+            }
+        }
+        return data;
+    });
+
     RestangularProvider.addErrorInterceptor((response, subject, responseHandler) => {
         if (response.status === 504) {
             genericDialogs.createWarning('Data or authorization server is not responding.\n \
@@ -131,11 +167,18 @@ export function RestangularConfigFactory(RestangularProvider,
                 }
             }
         }),
-        BuildModule
+        BuildModule,
+        NgSelectModule,
     ],
-    providers: [SelectedArchitectureService, AuthenticationService,
-        AuthenticationWithoutLoginService, AuthGuard, JwtHelper,
-        GenericDialogsService],
+    providers: [
+        SelectedArchitectureService,
+        AuthenticationService,
+        AuthenticationWithoutLoginService,
+        AuthGuard,
+        JwtHelper,
+        GenericDialogsService,
+        TrainParamsService
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule {

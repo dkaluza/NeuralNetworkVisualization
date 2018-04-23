@@ -1,10 +1,15 @@
 from app import db
+from app.utils import NnvisException
 
 from flask import current_app as app
 from datetime import datetime
 from shutil import rmtree
 import os
+import json
 from werkzeug.security import generate_password_hash
+
+from app.nnvis.train.losses import get_loss
+from app.nnvis.train.optimizers import get_optimizer
 
 
 class CRUD():
@@ -49,17 +54,35 @@ class Architecture(db.Model, CRUD):
         return '<Archtecture {id} {name} of user {user_id}>'.format(
                 id=self.id, name=self.name, user_id=self.user_id)
 
+    def to_dict(self):
+        if self.last_used is not None:
+            last_used = self.last_used.strftime('%Y-%m-%d')
+        else:
+            last_used = 'None'
+        return {
+                'id': self.id,
+                'name': self.name,
+                'description': self.description,
+                'architecture': json.loads(self.graph),
+                'last_used': last_used,
+                'last_modified': self.last_modified.strftime('%Y-%m-%d')
+                }
+
+    def get_folder_path(self):
+        return os.path.join(app.config['WEIGHTS_DIR'],
+                            '{id}'.format(id=self.id))
+
+    def get_meta_file_path(self):
+        return os.path.join(self.get_folder_path(), 'graph.meta')
+
     def add(self):
         super().add()
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}'.format(id=self.id))
-        os.makedirs(path)
+        os.makedirs(self.get_folder_path())
 
     def delete(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}'.format(id=self.id))
+        path = self.get_folder_path()
         if os.path.isdir(path):
-            os.rmdir(path)
+            rmtree(path)
         super().delete()
 
 
@@ -96,21 +119,62 @@ class Model(db.Model, CRUD):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{arch}/{model}/'.format(
-                                arch=self.arch_id, model=self.id)
-                            )
-        self.weights_path = path
+        self.weights_path = os.path.join(
+                app.config['WEIGHTS_DIR'],
+                str(self.arch_id),
+                str(self.id))
         super().add()
 
     def delete(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{arch}/{model}/'.format(
-                                arch=self.arch_id, model=self.id)
-                            )
-        if os.path.isdir(path):
-            rmtree(path, True)
+        if os.path.isdir(self.weights_path):
+            rmtree(self.weights_path, True)
         super().delete()
+
+    def get_data_file_path(self):
+        return os.path.join(
+                self.weights_path,
+                'model.ckpt.data-00000-of-00001')
+
+    def get_index_file_path(self):
+        return os.path.join(
+                self.weights_path,
+                'model.ckpt.index')
+
+    def to_dict(self):
+        if self.training_params is not None:
+            params = json.loads(self.training_params)
+            params['loss'] = get_loss(params['loss'])['name']
+
+            opt = get_optimizer(params['optimizer'])
+            params['optimizer'] = opt['name']
+            params['optimizer_params'] = [
+                {
+                    'name': p['name'],
+                    'value': params['optimizer_params'][p['id']]
+                }
+                for p in opt['params']
+            ]
+        else:
+            params = {
+                    'loss': 'none',
+                    'optimizer': 'none',
+                    'optimizer_params': None,
+                    'batch_size': None,
+                    'nepochs': None,
+                    }
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'valid_loss': self.validation_loss,
+            'train_loss': self.training_loss,
+            'loss': params['loss'],
+            'optimizer': params['optimizer'],
+            'optimizer_params': params['optimizer_params'],
+            'batch_size': params['batch_size'],
+            'nepochs': params['nepochs']
+        }
 
 
 class Dataset(db.Model, CRUD):
@@ -164,6 +228,10 @@ class Image(db.Model, CRUD):
     def json(self):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
                 'label': self.label, 'dataset_id': self.dataset_id}
+
+    def full_path(self):
+        ds_path = Dataset.query.get(self.dataset_id).path
+        return os.path.join(ds_path, self.relative_path)
 
 
 class User(db.Model, CRUD):

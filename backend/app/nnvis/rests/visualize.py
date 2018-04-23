@@ -1,28 +1,27 @@
-import os
-
-from flask import current_app as app
+import base64
 
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Image
 from app.nnvis.models import Model
 from app.nnvis.models import Dataset
 
-# from app.vis_tools.utils import algorithms_register
-# from app.vis_tools.utils import visualize_saliency
-# from app.vis_tools.utils import inference
-# from app.vis_tools.utils import NumpyEncoder
-
+from app.utils import fileToB64
 from app.vis_tools import visualize_utils
 
-import json
-import shutil
+
+def safe_add_is_training(feed_dict, graph, train):
+    try:
+        is_training = graph.get_tensor_by_name('is_training:0')
+        feed_dict[is_training] = train
+    except KeyError:
+        pass
 
 
 # inference/<int:model_id>/<int:image_id>
 class Inference(ProtectedResource):
     def get(self, model_id, image_id):
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
+        image_path = image.full_path()
 
         model = Model.query.get(model_id)
         graph, sess, x, *_ = visualize_utils.load_model(model)
@@ -32,7 +31,12 @@ class Inference(ProtectedResource):
 
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
 
-        predictions = output_op.eval(feed_dict={x: [image_input]}, session=sess)
+        feed_dict = {
+                x: [image_input]
+                }
+        safe_add_is_training(feed_dict, graph, False)
+
+        predictions = output_op.eval(feed_dict=feed_dict, session=sess)
         predictions = predictions[0]
 
         sess.close()
@@ -53,7 +57,7 @@ class Visualize(ProtectedResource):
             return {'errormsg': "Bad algorithm id"}, 400
 
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
+        image_path = image.full_path()
 
         model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
@@ -61,28 +65,41 @@ class Visualize(ProtectedResource):
         alg_class = visualize_utils.algorithms_register[alg_id]
         vis_algorithm = alg_class(graph, sess, y, x)
 
+        feed_dict = {
+                neuron_selector: int(image.label)
+                }
+        safe_add_is_training(feed_dict, graph, False)
+
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
+        saliency = vis_algorithm.GetMask(image_input, feed_dict=feed_dict)
 
         sess.close()
 
-        image_output_path = image_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_gray_pos)
-        image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + str(vis_algorithm) + '.png'
-        return {'image_path': image_path}
+        img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
+        img_b64 = fileToB64(img_stream)
+        return {
+                'base64': [{
+                    'name': 'img',
+                    'contentType': 'image/png'
+                    }],
+                'img': img_b64
+                }
 
 
 # /image/<string:image_id>
 class Images(ProtectedResource):
     def get(self, image_id):
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
-        dataset = Dataset.query.get(image.dataset_id)
-        image_db_path = os.path.join(dataset.path, image.relative_path)
-        if not os.path.isfile(image_path):
-            shutil.copyfile(image_db_path, image_path)
-        image_url = 'api/static/' + image.relative_path
-        return {'image_path': image_url}
+        img_path = image.full_path()
+        with open(img_path, 'rb') as img_f:
+            img_b64 = fileToB64(img_f)
+        return {
+                'base64': [{
+                    'name': 'img',
+                    'contentType': 'image/png'
+                    }],
+                'img': img_b64
+                }
 
 
 # /images/<int:model_id>
@@ -95,4 +112,6 @@ class ImageList(ProtectedResource):
 
 class Algorithms(ProtectedResource):
     def get(self):
-        return {alg_class.__name__: alg_id for alg_id, alg_class in visualize_utils.algorithms_register}
+        return {
+            'algs': {alg_class.__name__: alg_id for alg_id, alg_class in visualize_utils.algorithms_register.items()}
+        }

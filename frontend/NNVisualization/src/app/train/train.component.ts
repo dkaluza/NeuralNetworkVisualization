@@ -3,6 +3,8 @@ import { Restangular } from 'ngx-restangular';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 import { MatTableDataSource } from '@angular/material';
+import { TrainParamsService, LossFunction,
+         Optimizer, OptimizerParam } from './train-params.serivce';
 
 interface Element {
     position: number;
@@ -22,45 +24,8 @@ export class TrainComponent implements OnInit {
     selectedDatasetId: number = undefined;
     selectedDatasetName: string = undefined;
 
-    losses = [
-        {
-            'value': 'logloss',
-            'name': 'Logloss'
-        }, {
-            'value': 'mse',
-            'name': 'Mean squared error'
-        }
-    ];
-    loss: string = undefined;
-    lossName: string = undefined;
-
-    optimizers = [
-        {
-            'value': 'adam',
-            'name': 'Adam'
-        } , {
-            'value': 'sgd',
-            'name': 'Gradient Descent'
-        }
-    ];
-    optimizer: string = undefined;
-    optimizerName: string = undefined;
-
-    optimizerParamsSets = {
-        'sgd': [ {
-            'name': 'Learning rate', 'value': 'lr', 'default': 0.1
-        } ],
-        'adam': [ {
-            'name': 'Learning rate', 'value': 'lr', 'default': 0.001
-        }, {
-            'name': 'Beta 1', 'value': 'beta1', 'default': 0.9
-        }, {
-            'name': 'Beta 2', 'value': 'beta2', 'default': 0.999
-        }, {
-            'name': 'Epsilon', 'value': 'epsilon', 'default': 0.00000001
-        }]
-    };
-    optimizerParams: Map<string, any>;
+    loss: LossFunction;
+    optimizer: Optimizer;
 
     displayedColumns = ['position', 'name'];
 
@@ -69,7 +34,8 @@ export class TrainComponent implements OnInit {
 
     constructor(private restangular: Restangular,
         private selArchService: SelectedArchitectureService,
-        private genericDialog: GenericDialogsService) {
+        private genericDialog: GenericDialogsService,
+        public trainParams: TrainParamsService) {
 
         this._datasets = [];
         this.datasetDataSource = new MatTableDataSource<Element>([]);
@@ -93,8 +59,8 @@ export class TrainComponent implements OnInit {
         if (this.optimizer === undefined) {
             return false;
         }
-        for (const key of Array.from(this.optimizerParams.keys())) {
-            if (!this.optimizerParams.get(key)) {
+        for (const param of this.optimizer.params) {
+            if (param.value === null || param.value === undefined) {
                 return false;
             }
         }
@@ -129,34 +95,16 @@ export class TrainComponent implements OnInit {
         dataSource.filter = filterValue;
     }
 
-    onLossChange(value) {
-        this.loss = value;
-        for (let i = 0; i < this.losses.length; i += 1) {
-            if (this.losses[i].value === value) {
-                this.lossName = this.losses[i].name;
-                break;
-            }
-        }
+    onLossChange(id) {
+        this.loss = this.trainParams.getLoss(id);
     }
 
-    onOptimizerChange(value) {
-        this.optimizerParams = new Map;
-        for (let i = 0; i < this.optimizers.length; i += 1) {
-            if (this.optimizers[i].value === value) {
-                this.optimizerName = this.optimizers[i].name;
-                break;
-            }
-        }
-        this.optimizerParamsSets[value].forEach(
-            val => {
-                this.optimizerParams.set(val.value, val.default);
-            }
-        );
-        this.optimizer = value;
-    }
-
-    onParamChange(param, value) {
-        this.optimizerParams.set(param, value);
+    onOptimizerChange(id) {
+        const optimizerTemplate = this.trainParams.getOptimizer(id);
+        this.optimizer = Object.assign({}, optimizerTemplate);
+        this.optimizer.params = optimizerTemplate.params.map(p => {
+            return Object.assign({}, p);
+        });
     }
 
     onTrain() {
@@ -169,19 +117,17 @@ export class TrainComponent implements OnInit {
             this.genericDialog.createWarning('Wrong training parameters');
             return;
         }
-        for (let i = 0; i < this.optimizerParamsSets[this.optimizer].length; i += 1) {
-            const val = this.optimizerParamsSets[this.optimizer][i];
-            if (this.optimizerParams.get(val.value) === '') {
+        for (let i = 0; i < this.optimizer.params.length; i += 1) {
+            const param = this.optimizer.params[i];
+            if (param.value === null || param.value === undefined) {
                 this.genericDialog.createWarning(
-                    'Optimizer parameter \'' + val.name + '\' must be a number'
+                    'Optimizer parameter \'' + param.name + '\' must be a number'
                 );
                 return;
             }
         }
         this.genericDialog.createInputs(['Name', 'Description']).afterClosed().subscribe(
             result => {
-                const params = {};
-                this.optimizerParams.forEach((v, k) => { params[k] = v; } );
                 if (result && result['Name']) {
                     const data = {
                         name: result['Name'],
@@ -190,7 +136,6 @@ export class TrainComponent implements OnInit {
                         batch_size: Number(this.batchSize),
                         loss: this.loss,
                         optimizer: this.optimizer,
-                        optimizer_params: params,
                         dataset_id: this.selectedDatasetId
                     };
                     const id = this.selArchService.architecture.id;

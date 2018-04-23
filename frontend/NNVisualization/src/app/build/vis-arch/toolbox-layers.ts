@@ -36,5 +36,20 @@ export const layerTemplates: ToolboxLayer[] = [
         label: 'Batch Normalization',
         shortcut: 'batch norm',
         color: '#aa88a4'
+    }, {
+        id: 'add',
+        label: 'Add',
+        shortcut: 'add',
+        color: '#58a7a7'
+    }, {
+        id: 'concat',
+        label: 'Concatenation',
+        shortcut: 'concat',
+        color: '#99a355'
+    }, {
+        id: 'softmax',
+        label: 'Softmax',
+        shortcut: 'softmax',
+        color: '#abab65'
     }
 ];

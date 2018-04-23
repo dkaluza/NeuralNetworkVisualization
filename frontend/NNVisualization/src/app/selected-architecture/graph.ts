@@ -88,32 +88,75 @@ export class Graph {
     }
 
     checkForLoop(): number[] {
-        // this tries to do topological sort
-        // if it can't that means that there exists a loop
-        const edgeCounter = new Map();
-        this._nodes.forEach(n => { edgeCounter.set(n, 0); });
-        this._links.forEach(l => {
-            l.forEach(n => {
-                edgeCounter.set(n, edgeCounter.get(n) + 1);
-            });
-        });
-        const queue = this.getGraphInputs();
-        while (queue.length > 0) {
-            const n = queue.shift();
-            this._links.get(n).forEach(m => {
-                edgeCounter.set(m, edgeCounter.get(m) - 1);
-                if (edgeCounter.get(m) === 0) {
-                    queue.push(m);
+        /*
+         * notVisited - nodes that weren't yet visited
+         * beingVisited - nodes that we started visiting,
+         *    but some children are still not done
+         * visited - nodes that were visited and all its
+         *    children were visited
+         */
+        const notVisited = new Set(this._nodes);
+        const beingVisited = new Set;
+        const visited = new Set;
+        /*
+         * map for reconstructing loop
+         * every node remebers from which node
+         *      it was visited
+         */
+        const loopMap = new Map;
+
+        /*
+         * function that recursively visit nodes
+         *
+         * it checks all children (v) of a node (n)
+         * if v is in notVisited set:
+         *      v is moved to beingVisited
+         *      parent v is set to n
+         *      recursively visit v
+         * if v is in beingVisited it means that
+         *      we found a loop
+         * undefined means that no loop was found
+         * number u as result means that there is a loop,
+         *      and node u is in a loop
+         */
+        const visit = n => {
+            const links = this._links.get(n);
+            for (const v of links) {
+                if (notVisited.has(v)) {
+                    notVisited.delete(v);
+                    beingVisited.add(v);
+                    loopMap.set(v, n);
+                    const ret = visit(v);
+                    if (ret !== undefined) {
+                        return ret;
+                    }
+                } else if (beingVisited.has(v)) {
+                    loopMap.set(v, n);
+                    return v;
                 }
-            });
-        }
-        const loop = [];
-        edgeCounter.forEach((l, n) => {
-            if (l > 0) {
-                loop.push(n);
             }
-        });
-        return loop;
+            beingVisited.delete(n);
+            visited.add(n);
+            return undefined;
+        };
+
+        while (notVisited.size > 0) {
+            let n = notVisited.values().next().value;
+            notVisited.delete(n);
+            beingVisited.add(n);
+            loopMap.set(n, undefined);
+            const ret = visit(n);
+            if (ret !== undefined) {
+                const loop = [ret];
+                n = loopMap.get(ret);
+                while (n !== ret) {
+                    loop.push(n);
+                    n = loopMap.get(n);
+                }
+                return loop;
+            }
+        }
+        return [];
     }
 
     sortTopologically(): number[] {

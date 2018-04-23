@@ -3,16 +3,10 @@ export abstract class Layer {
     private _label: string;
     private _layerType: string;
 
-    private _inputShape: string;
-    private _outputShape: string;
-
-    constructor(id: number, label: string, layerType: string,
-                input: string, output: string) {
+    constructor(id: number, label: string, layerType: string) {
         this._id = id;
         this._label = label;
         this._layerType = layerType;
-        this._inputShape = input;
-        this._outputShape = output;
     }
 
     ngOnInit() {
@@ -34,22 +28,6 @@ export abstract class Layer {
         this._label = label;
     }
 
-    get inputShape(): string {
-        return this._inputShape;
-    }
-
-    set inputShape(input: string) {
-        this._inputShape = input;
-    }
-
-    get outputShape(): string {
-        return this._outputShape;
-    }
-
-    set outputShape(output: string) {
-        this._outputShape = output;
-    }
-
     abstract addAttributes(dict);
 
     // assumes that value is already valid number array
@@ -63,8 +41,6 @@ export abstract class Layer {
             label: this._label,
             layerType: this._layerType,
             params: {
-                inputShape: this.strToArray(this._inputShape),
-                outputShape: this.strToArray(this._outputShape)
             }
         };
         dict.params = this.addAttributes(dict.params);

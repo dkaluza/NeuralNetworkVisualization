@@ -6,9 +6,10 @@ export class BatchNormLayer extends Layer {
     private _center: boolean;
     private _scale: boolean;
 
-    constructor(id: number, label: string, input = '1',
-                decay = 0.999, center = true, scale = false) {
-        super(id, label, 'batch_norm', input, input);
+    constructor(id: number, label: string,
+                decay = 0.999, center = true,
+                scale = false) {
+        super(id, label, 'batch_norm');
         this._decay = decay;
         this._center = center;
         this._scale = scale;
@@ -17,8 +18,7 @@ export class BatchNormLayer extends Layer {
     static fromDict(dict: ArchNode): BatchNormLayer {
         return new BatchNormLayer(
             Number(dict.id), dict.label,
-            String(dict.params.inputShape),
-            dict.params.decay,
+            Number(dict.params.decay),
             dict.params.center,
             dict.params.scale
         );
