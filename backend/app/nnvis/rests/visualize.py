@@ -22,10 +22,10 @@ class Inference(ProtectedResource):
         image_path = image.full_path()
 
         model = Model.query.get(model_id)
-        model_folder = model.weights_path
+        weights_path = model.weights_path
         meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
         graph, sess, x, *_ = \
-            visualize_utils.load_model(meta_file, model_folder)
+            visualize_utils.load_model(meta_file, weights_path)
 
         output_op = graph.get_tensor_by_name('output:0')
 
@@ -60,9 +60,9 @@ class Visualize(ProtectedResource):
         image_path = image.full_path()
 
         model = Model.query.get(model_id)
-        model_folder = model.weights_path
+        weights_path = model.weights_path
         meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
-        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(meta_file, model_folder)
+        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(meta_file, weights_path)
 
         alg_class = visualize_utils.algorithms_register[alg_id]
         vis_algorithm = alg_class(graph, sess, y, x)

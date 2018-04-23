@@ -72,13 +72,12 @@ def save_image(image, proc=None):
 
 
 # mocked for now
-def load_model(meta_file, model_folder):
+def load_model(meta_file, weight_path):
     graph = tf.Graph()
     with graph.as_default():
-        # mocked model
         saver = tf.train.import_meta_graph(meta_file)
         sess = tf.Session(graph=graph)
-        saver.restore(sess, tf.train.latest_checkpoint(model_folder))
+        saver.restore(sess, weight_path)
 
         logits = graph.get_tensor_by_name('logits:0')
         x = graph.get_tensor_by_name('input/1:0')
