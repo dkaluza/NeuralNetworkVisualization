@@ -42,9 +42,12 @@ def _build_fc_op(node, input_ops, is_training):
     x = input_ops[0]
     x = layers.flatten(x)
     with tf.name_scope(node['id']):
+        scope = str(node['weightId'])
         op = layers.fully_connected(
                 x, num_outputs=node['params']['numOutputs'],
-                activation_fn=tf.identity)
+                activation_fn=tf.identity,
+                reuse=tf.AUTO_REUSE,
+                scope=scope)
         # add new name for logits tensor
         tf.identity(op, name='logits')
         return _get_activation(node)(op, name=node['params']['activation'])
@@ -57,12 +60,15 @@ def _build_conv_op(node, input_ops, is_training):
     strides = node['params']['strides']
 
     with tf.name_scope(node['id']):
+        scope = str(node['weightId'])
         op = layers.conv2d(
                 x, num_outputs=num_filters,
                 kernel_size=kernel_size,
                 stride=strides,
                 padding=_get_padding(node),
-                activation_fn=tf.identity)
+                activation_fn=tf.identity,
+                reuse=tf.AUTO_REUSE,
+                scope=scope)
         # add new name for logits tensor
         tf.identity(op, name='logits')
         return _get_activation(node)(op, name=node['params']['activation'])
