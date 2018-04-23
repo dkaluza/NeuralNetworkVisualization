@@ -1,5 +1,5 @@
 import { InputLayer } from './input';
-import { testEqualArrays } from '../test-utils';
+import { testsForCalculateOutputShape, testsForValidateInputShapes } from '../test-utils';
 
 describe('InputLayer', () => {
     let input: InputLayer;
@@ -20,16 +20,17 @@ describe('InputLayer', () => {
     });
 
     it('test calculateOutputShape', () => {
-        expect(testEqualArrays(
-            input.calculateOutputShape([]),
-            [-1, 28, 28, 1]))
-            .toBe(true, 'output shape should be [-1, 28, 28, 1]');
+        const tests = [
+            {input: [], output: [-1, 28, 28, 1]},
+        ];
+        testsForCalculateOutputShape(input, tests);
     });
 
     it('test validateInputShapes', () => {
-        expect(input.validateInputShapes([]))
-            .toBe(true, '[] should be correct input');
-        expect(input.validateInputShapes([[-1, 28, 28, 1]]))
-            .toBe(false, '[[-1, 28, 28, 1] should be incorrect input');
+        const tests = [
+            {input: [], output: true},
+            {input: [[-1, 28, 28, 1]], output: false},
+        ];
+        testsForValidateInputShapes(input, tests);
     });
 });

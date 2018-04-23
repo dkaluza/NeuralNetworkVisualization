@@ -1,16 +1,15 @@
-import { FullyConnectedLayer } from './fully-connected';
+import { SoftmaxLayer } from './softmax';
 import { testsForCalculateOutputShape, testsForValidateInputShapes } from '../test-utils';
 
-describe('FullyConnectedLayer', () => {
-    let layer: FullyConnectedLayer;
+describe('SoftmaxLayer', () => {
+    let layer: SoftmaxLayer;
 
     beforeEach(() => {
-        layer = FullyConnectedLayer.fromDict({
+        layer = SoftmaxLayer.fromDict({
             id: '1', label: 'label',
-            layerType: 'fc',
+            layerType: 'softmax',
             params: {
-                numOutputs: 32,
-                activation: 'Relu'
+                axis: -1
             }
         });
     });
@@ -21,17 +20,16 @@ describe('FullyConnectedLayer', () => {
 
     it('test calculateOutputShape', () => {
         const tests = [
-            {input: [[-1, 28, 28, 1]], output: [-1, 32]},
-            {input: [[100, 28, 28, 1]], output: [100, 32]},
+            {input: [[-1, 28, 28, 1]], output: [-1, 28, 28, 1]},
         ];
         testsForCalculateOutputShape(layer, tests);
     });
 
     it('test validateInputShapes', () => {
         const tests = [
-            {input: [[-1, 28, 28, 1]], output: true},
             {input: [], output: false},
-            {input: [[-1, 28, 1], [-1, 28, 1]], output: false},
+            {input: [[-1, 28, 28, 1]], output: true},
+            {input: [[-1, 28, 28, 1], [-1, 28, 28, 1]], output: false},
         ];
         testsForValidateInputShapes(layer, tests);
     });
