@@ -100,6 +100,8 @@
                         (click)="editCurrentArchitecture()">Edit</button>
                 <button mat-button
                         (click)="deleteCurrentArchitecture()">Delete</button>
+                <button mat-button
+                         (click)="exportCurrentArchitecture()">Export</button>
             </ng-container>
             <ng-template #noArch>
                 No architecture selected
@@ -128,6 +130,8 @@
                     (click)="editCurrentModel()">Edit</button>
             <button mat-button
                     (click)="deleteCurrentModel()">Delete</button>
+            <button mat-button
+                     (click)="exportCurrentModel()">Export</button>
         </ng-container>
         <ng-template #noModel>
             No model selected

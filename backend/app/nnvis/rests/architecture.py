@@ -2,53 +2,66 @@ from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
 
-from flask import current_app as app
-from app.nnvis.models import Architecture, Model
-from app.nnvis.rests.protected_resource import ProtectedResource
 from datetime import datetime
 import json
 import os
 
+from app.utils import fileToB64
+from app.nnvis.models import Architecture, Model
+from app.nnvis.rests.protected_resource import ProtectedResource
+from app.nnvis.train.build_model import TFModel
 
-class ArchitectureTask(ProtectedResource):
-    def __abort_if_arch_doesnt_exist(self, arch, arch_id):
+
+class ArchitectureUtils(object):
+    @staticmethod
+    def _save_meta_file(arch):
+        graph = json.loads(arch.graph)
+        tfmodel = TFModel(graph['nodes'], graph['links'])
+        tfmodel.save_graph(arch.get_folder_path())
+
+    @staticmethod
+    def _abort_if_arch_doesnt_exist(arch, arch_id):
         if arch is None:
             message = 'Architecture {id} doesn\'t exist'.format(id=arch_id)
             abort(403, message=message)
 
-    def __abort_if_arch_isnt_owned_by_user(self, arch):
+    @staticmethod
+    def _abort_if_arch_isnt_owned_by_user(arch):
         if arch.user_id != get_current_user():
             message = "Architecture {id} isn't owned by the user".format(
                 id=arch.id)
             abort(401, message=message)
 
-    def __abort_if_models_list_isnt_empty(self, models, arch_id):
+    @staticmethod
+    def _abort_if_models_list_isnt_empty(models, arch_id):
         if len(models) > 0:
             message = 'Architecture {id} still has some models'\
                       .format(id=arch_id)
             abort(403, message=message)
 
+
+class ArchitectureTask(ProtectedResource, ArchitectureUtils):
     def get(self, arch_id):
         arch = Architecture.query.get(arch_id)
-        self.__abort_if_arch_doesnt_exist(arch, arch_id)
-        self.__abort_if_arch_isnt_owned_by_user(arch)
+        self._abort_if_arch_doesnt_exist(arch, arch_id)
+        self._abort_if_arch_isnt_owned_by_user(arch)
         return arch.to_dict()
 
     def delete(self, arch_id):
         arch = Architecture.query.get(arch_id)
-        self.__abort_if_arch_doesnt_exist(arch, arch_id)
-        self.__abort_if_arch_isnt_owned_by_user(arch)
+        self._abort_if_arch_doesnt_exist(arch, arch_id)
+        self._abort_if_arch_isnt_owned_by_user(arch)
         models = Model.query.filter_by(arch_id=arch_id).all()
-        self.__abort_if_models_list_isnt_empty(models, arch_id)
+        self._abort_if_models_list_isnt_empty(models, arch_id)
         arch.delete()
         return '', 204
 
     def post(self, arch_id):
         arch = Architecture.query.get(arch_id)
-        self.__abort_if_arch_doesnt_exist(arch, arch_id)
-        self.__abort_if_arch_isnt_owned_by_user(arch)
+        self._abort_if_arch_doesnt_exist(arch, arch_id)
+        self._abort_if_arch_isnt_owned_by_user(arch)
         models = Model.query.filter_by(arch_id=arch_id).all()
-        self.__abort_if_models_list_isnt_empty(models, arch_id)
+        self._abort_if_models_list_isnt_empty(models, arch_id)
 
         args = request.get_json(force=True)
         if 'name' in args:
@@ -57,13 +70,15 @@ class ArchitectureTask(ProtectedResource):
             arch.description = args['description']
         if 'graph' in args:
             arch.graph = json.dumps(args['graph'])
+            self._save_meta_file(arch)
+
         arch.last_modified = datetime.utcnow()
 
         arch.update()
         return arch.to_dict(), 201
 
 
-class UploadNewArchitecture(ProtectedResource):
+class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
     def post(self):
         user_id = get_current_user()
         args = request.get_json(force=True)
@@ -82,13 +97,14 @@ class UploadNewArchitecture(ProtectedResource):
 
         try:
             new_arch.add()
+            self._save_meta_file(new_arch)
         except Exception as e:
             abort(403, message=e)
 
         return new_arch.to_dict(), 201
 
 
-class ListAllArchitectures(ProtectedResource):
+class ListAllArchitectures(ProtectedResource, ArchitectureUtils):
     def get(self):
         archs = Architecture.query.filter_by(user_id=get_current_user())
         return [arch.to_dict() for arch in archs]
@@ -117,13 +133,34 @@ class ImportArchitecture(ProtectedResource):
                 user_id=get_current_user())
         try:
             new_arch.add()
-            path = os.path.join(
-                    app.config['WEIGHTS_DIR'],
-                    str(new_arch.id),
-                    'graph.meta')
+
+            path = new_arch.get_meta_file_path()
             with open(path, 'wb') as fd:
                 fd.write(postfile.stream.read())
         except Exception as e:
             abort(403, message=e)
 
         return new_arch.to_dict(), 201
+
+
+class ExportArchitecture(ProtectedResource, ArchitectureUtils):
+    def get(self, arch_id):
+        arch = Architecture.query.get(arch_id)
+        self._abort_if_arch_doesnt_exist(arch, arch_id)
+        self._abort_if_arch_isnt_owned_by_user(arch)
+
+        graph_path = os.path.join(arch.get_folder_path(), 'graph.meta')
+        with open(graph_path, 'rb') as graph_fd:
+            graph_b64 = fileToB64(graph_fd)
+
+        filename = '{name}.meta'.format(
+                name=arch.name.replace(' ', '_')
+                )
+        return {
+                'base64': [{
+                    'name': 'file',
+                    'contentType': 'application/octet-stream'
+                    }],
+                'filename': filename,
+                'file': graph_b64
+                }

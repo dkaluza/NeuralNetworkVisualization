@@ -1,45 +1,49 @@
 from flask import request
 from flask_restful import abort
 from flask_jwt_extended import get_current_user
-import json
+from zipfile import ZipFile, ZIP_DEFLATED
+from io import BytesIO
 import os
-from zipfile import ZipFile
 
-from flask import current_app as app
+from app.utils import NnvisException, fileToB64
 from app.nnvis.models import Model, Architecture
 from app.nnvis.rests.protected_resource import ProtectedResource
 
 
-class ModelTask(ProtectedResource):
-    def __abort_if_model_doesnt_exist(self, model, model_id):
+class ModelUtils:
+    @staticmethod
+    def _abort_if_model_doesnt_exist(model, model_id):
         if model is None:
             message = 'Model {id} doesn\'t exist' \
                       .format(id=model_id)
             abort(403, message=message)
 
-    def __abort_if_model_isnt_owned_by_user(self, model):
+    @staticmethod
+    def _abort_if_model_isnt_owned_by_user(model):
         if model.architecture.user_id != get_current_user():
             message = "Model {id} isn't owned by the user".format(
                 id=model.id)
             abort(401, message=message)
 
+
+class ModelTask(ProtectedResource, ModelUtils):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        self.__abort_if_model_doesnt_exist(model, model_id)
-        self.__abort_if_model_isnt_owned_by_user(model)
+        self._abort_if_model_doesnt_exist(model, model_id)
+        self._abort_if_model_isnt_owned_by_user(model)
         return model.to_dict()
 
     def delete(self, model_id):
         model = Model.query.get(model_id)
-        self.__abort_if_model_doesnt_exist(model, model_id)
-        self.__abort_if_model_isnt_owned_by_user(model)
+        self._abort_if_model_doesnt_exist(model, model_id)
+        self._abort_if_model_isnt_owned_by_user(model)
         model.delete()
         return '', 204
 
     def post(self, model_id):
         model = Model.query.get(model_id)
-        self.__abort_if_model_doesnt_exist(model, model_id)
-        self.__abort_if_model_isnt_owned_by_user(model)
+        self._abort_if_model_doesnt_exist(model, model_id)
+        self._abort_if_model_isnt_owned_by_user(model)
 
         args = request.get_json(force=True)
         if 'name' in args:
@@ -51,13 +55,13 @@ class ModelTask(ProtectedResource):
         return model.to_dict(), 201
 
 
-class UploadNewModel(ProtectedResource):
+class UploadNewModel(ProtectedResource, ModelUtils):
     def post(self, arch_id):
         # TODO: upload_new_model REST
         pass
 
 
-class ListAllModels(ProtectedResource):
+class ListAllModels(ProtectedResource, ModelUtils):
     def get(self, arch_id):
         arch = Architecture.query.get(arch_id)
         if arch is None:
@@ -127,10 +131,7 @@ class ImportModel(ProtectedResource):
             abort(403, message=e)
 
         try:
-            meta_path = os.path.join(
-                    app.config['WEIGHTS_DIR'],
-                    str(new_arch.id),
-                    'graph.meta')
+            meta_path = new_arch.get_meta_file_path()
             with open(meta_path, 'wb') as fd:
                 fd.write(zipdata.read(meta))
         except Exception as e:
@@ -150,11 +151,10 @@ class ImportModel(ProtectedResource):
 
         try:
             os.mkdir(new_model.weights_path)
-            data_path = os.path.join(
-                    new_model.weights_path,
-                    'model.ckpt.data-00000-of-00001')
+            data_path = new_model.get_data_file_path()
             with open(data_path, 'wb') as fd:
                 fd.write(zipdata.read(data))
+            index_path = new_model.get_index_file_path()
             index_path = os.path.join(
                     new_model.weights_path,
                     'model.ckpt.index')
@@ -168,4 +168,44 @@ class ImportModel(ProtectedResource):
         return {
                 'arch': new_arch.to_dict(),
                 'model': new_model.to_dict()
+                }
+
+
+class ExportModel(ProtectedResource, ModelUtils):
+    def get(self, model_id):
+        model = Model.query.get(model_id)
+        self._abort_if_model_doesnt_exist(model, model_id)
+        self._abort_if_model_isnt_owned_by_user(model)
+
+        try:
+            data_file = model.get_data_file_path()
+            index_file = model.get_index_file_path()
+            meta_file = Architecture.query.get(model.arch_id)\
+                .get_meta_file_path()
+        except NnvisException:
+            return {}, 400
+
+        name = model.name.replace(' ', '_') + '.{}'
+        data_name = name.format('ckpt.data-00000-of-00001')
+        index_name = name.format('ckpt.index')
+        meta_name = name.format('meta')
+
+        # create zip file
+        bytestr = BytesIO()
+        with ZipFile(bytestr, mode="x", compression=ZIP_DEFLATED) as zipfile:
+            zipfile.write(data_file, data_name)
+            zipfile.write(index_file, index_name)
+            zipfile.write(meta_file, meta_name)
+        bytestr.seek(0)
+
+        zip_name = name.format('zip')
+        zip_b64 = fileToB64(bytestr)
+
+        return {
+                'base64': [{
+                    'name': 'file',
+                    'contentType': 'application/octet-stream'
+                    }],
+                'filename': zip_name,
+                'file': zip_b64
                 }

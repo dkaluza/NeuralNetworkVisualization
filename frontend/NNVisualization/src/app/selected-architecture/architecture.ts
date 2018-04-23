@@ -1,5 +1,3 @@
-import { Layer } from './layer';
-
 export interface ArchNode {
     id: string;
     label: string;
@@ -16,7 +14,6 @@ export class Architecture {
     private _id: number;
     private _name: string;
     private _description: string;
-    private _layers: Layer[];
 
     private _nodes: ArchNode[];
     private _links: ArchLink[];

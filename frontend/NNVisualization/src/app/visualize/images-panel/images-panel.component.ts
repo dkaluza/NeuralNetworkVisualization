@@ -82,7 +82,7 @@ export class ImagesPanelComponent implements OnInit {
     onGetImage(image: Image) {
         this.visualizeService.getImage(image.imageId)
             .subscribe(response => {
-                this.currentImage.display_path = response['image_path'];
+                this._parseb64(response['img'], (result) => { this.currentImage.display_path = result; });
             });
         this.currentImageVis = '';
     }
@@ -91,7 +91,7 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.visualizeService.getImageVis(model.id, 0, this.currentImage.imageId)
             .subscribe(response => {
-                this.currentImageVis = response['image_path'];
+                this._parseb64(response['img'], (result) => { this.currentImageVis = result; });
             });
     }
 
@@ -110,5 +110,14 @@ export class ImagesPanelComponent implements OnInit {
                 }
                 this.dataSource = new MatTableDataSource(scores);
             });
+    }
+
+    _parseb64(img_blob, callback) {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            callback(reader.result);
+        }, false);
+
+        reader.readAsDataURL(img_blob);
     }
 }

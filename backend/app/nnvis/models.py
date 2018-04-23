@@ -1,11 +1,11 @@
 from app import db
+from app.utils import NnvisException
 
 from flask import current_app as app
 from datetime import datetime
 from shutil import rmtree
 import os
 import json
-
 from werkzeug.security import generate_password_hash
 
 from app.nnvis.train.losses import get_loss
@@ -54,19 +54,6 @@ class Architecture(db.Model, CRUD):
         return '<Archtecture {id} {name} of user {user_id}>'.format(
                 id=self.id, name=self.name, user_id=self.user_id)
 
-    def add(self):
-        super().add()
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}'.format(id=self.id))
-        os.makedirs(path)
-
-    def delete(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{id}'.format(id=self.id))
-        if os.path.isdir(path):
-            rmtree(path, True)
-        super().delete()
-
     def to_dict(self):
         if self.last_used is not None:
             last_used = self.last_used.strftime('%Y-%m-%d')
@@ -81,6 +68,23 @@ class Architecture(db.Model, CRUD):
                 'last_used': last_used,
                 'last_modified': self.last_modified.strftime('%Y-%m-%d')
                 }
+
+    def get_folder_path(self):
+        return os.path.join(app.config['WEIGHTS_DIR'],
+                            '{id}'.format(id=self.id))
+
+    def get_meta_file_path(self):
+        return os.path.join(self.get_folder_path(), 'graph.meta')
+
+    def add(self):
+        super().add()
+        os.makedirs(self.get_folder_path())
+
+    def delete(self):
+        path = self.get_folder_path()
+        if os.path.isdir(path):
+            rmtree(path)
+        super().delete()
 
 
 class Model(db.Model, CRUD):
@@ -116,21 +120,26 @@ class Model(db.Model, CRUD):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{arch}/{model}/'.format(
-                                arch=self.arch_id, model=self.id)
-                            )
-        self.weights_path = path
+        self.weights_path = os.path.join(
+                app.config['WEIGHTS_DIR'],
+                str(self.arch_id),
+                str(self.id))
         super().add()
 
     def delete(self):
-        path = os.path.join(app.config['WEIGHTS_DIR'],
-                            '{arch}/{model}/'.format(
-                                arch=self.arch_id, model=self.id)
-                            )
-        if os.path.isdir(path):
-            rmtree(path, True)
+        if os.path.isdir(self.weights_path):
+            rmtree(self.weights_path, True)
         super().delete()
+
+    def get_data_file_path(self):
+        return os.path.join(
+                self.weights_path,
+                'model.ckpt.data-00000-of-00001')
+
+    def get_index_file_path(self):
+        return os.path.join(
+                self.weights_path,
+                'model.ckpt.index')
 
     def to_dict(self):
         if self.training_params is not None:
@@ -220,6 +229,10 @@ class Image(db.Model, CRUD):
     def json(self):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
                 'label': self.label, 'dataset_id': self.dataset_id}
+
+    def full_path(self):
+        ds_path = Dataset.query.get(self.dataset_id).path
+        return os.path.join(ds_path, self.relative_path)
 
 
 class User(db.Model, CRUD):
