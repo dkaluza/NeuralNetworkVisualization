@@ -1,9 +1,7 @@
 import base64
 
 from app.nnvis.rests.protected_resource import ProtectedResource
-from app.nnvis.models import Image
-from app.nnvis.models import Model
-from app.nnvis.models import Dataset
+from app.nnvis.models import Architecture, Model, Image, Dataset
 
 from app.utils import fileToB64
 from app.vis_tools import visualize_utils
@@ -24,8 +22,10 @@ class Inference(ProtectedResource):
         image_path = image.full_path()
 
         model = Model.query.get(model_id)
-        graph, sess, x, *_ = visualize_utils.load_model(model)
-
+        model_folder = model.weights_path
+        meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
+        graph, sess, x, *_ = \
+            visualize_utils.load_model(meta_file, model_folder)
 
         output_op = graph.get_tensor_by_name('output:0')
 
@@ -60,7 +60,9 @@ class Visualize(ProtectedResource):
         image_path = image.full_path()
 
         model = Model.query.get(model_id)
-        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
+        model_folder = model.weights_path
+        meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
+        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(meta_file, model_folder)
 
         alg_class = visualize_utils.algorithms_register[alg_id]
         vis_algorithm = alg_class(graph, sess, y, x)
