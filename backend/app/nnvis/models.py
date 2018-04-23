@@ -182,6 +182,7 @@ class Dataset(db.Model, CRUD):
     description = db.Column(db.Text(256))
     path = db.Column(db.Text(256), nullable=False)
     labels = db.Column(db.Text(256), nullable=False)
+    imgs_per_sample = db.Column(db.Integer, nullable=False)
     models = db.relationship('Model', backref='dataset', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     training_samples = db.relationship('TrainingSample', cascade='all, delete-orphan',
@@ -191,12 +192,13 @@ class Dataset(db.Model, CRUD):
         db.UniqueConstraint('name', 'user_id', name='_name_userid_uc'),
     )
 
-    def __init__(self, name, description, path, labels, user_id):
+    def __init__(self, name, description, path, labels, user_id, imgs_per_sample):
         self.name = name
         self.description = description
         self.path = path
         self.labels = labels
         self.user_id = user_id
+        self.imgs_per_sample = imgs_per_sample
 
     def __repr__(self):
         return '<Dataset {id} {name} of user {user_id}>'.format(
