@@ -67,6 +67,7 @@ do-run()
                --name nnvis-container \
                -it \
                -p 4200:4200 \
+               -p 9876:9876 \
                "$IMGTAG"
     else
         echo "Already running!"

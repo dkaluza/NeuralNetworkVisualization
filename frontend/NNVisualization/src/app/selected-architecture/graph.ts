@@ -36,7 +36,8 @@ export class Graph {
     }
 
     addLink(source: number,  target: number): void {
-        if (!this._links.get(source).some(n => (n === target))) {
+        if (!this._links.get(source).some(n => (n === target)) &&
+            source !== target) {
             this._links.get(source).push(target);
         }
     }
