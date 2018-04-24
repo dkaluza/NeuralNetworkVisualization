@@ -50,11 +50,10 @@ class DatasetBuilder(object):
         self._path = path
 
         self._label_list = self._parse_class_mapping(path)
-        self._class_no = len(self._label_list)
-
-        self._img_to_label, self._imgs_per_sample = self._parse_labels_mapping(path, self._class_no)
+        self._img_to_label, self._imgs_per_sample = self._parse_labels_mapping(path, len(self._label_list))
 
         self.imgs = []
+        self.training_samples = []
 
     @staticmethod
     def _parse_class_mapping(path):
