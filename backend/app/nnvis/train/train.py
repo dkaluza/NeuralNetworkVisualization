@@ -96,7 +96,7 @@ class TrainThread(threading.Thread):
                     x: batch_x for x, batch_x in zip(self._X, batch_xs)
                     }
             feed_dict[self._y] = batch_y
-            feed_dict[self._is_training] = True
+            feed_dict[self._is_training] = train
 
             if train:
                 _, loss, acc = sess.run([self._opt, self._loss, self._acc],
