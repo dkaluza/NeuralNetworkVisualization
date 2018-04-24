@@ -19,7 +19,8 @@ export class IOSocketService {
             },
             query: {
                 id: id
-            }
+            },
+            forceNew: true // TODO: check if multiplexing works in new versions of flask_socketio
         });
     }
 }
