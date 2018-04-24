@@ -80,26 +80,17 @@ class Visualize(ProtectedResource):
         # preprocess image data
         image_input = visualize_utils.preprocess(original_image)
 
-
         # run algorithm
         image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
         sess.close()
-
 
         # get postprocessing
         if not on_image:
             original_image = None
         postproc_class = visualize_utils.postprocessing_register[postprocessing_id]
-        postproc = postproc_class()
-        saliency = postproc.process(image_output, original_image)
+        saliency = postproc_class.process(image_output, original_image)
 
-        # save image
-#         sufix = '_' + alg_class.__name__ + '_' + postproc_class.__name__ + '_' + \
-#                 ('with_image' if on_image == 1 else '') + '.png'
-#         image_output_path = image_path.rsplit('.', 1)[0] + sufix
-#         visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_rgb)
-
-        img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
+        img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_rgb)
         img_b64 = fileToB64(img_stream)
         return {
                 'base64': [{
