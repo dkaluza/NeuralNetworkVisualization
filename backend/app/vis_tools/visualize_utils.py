@@ -3,32 +3,28 @@ import numpy as np
 import cv2
 import os
 
-from app.vis_tools.algorithms.vanillasaliency import GradientSaliency
-from app.vis_tools.algorithms.guidedbackpropagation import GuidedBackprop
+from app.vis_tools.algorithms.saliency import Saliency
+from app.vis_tools.algorithms.guidedbackprop import GuidedBackprop
 from app.vis_tools.algorithms.occlusion import Occlusion
 from app.vis_tools.algorithms.gradcam import GradCAM
 
 
-from app.vis_tools.postprocessing.GrayscaleSaliency import GrayscaleSaliency
-from app.vis_tools.postprocessing.SaliencyOnImage import SaliencyOnImage
-from app.vis_tools.postprocessing.RGBSaliency import RGBSaliency
+from app.vis_tools.postprocessing.Grayscale import Grayscale
+from app.vis_tools.postprocessing.RGB import RGB
 from app.vis_tools.postprocessing.Heatmap import Heatmap
-from app.vis_tools.postprocessing.HeatmapOnImage import HeatmapOnImage
+
 
 algorithms_register = {
-    0: GradientSaliency,
+    0: Saliency,
     1: GuidedBackprop,
-    2: Occlusion,
-    # 3: GradCAM,
+    2: GradCAM,
+    # 3: GuidedGradCAM,
 }
 
-
 postprocessing_register = {
-    0: GrayscaleSaliency,
-    1: RGBSaliency,
-    2: SaliencyOnImage,
-    3: Heatmap,
-    4: HeatmapOnImage,
+    0: Grayscale,
+    1: RGB,
+    2: Heatmap,
 }
 
 
