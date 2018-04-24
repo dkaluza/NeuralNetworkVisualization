@@ -9,6 +9,7 @@ export class VisualizeService implements OnInit {
     postprocessingList: Postprocessing[] = [];
     currentAlgorithm = -1;
     currentPostprocessing = -1;
+    postprocessingEnabled = false;
 
     constructor(private restangular: Restangular) {
 
@@ -30,10 +31,11 @@ export class VisualizeService implements OnInit {
         return this.restangular.one('image/' + image_id.toString()).get();
     }
 
-    getImageVis(model_id: number, image_id: number) {
+    getImageVis(model_id: number, image_id: number, onImage: boolean) {
         return this.restangular.one('visualize/' + model_id.toString() + '/'
             + this.currentAlgorithm.toString() + '/' + image_id.toString() + '/'
-            + this.currentPostprocessing.toString()).get();
+            + this.currentPostprocessing.toString() + '/'
+            + (onImage ? 1 : 0).toString()).get();
     }
 
     doInference(model_id: number, image_id: number) {

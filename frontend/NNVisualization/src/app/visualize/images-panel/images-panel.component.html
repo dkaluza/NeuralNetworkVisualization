@@ -89,19 +89,32 @@
         <div fxLayout="row" fxLayoutAlign="center">
             <div fxLayout="column" fxLayoutAlign="center">
                 <div fxLayout="row" fxLayoutAlign="center" class="my_form">
-
-                    <app-nav-algorithms></app-nav-algorithms>
+                    <div fxLayout="column" fxLayoutAlign="center">
+                        <app-nav-algorithms></app-nav-algorithms>
+                    </div>
                 </div>
                 <div fxLayout="row" fxLayoutAlign="center" class="my_form">
-                    <div fxLayoutAlign="left">
-                        <mat-form-field>
-                            <mat-select placeholder="Choose postprocessing" (change)="onSelectPostprocessing($event)">
-                                <mat-option *ngFor="let postprocessing of visualizeService.postprocessingList"
-                                            [value]="postprocessing.postprocessingId">
-                                    {{ postprocessing.postprocessingName }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
+                    <div fxLayout="column" fxLayoutAlign="center">
+                        <div fxLayoutAlign="left">
+                            <mat-form-field>
+                                <mat-select placeholder="Choose postprocessing"
+                                            (change)="onSelectPostprocessing($event)">
+                                    <mat-option *ngFor="let postprocessing of visualizeService.postprocessingList"
+                                                [value]="postprocessing.postprocessingId"
+                                                [disabled]="visualizeService.postprocessingEnabled">
+                                        {{ postprocessing.postprocessingName }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+                    <div fxLayout="column" fxLayoutAlign="center">
+                        <mat-checkbox
+                            class="example-margin"
+                            [(ngModel)]="onImageChecked">
+                            display on image
+                        </mat-checkbox>
                     </div>
                 </div>
                 <div fxLayout="row"

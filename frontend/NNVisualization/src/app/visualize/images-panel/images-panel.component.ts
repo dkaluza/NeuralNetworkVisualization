@@ -13,12 +13,12 @@ import { Algorithm } from '../algorithm.model';
     styleUrls: ['./images-panel.component.css']
 })
 export class ImagesPanelComponent implements OnInit {
-
     placeholder_img = 'api/static/placeholder2.jpg';
     currentImage: Image;
     currentImageVis = '';
     currentImageName: any;
     imagesList: Image[] = [];
+    onImageChecked = false;
 
     displayedColumns = ['class_number', 'class_name', 'score'];
     dataSource = new MatTableDataSource();
@@ -91,7 +91,7 @@ export class ImagesPanelComponent implements OnInit {
 
     onVisualize() {
         const model = this.selectedService.model;
-        this.visualizeService.getImageVis(model.id, this.currentImage.imageId)
+        this.visualizeService.getImageVis(model.id, this.currentImage.imageId, this.onImageChecked)
             .subscribe(response => {
                 this.currentImageVis = response['image_path'];
             });
