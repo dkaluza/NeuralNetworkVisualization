@@ -7,6 +7,7 @@ import { Postprocessing } from '../postprocessing.model';
 import { Algorithm } from '../algorithm.model';
 
 
+
 @Component({
     selector: 'app-images-panel',
     templateUrl: './images-panel.component.html',
@@ -14,11 +15,13 @@ import { Algorithm } from '../algorithm.model';
 })
 export class ImagesPanelComponent implements OnInit {
     placeholder_img = 'api/static/placeholder2.jpg';
-    currentImage: Image;
+    currentImage: Image; // = new Image(-1, -1, '', '', -1);
     currentImageVis = '';
+
     currentImageName: any;
     imagesList: Image[] = [];
     onImageChecked = false;
+
 
     displayedColumns = ['class_number', 'class_name', 'score'];
     dataSource = new MatTableDataSource();
@@ -84,7 +87,7 @@ export class ImagesPanelComponent implements OnInit {
     onGetImage(image: Image) {
         this.visualizeService.getImage(image.imageId)
             .subscribe(response => {
-                this.currentImage.display_path = response['image_path'];
+                this._parseb64(response['img'], (result) => { this.currentImage.display_path = result; });
             });
         this.currentImageVis = '';
     }
@@ -93,7 +96,7 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.visualizeService.getImageVis(model.id, this.currentImage.imageId, this.onImageChecked)
             .subscribe(response => {
-                this.currentImageVis = response['image_path'];
+                this._parseb64(response['img'], (result) => { this.currentImageVis = result; });
             });
     }
 
@@ -142,5 +145,14 @@ export class ImagesPanelComponent implements OnInit {
                 this.visualizeService.algorithmsList.push(algorithm);
             }
         });
+
+    _parseb64(img_blob, callback) {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            callback(reader.result);
+        }, false);
+
+        reader.readAsDataURL(img_blob);
+
     }
 }

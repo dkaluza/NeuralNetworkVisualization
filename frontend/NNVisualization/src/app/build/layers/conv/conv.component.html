@@ -11,6 +11,7 @@
     <mat-form-field class="node-element">
         <input matInput placeholder="# Filters"
                         [(ngModel)]="layer.numFilters"
+                        (input)="onChange()"
                         type="number">
     </mat-form-field>
     <mat-form-field class="node-element">
@@ -46,5 +47,11 @@
                 {{ p.viewValue }}
             </mat-option>
         </mat-select>
+    </mat-form-field>
+    <mat-form-field class="node-element">
+        <input matInput placeholder="Share weights from"
+                        type="number" min="1"
+                        [(ngModel)]="layer.shareWeightsFrom"
+                        (input)="onChange()">
     </mat-form-field>
 </div>

@@ -3,14 +3,18 @@ from flask_restful import Api
 from app import nnvis
 from app.nnvis.rests.architecture import (ArchitectureTask,
                                           UploadNewArchitecture,
-                                          ListAllArchitectures)
+                                          ListAllArchitectures,
+                                          ExportArchitecture)
+from app.nnvis.rests.model import (ModelTask,
+                                   UploadNewModel,
+                                   ListAllModels,
+                                   ExportModel)
 from app.nnvis.rests.dataset import (DatasetTask,
                                      UploadNewDataset,
                                      ListAllDatasets)
-from app.nnvis.rests.model import (ModelTask,
-                                   UploadNewModel,
-                                   ListAllModels)
-from app.nnvis.rests.train import (TrainNewModel, TrainModel)
+
+from app.nnvis.rests.train import (TrainNewModel, TrainModel,
+                                   ListLosses, ListOptimizers)
 from app.nnvis.rests.user import AuthenticationTask
 from app.nnvis.rests.visualize import (Inference, Visualize, Images,
                                        ImageList, Algorithms, Postprocessing)
@@ -20,10 +24,12 @@ api = Api(nnvis)
 api.add_resource(ArchitectureTask, 'arch/<int:arch_id>')
 api.add_resource(UploadNewArchitecture, 'upload_arch')
 api.add_resource(ListAllArchitectures, 'list_archs')
+api.add_resource(ExportArchitecture, 'export_arch/<int:arch_id>')
 
 api.add_resource(ModelTask, 'model/<int:model_id>')
 api.add_resource(UploadNewModel, 'upload_model/<int:arch_id>')
 api.add_resource(ListAllModels, 'list_models/<int:arch_id>')
+api.add_resource(ExportModel, 'export_model/<int:model_id>')
 
 api.add_resource(DatasetTask, 'dataset/<int:dataset_id>')
 api.add_resource(UploadNewDataset, 'upload_dataset')
@@ -40,3 +46,6 @@ api.add_resource(TrainNewModel, 'train_new_model/<int:arch_id>')
 api.add_resource(TrainModel, 'train_model/<int:model_id>')
 
 api.add_resource(AuthenticationTask, 'authenticate')
+
+api.add_resource(ListLosses, 'list_losses')
+api.add_resource(ListOptimizers, 'list_optimizers')

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { Restangular } from 'ngx-restangular';
 import { MatTableDataSource } from '@angular/material';
+import { saveAs } from 'file-saver/FileSaver';
 
 import { Architecture } from '../selected-architecture/architecture';
 import { Model } from '../selected-architecture/model';
@@ -229,5 +230,21 @@ export class ManageComponent implements OnInit {
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
             );
+    }
+
+    exportCurrentModel(): void {
+        const model = this.selArchService.model;
+        this.restangular.one('export_model', model.id)
+            .get().subscribe(response => {
+                saveAs(response['file'], response['filename']);
+            });
+    }
+
+    exportCurrentArchitecture(): void {
+        const arch = this.selArchService.architecture;
+        this.restangular.one('export_arch', arch.id)
+            .get().subscribe(response => {
+                saveAs(response['file'], response['filename']);
+            });
     }
 }

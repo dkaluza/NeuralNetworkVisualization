@@ -7,9 +7,10 @@ export class FullyConnectedLayer extends Layer {
 
 
     constructor(id: number, label: string,
-                input = '1', numOutputs = 1,
-                activation = Activation.Relu) {
-        super(id, label, 'fc', input, String(numOutputs));
+                numOutputs = 1,
+                activation = Activation.Relu,
+                shareWeightsFrom?: number) {
+        super(id, label, 'fc', shareWeightsFrom);
 
         this._activation = activation;
         this._numOutputs = numOutputs;
@@ -18,9 +19,9 @@ export class FullyConnectedLayer extends Layer {
     static fromDict(dict: ArchNode): FullyConnectedLayer {
         return new FullyConnectedLayer(
             Number(dict.id), dict.label,
-            String(dict.params.inputShape),
             dict.params.numOutputs,
-            StrToActivation(dict.params.activation)
+            StrToActivation(dict.params.activation),
+            Number(dict.shareWeightsFrom)
         );
     }
 
@@ -61,5 +62,33 @@ export class FullyConnectedLayer extends Layer {
 
     validateInputShapes(shapes: number[][]): boolean {
         return shapes.length === 1;
+    }
+
+    canShareWeightFrom(layer: Layer): boolean {
+        if (!layer) {
+            return false;
+        }
+
+        if (layer.layerType !== 'fc') {
+            return false;
+        }
+        const fclayer = layer as FullyConnectedLayer;
+
+        if (this._numOutputs !== fclayer.numOutputs) {
+            return false;
+        }
+
+        let thisInputSize = 1, layerInputSize = 1;
+        for (let i = 1; i < this._inputShapes[0].length; i += 1) {
+            thisInputSize *= this._inputShapes[0][i];
+        }
+        for (let i = 1; i < fclayer.inputShapes[0].length; i += 1) {
+            layerInputSize *= fclayer.inputShapes[0][i];
+        }
+        if (thisInputSize !== layerInputSize) {
+            return false;
+        }
+
+        return true;
     }
 }

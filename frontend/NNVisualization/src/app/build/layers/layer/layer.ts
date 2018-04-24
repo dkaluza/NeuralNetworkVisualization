@@ -1,21 +1,20 @@
+import { ArchNode } from '../../../selected-architecture/architecture';
+
 export abstract class Layer {
     private _id: number;
     private _label: string;
     private _layerType: string;
+    private _shareWeightsFrom: number;
 
-    private _inputShape: string;
-    private _outputShape: string;
+    protected _inputShapes: number[][];
 
     constructor(id: number, label: string, layerType: string,
-                input: string, output: string) {
+                shareFrom?: number) {
         this._id = id;
         this._label = label;
         this._layerType = layerType;
-        this._inputShape = input;
-        this._outputShape = output;
-    }
-
-    ngOnInit() {
+        this._shareWeightsFrom = shareFrom;
+        this._inputShapes = undefined;
     }
 
     get id(): number {
@@ -34,39 +33,47 @@ export abstract class Layer {
         this._label = label;
     }
 
-    get inputShape(): string {
-        return this._inputShape;
+    get shareWeightsFrom(): number {
+        return this._shareWeightsFrom;
     }
 
-    set inputShape(input: string) {
-        this._inputShape = input;
+    set shareWeightsFrom(id: number) {
+        this._shareWeightsFrom = id;
     }
 
-    get outputShape(): string {
-        return this._outputShape;
+    get inputShapes(): number[][] {
+        return this._inputShapes;
     }
 
-    set outputShape(output: string) {
-        this._outputShape = output;
+    set inputShapes(shapes: number[][]) {
+        this._inputShapes = shapes;
     }
 
     abstract addAttributes(dict);
+
+    // default is that you can't share weights
+    //     needs to be overwritten to share weights
+    canShareWeightFrom(layer: Layer): boolean {
+        return false;
+    }
 
     // assumes that value is already valid number array
     strToArray(value: string): number[] {
         return value.split(',').map(Number);
     }
 
-    toDict() {
+    toDict(): ArchNode {
         const dict = {
             id: String(this._id),
             label: this._label,
             layerType: this._layerType,
+            shareWeightsFrom: 0,
             params: {
-                inputShape: this.strToArray(this._inputShape),
-                outputShape: this.strToArray(this._outputShape)
             }
         };
+        if (this._shareWeightsFrom) {
+            dict.shareWeightsFrom = this._shareWeightsFrom;
+        }
         dict.params = this.addAttributes(dict.params);
         return dict;
     }

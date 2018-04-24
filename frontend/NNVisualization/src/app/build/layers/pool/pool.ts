@@ -23,10 +23,10 @@ export class PoolLayer extends Layer {
     private _padding: Padding;
     private _pool: Pool;
 
-    constructor(id: number, label: string, input = '1',
+    constructor(id: number, label: string,
                 kernelShape = '2, 2', strides = '2, 2',
                 padding = Padding.Valid, pool = Pool.Max) {
-        super(id, label, 'pool', input, input);
+        super(id, label, 'pool');
 
         this._kernelShape = kernelShape;
         this._strides = strides;
@@ -37,7 +37,6 @@ export class PoolLayer extends Layer {
     static fromDict(dict): PoolLayer {
         return new PoolLayer(
             dict.id, dict.label,
-            String(dict.params.inputShape),
             String(dict.params.kernelShape),
             String(dict.params.strides),
             StrToPadding(dict.params.padding),

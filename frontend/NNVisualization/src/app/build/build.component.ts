@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { SelectedArchitectureService, ErrorInfo } from '../selected-architecture/selected-architecture.service';
+import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
+import { CurrentArchService, ErrorInfo } from './current-arch.service';
 import { Restangular } from 'ngx-restangular';
 
 import { VisArchComponent } from './vis-arch/vis-arch.component';
 
 import { Architecture, ArchNode, ArchLink } from '../selected-architecture/architecture';
-import { Graph } from '../selected-architecture/graph';
+import { Graph } from './graph';
 
 import { Layer } from './layers/layer/layer';
 import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
@@ -17,8 +18,6 @@ import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.servic
 })
 export class BuildComponent implements OnInit {
 
-    nodes: Map<number, Layer>;
-    links: ArchLink[];
     hasNodesBeenModified = false;
 
     selectedLayer: Layer;
@@ -26,16 +25,21 @@ export class BuildComponent implements OnInit {
 
     graphErrorInfo: ErrorInfo;
 
-    constructor(private selArchService: SelectedArchitectureService,
+    constructor(
+        private selArchService: SelectedArchitectureService,
+        private currentArch: CurrentArchService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
     }
 
     ngOnInit() {
-        this.nodes = this.selArchService.currentNodes;
-        this.links = this.selArchService.currentLinks;
+        if (this.selArchService.architecture) {
+            if (this.selArchService.architecture.id !== this.currentArch.archId) {
+                this.currentArch.setArchitecture(this.selArchService.architecture);
+            }
+        }
 
-        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
+        this.graphErrorInfo = this.currentArch.checkIfArchIsValid(true);
     }
 
     private _unselectNode(): void {
@@ -43,27 +47,21 @@ export class BuildComponent implements OnInit {
         this.selectedID = undefined;
     }
 
-    onGraphModified(data): void {
-        this.selArchService.currentNodes = data.nodes;
-        this.selArchService.currentLinks = data.links;
-
-        this.nodes = data.nodes;
-        this.links = data.links;
-
-        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
+    onGraphModified(): void {
+        this.graphErrorInfo = this.currentArch.checkIfArchIsValid(true);
     }
 
     onNodeSelected(id): void {
         if (id === undefined) {
             this._unselectNode();
         } else {
-            this.selectedLayer = this.nodes.get(id);
+            this.selectedLayer = this.currentArch.layers.get(id);
             this.selectedID = id;
         }
     }
 
     onNodeUpdate(redraw: boolean): void {
-        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
+        this.graphErrorInfo = this.currentArch.checkIfArchIsValid(true);
         if (redraw) {
             // trigger ngOnChanges in VisArchComponent
             this.hasNodesBeenModified = !this.hasNodesBeenModified;
@@ -71,29 +69,24 @@ export class BuildComponent implements OnInit {
     }
 
     clearCurrentArch(): void {
-        this.selArchService.currentNodes.clear();
-        this.selArchService.currentLinks = [];
-        this.selArchService.graph = new Graph();
+        this.currentArch.setArchitecture(undefined);
         this._updateView();
     }
 
     resetArch(): void {
-        // this line sets currentNodes and currentLinks to those in selected architecture
-        this.selArchService.architecture = this.selArchService.architecture;
+        this.currentArch.setArchitecture(this.selArchService.architecture);
         this._updateView();
     }
 
     private _updateView(): void {
-        this.nodes = this.selArchService.currentNodes;
-        this.links = this.selArchService.currentLinks;
-        this.graphErrorInfo = this.selArchService.checkIfArchIsValid(true);
+        this.graphErrorInfo = this.currentArch.checkIfArchIsValid(true);
 
         this._unselectNode();
     }
 
     saveCurrentArch() {
         if (this.selArchService.architecture) {
-            if (!this.selArchService.checkIfArchIsValid().value) {
+            if (!this.currentArch.checkIfArchIsValid().value) {
                 return;
             }
             const arch = this.selArchService.architecture;
@@ -106,10 +99,7 @@ export class BuildComponent implements OnInit {
                         return;
                     }
                     const data = {
-                        graph: {
-                            nodes: this.selArchService.currentNodesToDict(),
-                            links: this.selArchService.currentLinks
-                        }
+                        graph: this.currentArch.toDict()
                     };
                     this.restangular.all('arch').all(arch.id)
                         .post(data).subscribe(
@@ -124,7 +114,7 @@ export class BuildComponent implements OnInit {
     }
 
     saveAsNewArch() {
-        if (!this.selArchService.checkIfArchIsValid().value) {
+        if (!this.currentArch.checkIfArchIsValid().value) {
             return;
         }
         this.genericDialogs.createInputs(['Name', 'Description']).afterClosed().subscribe(
@@ -140,10 +130,7 @@ export class BuildComponent implements OnInit {
         const data = {
             name: name,
             description: desc,
-            graph: {
-                nodes: this.selArchService.currentNodesToDict(),
-                links: this.selArchService.currentLinks
-            }
+            graph: this.currentArch.toDict()
         };
 
         this.restangular.all('upload_arch')

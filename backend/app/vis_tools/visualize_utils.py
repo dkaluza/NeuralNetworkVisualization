@@ -13,6 +13,7 @@ from app.vis_tools.postprocessing.Grayscale import Grayscale
 from app.vis_tools.postprocessing.RGB import RGB
 from app.vis_tools.postprocessing.Heatmap import Heatmap
 
+from io import BytesIO
 
 algorithms_register = {
     0: Saliency,
@@ -81,10 +82,10 @@ def load_image(image_path, dst_shape, proc=None):
     return image
 
 
-def save_image(image, image_path, proc=None):
+def save_image(image, proc=None):
     if proc:
         image = proc(image)
-    cv2.imwrite(image_path, image)
+    return BytesIO(cv2.imencode('.png', image)[1].tostring())
 
 
 # mocked for now

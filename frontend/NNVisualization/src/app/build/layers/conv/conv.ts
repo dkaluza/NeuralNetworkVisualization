@@ -24,10 +24,11 @@ export class ConvLayer extends Layer {
     private _padding: Padding;
     private _activation: Activation;
 
-    constructor(id: number, label: string, input = '1',
+    constructor(id: number, label: string,
                 numFilters = 1, kernelShape = '3, 3', strides = '1, 1',
-                padding = Padding.Same, activation = Activation.Relu) {
-        super(id, label, 'conv', input, String(numFilters));
+                padding = Padding.Same, activation = Activation.Relu,
+                shareWeightsFrom?: number) {
+        super(id, label, 'conv', shareWeightsFrom);
 
         this._numFilters = numFilters;
         this._kernelShape = kernelShape;
@@ -39,12 +40,12 @@ export class ConvLayer extends Layer {
     static fromDict(dict: ArchNode): ConvLayer {
         return new ConvLayer(
             Number(dict.id), dict.label,
-            String(dict.params.inputShape),
             dict.params.numFilters,
             String(dict.params.kernelShape),
             String(dict.params.strides),
             StrToPadding(dict.params.padding),
-            StrToActivation(dict.params.activation)
+            StrToActivation(dict.params.activation),
+            Number(dict.shareWeightsFrom)
         );
     }
 
@@ -118,7 +119,7 @@ export class ConvLayer extends Layer {
             }
             output.push(Math.ceil(dim));
         }
-        output.push(shape[shape.length - 1]);
+        output.push(this._numFilters);
         return output;
     }
 
@@ -136,6 +137,54 @@ export class ConvLayer extends Layer {
             shape.length !== kernel.length + 2) {
             return false;
         }
+        return true;
+    }
+
+    private _compareArrays(arr1: number[], arr2: number[],
+        start: number, end: number): boolean {
+            if (arr1.length !== arr2.length) {
+                return false;
+            }
+            for (let i = start; i < end; i += 1) {
+                if (arr1[i] !== arr2[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+    canShareWeightFrom(layer: Layer): boolean {
+        if (!layer) {
+            return false;
+        }
+
+        if (layer.layerType !== 'conv') {
+            return false;
+        }
+        const convLayer = layer as ConvLayer;
+
+        if (this._numFilters !== convLayer.numFilters) {
+            return false;
+        }
+
+        if (!this._compareArrays(
+                this.strToArray(this._kernelShape),
+                this.strToArray(convLayer.kernelShape),
+                1, this._kernelShape.length)) {
+            return false;
+        }
+
+        if (this._inputShapes[0].length !== convLayer.inputShapes[0].length) {
+            return false;
+        }
+
+        // this just takes last elements of each array :P
+        const thisInputChannels = this._inputShapes[0][this._inputShapes[0].length - 1];
+        const convInputChannels = convLayer.inputShapes[0][convLayer.inputShapes[0].length - 1];
+        if (thisInputChannels !== convInputChannels) {
+            return false;
+        }
+
         return true;
     }
 }

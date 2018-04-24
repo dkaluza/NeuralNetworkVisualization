@@ -33,7 +33,7 @@ export class InputComponent extends LayerComponent {
 
     onShapeChange(value: string) {
         if (this._pattern.test(value)) {
-            this.layer.outputShape = value;
+            this.layer.shape = value;
             this.onChange();
         }
     }

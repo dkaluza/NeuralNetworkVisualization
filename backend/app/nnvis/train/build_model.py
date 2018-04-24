@@ -1,5 +1,41 @@
 import tensorflow as tf
+import os
+
 from app.nnvis.train.layers import build_op
+
+
+class FindUnion:
+    def __init__(self, size):
+        self._size = size
+        self._tab = list(range(0, size + 1))
+        self._sizes = [1] * (size + 1)
+
+    def find(self, elem):
+        # representant of elem
+        rep = elem
+        while rep != self._tab[rep]:
+            rep = self._tab[rep]
+
+        temp = elem
+        while self._tab[temp] != rep:
+            nextElem = self._tab[temp]
+            self._tab[temp] = rep
+            temp = nextElem
+
+        return rep
+
+    def union(self, elem1, elem2):
+        felem1 = self.find(elem1)
+        felem2 = self.find(elem2)
+
+        if felem1 == felem2:
+            return
+        if self._sizes[felem1] <= self._sizes[felem2]:
+            self._sizes[felem2] += self._sizes[felem1]
+            self._tab[felem1] = felem2
+        else:
+            self._sizes[felem1] += self._sizes[felem2]
+            self._tab[felem2] = felem1
 
 
 class TFModel:
@@ -38,6 +74,14 @@ class TFModel:
 
         outputs = {id: [] for id in ids}
         inputs = {id: [] for id in ids}
+        findunion = FindUnion(len(ids))
+        for id in ids:
+            sharedId = nodes[id]['shareWeightsFrom']
+            if sharedId != 0:
+                findunion.union(id, sharedId)
+        for id in ids:
+            nodes[id]['weightId'] = findunion.find(id)
+
         num_inputs = {id: 0 for id in ids}
         for link in links:
             outputs[int(link['source'])].append(int(link['target']))
@@ -88,3 +132,9 @@ class TFModel:
 
     def get_is_training(self):
         return self._is_training
+
+    def save_graph(self, path):
+        saver_path = os.path.join(path, 'graph.meta')
+        with self._graph.as_default():
+            saver = tf.train.Saver()
+            saver.export_meta_graph(saver_path)

@@ -2,6 +2,7 @@ import os
 import shutil
 
 from flask import current_app as app
+import base64
 
 from app.nnvis.models import Dataset
 from app.nnvis.models import Image
@@ -10,11 +11,21 @@ from app.nnvis.rests.protected_resource import ProtectedResource
 from app.vis_tools import visualize_utils
 
 
+from app.utils import fileToB64
+
+
+def safe_add_is_training(feed_dict, graph, train):
+    try:
+        is_training = graph.get_tensor_by_name('is_training:0')
+        feed_dict[is_training] = train
+    except KeyError:
+        pass
+
 # inference/<int:model_id>/<int:image_id>
 class Inference(ProtectedResource):
     def get(self, model_id, image_id):
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
+        image_path = image.full_path()
 
         model = Model.query.get(model_id)
         graph, sess, x, *_ = visualize_utils.load_model(model)
@@ -23,7 +34,12 @@ class Inference(ProtectedResource):
 
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
 
-        predictions = output_op.eval(feed_dict={x: [image_input]}, session=sess)
+        feed_dict = {
+                x: [image_input]
+                }
+        safe_add_is_training(feed_dict, graph, False)
+
+        predictions = output_op.eval(feed_dict=feed_dict, session=sess)
         predictions = predictions[0]
 
         sess.close()
@@ -48,7 +64,7 @@ class Visualize(ProtectedResource):
 
         # get image
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
+        image_path = image.full_path()
 
         # get model
         model = Model.query.get(model_id)
@@ -64,39 +80,51 @@ class Visualize(ProtectedResource):
         # preprocess image data
         image_input = visualize_utils.preprocess(original_image)
 
+
         # run algorithm
         image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
         sess.close()
+
 
         # get postprocessing
         if not on_image:
             original_image = None
         postproc_class = visualize_utils.postprocessing_register[postprocessing_id]
         postproc = postproc_class()
-        image_output = postproc.process(image_output, original_image)
+        saliency = postproc.process(image_output, original_image)
 
         # save image
-        sufix = '_' + alg_class.__name__ + '_' + postproc_class.__name__ + '_' + \
-                ('with_image' if on_image == 1 else '') + '.png'
-        image_output_path = image_path.rsplit('.', 1)[0] + sufix
-        visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_rgb)
+#         sufix = '_' + alg_class.__name__ + '_' + postproc_class.__name__ + '_' + \
+#                 ('with_image' if on_image == 1 else '') + '.png'
+#         image_output_path = image_path.rsplit('.', 1)[0] + sufix
+#         visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_rgb)
 
-        # respond with image path
-        image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + sufix
-        return {'image_path': image_path}
+        img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
+        img_b64 = fileToB64(img_stream)
+        return {
+                'base64': [{
+                    'name': 'img',
+                    'contentType': 'image/png'
+                    }],
+                'img': img_b64
+                }
+
 
 
 # /image/<string:image_id>
 class Images(ProtectedResource):
     def get(self, image_id):
         image = Image.query.get(image_id)
-        image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
-        dataset = Dataset.query.get(image.dataset_id)
-        image_db_path = os.path.join(dataset.path, image.relative_path)
-        if not os.path.isfile(image_path):
-            shutil.copyfile(image_db_path, image_path)
-        image_url = 'api/static/' + image.relative_path
-        return {'image_path': image_url}
+        img_path = image.full_path()
+        with open(img_path, 'rb') as img_f:
+            img_b64 = fileToB64(img_f)
+        return {
+                'base64': [{
+                    'name': 'img',
+                    'contentType': 'image/png'
+                    }],
+                'img': img_b64
+                }
 
 
 # /images/<int:model_id>
@@ -119,3 +147,4 @@ class Postprocessing(ProtectedResource):
         return {'postprocessing': [{'id': p_id, 'name': postprocessing.name()}
                                    for p_id, postprocessing
                                    in visualize_utils.postprocessing_register.items()]}
+

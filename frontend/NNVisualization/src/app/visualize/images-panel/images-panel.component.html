@@ -1,7 +1,5 @@
 <div fxLayout="row" fxLayoutAlign="center">
-
     <div fxLayout="column" class="inference">
-
         <div fxLayout="column"
              fxLayoutAlign="center">
             <button mat-button (click)="onInference()">inference</button>
@@ -60,6 +58,7 @@
                        [virtualScroll]="true"
                        bindLabel="imageName"
                        bindValue="imageId"
+
                        placeholder="Select image"
                        (add)="onSelectorSelect($event)"
                        [(ngModel)]="currentImageName">
