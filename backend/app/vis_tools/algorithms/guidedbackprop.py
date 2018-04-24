@@ -1,4 +1,4 @@
-from app.vis_tools.algorithms.vanillasaliency import SaliencyMask
+from app.vis_tools.algorithms.saliency import SaliencyMask
 import tensorflow as tf
 import numpy as np
 
@@ -62,8 +62,9 @@ class GuidedBackprop(SaliencyMask):
     return self.guided_sess.run(
         self.guided_grads_node, feed_dict = guided_feed_dict)[0]
 
-  def __str__(self):
-    return '_guided_backpropagation'
+  @staticmethod
+  def name():
+    return "guided backprop"
 
 class SmoothedGuidedBackprop:
   """A SaliencyMask class that computes saliency masks with GuidedBackProp.
@@ -161,3 +162,5 @@ class SmoothedGuidedBackprop:
 
     return total_gradients / nsamples
 
+  def __str__(self):
+    return "guided backprop"

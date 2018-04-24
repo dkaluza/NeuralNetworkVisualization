@@ -1,6 +1,6 @@
 # https://github.com/PAIR-code/saliency
 
-from app.vis_tools.algorithms.vanillasaliency import SaliencyMask
+from app.vis_tools.algorithms.saliency import SaliencyMask
 import tensorflow as tf
 import numpy as np
 
@@ -41,3 +41,6 @@ class Occlusion(SaliencyMask):
         print(occlusion_scores.shape)
 
         return occlusion_scores
+
+    def __str__(self):
+        return "occlusion"

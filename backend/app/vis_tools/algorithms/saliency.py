@@ -66,7 +66,8 @@ class SaliencyMask(object):
 
     return total_gradients / nsamples
 
-class GradientSaliency(SaliencyMask):
+
+class Saliency(SaliencyMask):
   r"""A SaliencyMask class that computes saliency masks with a gradient."""
 
   def __init__(self, graph, session, y, x):
@@ -83,5 +84,7 @@ class GradientSaliency(SaliencyMask):
     feed_dict[self.x] = [x_value]
     return self.session.run(self.gradients_node, feed_dict=feed_dict)[0]
 
-  def __str__(self):
-    return '_vanilla_saliency'
+  @staticmethod
+  def name():
+    return 'saliency'
+
