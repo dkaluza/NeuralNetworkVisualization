@@ -8,6 +8,7 @@ class RGB(Postprocessing):
     def __init__(self):
         super().__init__()
 
+    @staticmethod
     def process(self, saliency, original_image=None):
         if original_image is not None:
             image = np.sum(np.abs(saliency), axis=2)
