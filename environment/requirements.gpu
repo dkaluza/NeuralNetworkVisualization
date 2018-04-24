@@ -9,4 +9,5 @@ pandas
 opencv-python
 imageio
 numpy
+scipy
 
