@@ -145,6 +145,7 @@ export class ImagesPanelComponent implements OnInit {
                 this.visualizeService.algorithmsList.push(algorithm);
             }
         });
+    }
 
     _parseb64(img_blob, callback) {
         const reader = new FileReader();
