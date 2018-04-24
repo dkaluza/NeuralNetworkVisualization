@@ -139,23 +139,26 @@ class TrainThread(threading.Thread):
                             self._training_loss += average_loss
                             end_epoch = time.time()
 
-                            self.__update_history(training_history, e + 1)
+                            self.__update_history(training_history, e + 1, average_loss,
+                                                  average_acc)
 
                         self._training_loss /= float(self._nepochs)
 
                         self._validation_loss, average_acc = self.__runepoch(
                             sess, valid_ids, train=False)
-                              .format(loss=self._validation_loss))
-                        training_history.validation_loss=self._validation_loss
+                        training_history.validation_loss = self._validation_loss
+                        training_history.validation_acc = average_acc
                         training_history.update()
 
                         self.__save_model(sess, saver)
-                end_time=time.time()
+                end_time = time.time()
             except:
                 Model.query.get(self._model_id).delete()
                 raise
 
-    def __update_history(self, training_history, current_epoch):
-        training_history.training_loss=self._training_loss
-        training_history.current_epoch=current_epoch
+    def __update_history(self, training_history, current_epoch, training_loss,
+                         training_acc):
+        training_history.training_loss = training_loss
+        training_history.training_acc = training_acc
+        training_history.current_epoch = current_epoch
         training_history.update()

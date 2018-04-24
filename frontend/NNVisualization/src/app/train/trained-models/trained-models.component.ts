@@ -20,7 +20,9 @@ interface SelectedHistory {
     currentEpoch: number;
     numberOfEpochs: number;
     trainingLoss: number;
+    trainingAcc: number;
     validationLoss: number;
+    validationAcc: number;
 }
 
 @Component({
@@ -132,7 +134,9 @@ export class TrainedModelsComponent implements OnInit, OnDestroy {
             currentEpoch: data.current_epoch,
             numberOfEpochs: data.number_of_epochs,
             trainingLoss: data.train_loss,
-            validationLoss: data.valid_loss
+            trainingAcc: data.train_acc,
+            validationLoss: data.valid_loss,
+            validationAcc: data.valid_acc
         };
 
     }

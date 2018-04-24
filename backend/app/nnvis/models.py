@@ -123,7 +123,9 @@ class TrainingHistory(db.Model, CRUD):
     current_epoch = db.Column(db.Integer)
     number_of_epochs = db.Column(db.Integer)
     training_loss = db.Column(db.Float)
+    training_acc = db.Column(db.Float)
     validation_loss = db.Column(db.Float)
+    validation_acc = db.Column(db.Float)
 
     def __init__(self, model_id, batch_size, current_epoch,
                  number_of_epochs, training_loss, validation_loss):

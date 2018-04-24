@@ -27,7 +27,9 @@ def training_history_to_dict(history):
         'model_name': history.model.name,
         'arch_name': history.model.architecture.name,
         'valid_loss': history.validation_loss,
+        'valid_acc': history.validation_acc,
         'train_loss': history.training_loss,
+        'train_acc': history.training_acc,
         'batch_size': history.batch_size,
         'current_epoch': history.current_epoch,
         'number_of_epochs': history.number_of_epochs
