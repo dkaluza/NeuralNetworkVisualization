@@ -12,6 +12,8 @@ import { LayerStatsModule } from './layers/layer-stats.module';
 import { BuildComponent } from './build.component';
 import { VisArchComponent } from './vis-arch/vis-arch.component';
 
+import { CurrentArchService } from './current-arch.service';
+
 export { BuildComponent };
 
 @NgModule({
@@ -31,5 +33,6 @@ export { BuildComponent };
         FlexLayoutModule
     ],
     exports: [BuildComponent],
+    providers: [CurrentArchService]
 })
 export class BuildModule { }
