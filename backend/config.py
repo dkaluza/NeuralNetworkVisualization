@@ -13,3 +13,4 @@ DATASET_FOLDER = os.path.join(os.path.dirname(__file__), 'app', 'datasets')
 STATIC_FOLDER = os.path.join(os.path.dirname(__file__), 'app', 'static')
 
 LABELS_FILENAME = 'labels.csv'
+CLASSMAP_FILENAME = 'classes.csv'
