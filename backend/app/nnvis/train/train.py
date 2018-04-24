@@ -73,9 +73,9 @@ class TrainThread(threading.Thread):
         model_dir = os.path.join(
                 self._arch.get_folder_path(),
                 '{0}'.format(self._model_id))
-        path = os.path.join(model_dir, 'model.ckpt')
+        path = os.path.join(model_dir, 'model')
         saver.save(session, path)
-        os.remove(os.path.join(model_dir, 'model.ckpt.meta'))
+        os.remove(os.path.join(model_dir, 'model.meta'))
 
         model.training_params = json.dumps(self._params)
         model.validation_loss = self._validation_loss
@@ -96,7 +96,7 @@ class TrainThread(threading.Thread):
                     x: batch_x for x, batch_x in zip(self._X, batch_xs)
                     }
             feed_dict[self._y] = batch_y
-            feed_dict[self._is_training] = train
+            feed_dict[self._is_training] = True
 
             if train:
                 _, loss, acc = sess.run([self._opt, self._loss, self._acc],

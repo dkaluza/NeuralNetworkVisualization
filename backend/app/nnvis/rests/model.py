@@ -94,13 +94,13 @@ class ImportModel(ProtectedResource):
             abort(400, 'Wrong number of .meta files')
 
         data_files = list(filter(
-            lambda name: '.ckpt.data' in name,
+            lambda name: '.data' in name,
             files))
         if len(data_files) != 1:
             abort(400, 'Wrong number of .ckpt.data files')
 
         index_files = list(filter(
-            lambda name: '.ckpt.index' in name,
+            lambda name: '.index' in name,
             files))
         if len(index_files) != 1:
             abort(400, 'Wrong number of .ckpt.index files')
@@ -155,9 +155,6 @@ class ImportModel(ProtectedResource):
             with open(data_path, 'wb') as fd:
                 fd.write(zipdata.read(data))
             index_path = new_model.get_index_file_path()
-            index_path = os.path.join(
-                    new_model.weights_path,
-                    'model.ckpt.index')
             with open(index_path, 'wb') as fd:
                 fd.write(zipdata.read(index))
         except Exception as e:
@@ -186,8 +183,8 @@ class ExportModel(ProtectedResource, ModelUtils):
             return {}, 400
 
         name = model.name.replace(' ', '_') + '.{}'
-        data_name = name.format('ckpt.data-00000-of-00001')
-        index_name = name.format('ckpt.index')
+        data_name = name.format('data-00000-of-00001')
+        index_name = name.format('index')
         meta_name = name.format('meta')
 
         # create zip file
