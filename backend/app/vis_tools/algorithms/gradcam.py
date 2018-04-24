@@ -22,8 +22,8 @@ class GradCAM(SaliencyMask):
 
     def __init__(self, graph, session, y, x):
         super(GradCAM, self).__init__(graph, session, y, x)
-        conv_layer = 'InceptionV3/InceptionV3/Mixed_7c/concat:0' # mocked
-        self.conv_layer = graph.get_tensor_by_name(conv_layer)
+        # conv_layer = 'InceptionV3/InceptionV3/Mixed_7c/concat:0' # mocked
+        self.conv_layer = graph.get_tensor_by_name('last_conv')
         self.gradients_node = tf.gradients(y, self.conv_layer)[0]
 
     def GetMask(self, x_value, feed_dict={}, should_resize=True, three_dims=True):
