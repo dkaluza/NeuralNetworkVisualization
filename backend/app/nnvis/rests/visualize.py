@@ -37,38 +37,51 @@ class Inference(ProtectedResource):
         return {'class_scores': scores}
 
 
-# visualize/<int:model_id>/<int:alg_id>/<int:image_id>
+# visualize/<int:model_id>/<int:alg_id>/<int:image_id>/<int:on_image>
 class Visualize(ProtectedResource):
-    def get(self, model_id, alg_id, image_id, postprocessing_id):
+    def get(self, model_id, alg_id, image_id, postprocessing_id, on_image):
         if alg_id not in visualize_utils.algorithms_register:
             return {'errormsg': "Bad algorithm id"}, 400
 
         if postprocessing_id not in visualize_utils.postprocessing_register:
             return {'errormsg': "Bad postprocessing id"}, 400
 
+        # get image
         image = Image.query.get(image_id)
         image_path = os.path.join(app.config['STATIC_FOLDER'], image.relative_path)
 
+        # get model
         model = Model.query.get(model_id)
         graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
 
+        # get algorithm
         alg_class = visualize_utils.algorithms_register[alg_id]
         vis_algorithm = alg_class(graph, sess, y, x)
 
-        image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
+        # load image data
+        original_image = visualize_utils.load_image(image_path, x.shape.as_list()[1:])
 
+        # preprocess image data
+        image_input = visualize_utils.preprocess(original_image)
+
+        # run algorithm
+        image_output = vis_algorithm.GetMask(image_input, feed_dict={neuron_selector: int(image.label)})
         sess.close()
 
+        # get postprocessing
+        if not on_image:
+            original_image = None
         postproc_class = visualize_utils.postprocessing_register[postprocessing_id]
-
         postproc = postproc_class()
-        image_output = postproc.process(image_input, image_output)
+        image_output = postproc.process(image_output, original_image)
 
-        sufix = '_' + alg_class.__name__ + '_' + postproc_class.__name__ + '.png'
+        # save image
+        sufix = '_' + alg_class.__name__ + '_' + postproc_class.__name__ + '_' + \
+                ('with_image' if on_image == 1 else '') + '.png'
         image_output_path = image_path.rsplit('.', 1)[0] + sufix
-
         visualize_utils.save_image(image_output, image_output_path, proc=visualize_utils.normalize_rgb)
+
+        # respond with image path
         image_path = 'api/static/' + image.relative_path.rsplit('.', 1)[0] + sufix
         return {'image_path': image_path}
 
@@ -96,13 +109,13 @@ class ImageList(ProtectedResource):
 
 class Algorithms(ProtectedResource):
     def get(self):
-        return {'algorithms': [{'id': a_id, 'name': a_name.__name__}
-                               for a_id, a_name
+        return {'algorithms': [{'id': a_id, 'name': algo.name()}
+                               for a_id, algo
                                in visualize_utils.algorithms_register.items()]}
 
 
 class Postprocessing(ProtectedResource):
     def get(self):
-        return {'postprocessing': [{'id': p_id, 'name': p_name.__name__}
-                                   for p_id, p_name
+        return {'postprocessing': [{'id': p_id, 'name': postprocessing.name()}
+                                   for p_id, postprocessing
                                    in visualize_utils.postprocessing_register.items()]}
