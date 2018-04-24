@@ -43,7 +43,6 @@ class TrainThread(threading.Thread):
         self.app_ctx = app.app_context()
 
     def __build_model(self):
-        print('building graph...')
         self._tfmodel = TFModel(self._nodes, self._links)
         self._X = self._tfmodel.get_inputs()
         self._pred = self._tfmodel.get_output()
@@ -72,7 +71,6 @@ class TrainThread(threading.Thread):
         if model is None:
             return
 
-        print('saving model')
         weights_dir = app.config['WEIGHTS_DIR']
         model_dir = '{arch_id}/{model_id}/' \
             .format(arch_id=self._arch_id, model_id=self._model_id)
@@ -122,8 +120,6 @@ class TrainThread(threading.Thread):
                     split_into_train_and_valid(train_ids, 0.7)
                 self.__build_model()
 
-                print('starting training')
-
                 training_history = TrainingHistory(self._model_id, self._batch_size, 0,
                                                    self._nepochs, self._training_loss,
                                                    self._validation_loss)
@@ -137,44 +133,29 @@ class TrainThread(threading.Thread):
 
                         for e in range(self._nepochs):
                             start_epoch = time.time()
-                            print('---- Epoch {e} ----'.format(e=e))
                             train_ids = shuffle(train_ids)
                             average_loss, average_acc = self.__runepoch(
                                 sess, train_ids, train=True)
                             self._training_loss += average_loss
                             end_epoch = time.time()
 
-                            print('[Epoch {e}] Avg. loss = {loss}'
-                                  .format(e=e, loss=average_loss))
-                            print('[Epoch {e}] Avg. acc = {acc}'
-                                  .format(e=e, acc=average_acc))
-                            print('[Epoch {e}] Time = {t}'
-                                  .format(e=e, t=end_epoch - start_epoch))
-
                             self.__update_history(training_history, e + 1)
 
-                        print('finished training')
                         self._training_loss /= float(self._nepochs)
 
-                        print('staring validation')
                         self._validation_loss, average_acc = self.__runepoch(
                             sess, valid_ids, train=False)
-                        print('Validation loss = {loss}'
                               .format(loss=self._validation_loss))
-                        print('Validation acc = {acc}'.format(acc=average_acc))
-                        training_history.validation_loss = self._validation_loss
+                        training_history.validation_loss=self._validation_loss
                         training_history.update()
 
-                        print('finished validation')
                         self.__save_model(sess, saver)
-                end_time = time.time()
-                print('Model training time = {0}'
-                      .format(end_time - start_time))
+                end_time=time.time()
             except:
                 Model.query.get(self._model_id).delete()
                 raise
 
     def __update_history(self, training_history, current_epoch):
-        training_history.training_loss = self._training_loss
-        training_history.current_epoch = current_epoch
+        training_history.training_loss=self._training_loss
+        training_history.current_epoch=current_epoch
         training_history.update()
