@@ -2,5 +2,6 @@ class Postprocessing:
     def __init__(self):
         pass
 
-    def process(self, saliency, original_image=None):
+    @staticmethod
+    def process(saliency, original_image=None):
         raise NotImplementedError

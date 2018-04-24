@@ -9,7 +9,7 @@ class Heatmap(Postprocessing):
         super().__init__()
 
     @staticmethod
-    def process(self, saliency, original_image=None):
+    def process(saliency, original_image=None):
         if original_image is not None:
             saliency = cv2.addWeighted(saliency, 0.5, original_image, 0.5, 0)
 

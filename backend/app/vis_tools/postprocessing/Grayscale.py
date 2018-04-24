@@ -9,7 +9,7 @@ class Grayscale(Postprocessing):
         super().__init__()
 
     @staticmethod
-    def process(self, saliency, original_image=None):
+    def process(saliency, original_image=None):
         image = np.sum(np.abs(saliency), axis=2)
         im_max = np.percentile(image, 99) # could be variable
         im_min = np.min(image)
