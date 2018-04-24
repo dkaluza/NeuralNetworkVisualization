@@ -185,8 +185,8 @@ class Dataset(db.Model, CRUD):
     imgs_per_sample = db.Column(db.Integer, nullable=False)
     models = db.relationship('Model', backref='dataset', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    training_samples = db.relationship('TrainingSample', cascade='all, delete-orphan',
-                             backref='trainingsample', lazy=True)
+    # training_samples = db.relationship('TrainingSample', cascade='all, delete-orphan',
+                             # backref='trainingsample', lazy=True)
 
     __table_args__ = (
         db.UniqueConstraint('name', 'user_id', name='_name_userid_uc'),
@@ -208,35 +208,35 @@ class Dataset(db.Model, CRUD):
         return {str(i): c for i, c in enumerate(self.labels.split(','))}
 
 
-class TrainingSample(db.Model, CRUD):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), nullable=False)
-    label = db.Column(db.Text(256), nullable=False)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
-                           nullable=False)
-    images = db.relationship('Image', cascade='all, delete-orphan',
-                             backref='dataset', lazy=True)
+# class TrainingSample(db.Model, CRUD):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(64), nullable=False)
+#     label = db.Column(db.Text(256), nullable=False)
+#     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
+#                            nullable=False)
+#     images = db.relationship('Image', cascade='all, delete-orphan',
+#                              backref='dataset', lazy=True)
 
-    def __init__(self, name, label, dataset_id):
-        self.name = name
-        self.label = label
-        self.dataset_id = dataset_id
+#     def __init__(self, name, label, dataset_id):
+#         self.name = name
+#         self.label = label
+#         self.dataset_id = dataset_id
 
-    def __repr__(self):
-        return '<Sample {} id {} of dataset {}'.format(self.name,
-                                                       self.id,
-                                                       self.dataset_id)
+#     def __repr__(self):
+#         return '<Sample {} id {} of dataset {}'.format(self.name,
+#                                                        self.id,
+#                                                        self.dataset_id)
 
 
 class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
-    # label = db.Column(db.Text(256), nullable=False)
-    # dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
-    #                        nullable=False)
-    trainsample_id = db.Column(db.Integer, db.ForeignKey('trainingsample.id'),
-                               backref='trainingsample', lazy=True)
+    label = db.Column(db.Text(256), nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
+                           nullable=False)
+    # trainsample_id = db.Column(db.Integer, db.ForeignKey('trainingsample.id'),
+                               # backref='trainingsample', lazy=True)
 
     __table_args__ = (
         db.UniqueConstraint('name', 'dataset_id', name='_name_dataset_id_uc'),
