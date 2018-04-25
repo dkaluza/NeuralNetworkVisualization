@@ -33,7 +33,6 @@ export class ImagesPanelComponent implements OnInit {
 
     ngOnInit() {
         this.onGetDataset();
-        this.onGetPostprocessing();
         this.onGetAlgorithms();
     }
 
@@ -121,12 +120,23 @@ export class ImagesPanelComponent implements OnInit {
 
     onSelectPostprocessing(event) {
         this.visualizeService.currentPostprocessing = event.value;
+        this.visualizeService.disabledButton = false;
+        // this.visualizeService.selectedPostprocessing = this.visualizeService.postprocessingList[event.value];
     }
 
-    onGetPostprocessing() {
-        this.imagesList = [];
-        this.visualizeService.getPostprcessing().subscribe(response => {
+    onSelectorAlgorithm(event) {
+        this.visualizeService.currentAlgorithm = event.value;
+        this.visualizeService.disabledButton = true;
+        this.visualizeService.postprocessingList = [];
+        this.visualizeService.currentPostprocessing = -1;
+        this.visualizeService.selectedPostprocessing = undefined;
+        this.onGetPostprocessing(this.visualizeService.currentAlgorithm);
+    }
+
+    onGetPostprocessing(alg_id: number) {
+        this.visualizeService.getPostprcessing(alg_id).subscribe(response => {
             const len = response['postprocessing'].length;
+            this.visualizeService.postprocessingList = [];
             for (let i = 0; i < len; i++) {
                 const p = response['postprocessing'][i];
                 const postprocessing = new Postprocessing(p.id, p.name);

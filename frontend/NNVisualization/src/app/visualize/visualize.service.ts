@@ -9,7 +9,8 @@ export class VisualizeService implements OnInit {
     postprocessingList: Postprocessing[] = [];
     currentAlgorithm = -1;
     currentPostprocessing = -1;
-    postprocessingEnabled = false;
+    selectedPostprocessing = undefined;
+    disabledButton = true;
 
     constructor(private restangular: Restangular) {
 
@@ -19,8 +20,8 @@ export class VisualizeService implements OnInit {
         return this.restangular.one('images/' + model_id.toString()).get();
     }
 
-    getPostprcessing() {
-        return this.restangular.one('list_postprocessing').get();
+    getPostprcessing(alg_id: number) {
+        return this.restangular.one('list_postprocessing/' + alg_id.toString()).get();
     }
 
     getAlgorithms() {
