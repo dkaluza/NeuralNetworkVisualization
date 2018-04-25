@@ -72,7 +72,7 @@ class TrainThread(threading.Thread):
         print('saving model')
         model_dir = os.path.join(
                 self._arch.get_folder_path(),
-                '{0}'.format(self._model_id))
+                str(self._model_id))
         path = os.path.join(model_dir, 'model')
         saver.save(session, path)
         os.remove(os.path.join(model_dir, 'model.meta'))

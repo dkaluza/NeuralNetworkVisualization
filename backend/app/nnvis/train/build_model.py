@@ -7,16 +7,16 @@ from app.nnvis.train.layers import build_op
 class TFModel:
     def __init__(self, nodes=None, links=None, meta_file=None):
         if meta_file is None:
-            self._nodes = {int(node['id']): node for node in nodes}
-            self._links = links
-            self._graph, self._ops = self._build_model(self._nodes, links)
-            self.__rename_logits_and_output()
+            _nodes = {int(node['id']): node for node in nodes}
+            self._graph, self._ops = self._build_model(_nodes, links)
+            self.__rename_logits_and_output(_nodes, links)
         else:
             self._graph = self.__load_from_meta_graph(meta_file)
         self._inputs = self.__find_input_ops()
         self._is_training = self.__find_is_training()
 
-    def __load_from_meta_graph(self, meta_def):
+    @staticmethod
+    def __load_from_meta_graph(meta_def):
         graph = tf.Graph()
         with graph.as_default():
             tf.train.import_meta_graph(meta_def)
@@ -46,11 +46,11 @@ class TFModel:
 
         return op
 
-    def __rename_logits_and_output(self):
-        ids = list(map(str, self._nodes.keys()))
+    def __rename_logits_and_output(self, nodes, links):
+        ids = list(map(str, nodes.keys()))
         num_outputs = {id: 0 for id in ids}
 
-        for l in self._links:
+        for l in links:
             num_outputs[l['source']] += 1
 
         output_ids = list(filter(lambda id: num_outputs[id] == 0, ids))
@@ -67,7 +67,8 @@ class TFModel:
     def get_graph(self):
         return self._graph
 
-    def _build_model(self, nodes, links):
+    @staticmethod
+    def _build_model(nodes, links):
         ids = list(nodes.keys())
 
         outputs = {id: [] for id in ids}

@@ -97,9 +97,14 @@ class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
 
         try:
             new_arch.add()
-            self._save_meta_file(new_arch)
         except Exception as e:
             abort(403, message=e)
+
+        try:
+            self._save_meta_file(new_arch)
+        except Exception as e:
+            new_arch.delete()
+            abort(403, message=str(e))
 
         return new_arch.to_dict(), 201
 
