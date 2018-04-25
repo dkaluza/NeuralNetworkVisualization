@@ -5,8 +5,10 @@ Flask-Script==2.0.6
 Flask-RESTful==0.3.6
 Flask-Cors==3.0.3
 flask-jwt-extended==3.7.1
+Flask-SocketIO==2.9.6
+eventlet==0.22.1
+kombu==4.1.0
 pandas
 opencv-python
 imageio
 numpy
-
