@@ -1,6 +1,8 @@
 # https://github.com/PAIR-code/saliency
 
 from app.vis_tools.algorithms.saliency import SaliencyMask
+from app.vis_tools.postprocessing.Heatmap import Heatmap
+
 import tensorflow as tf
 import numpy as np
 import scipy.misc
@@ -19,11 +21,14 @@ class GradCAM(SaliencyMask):
     The Grad-CAM paper suggests using the last convolutional layer, which would
     be 'Mixed_5c' in inception_v2 and 'Mixed_7c' in inception_v3.
     """
+    postprocessings = {
+        0: Heatmap,
+    }
 
     def __init__(self, graph, session, y, x):
         super(GradCAM, self).__init__(graph, session, y, x)
-        # conv_layer = 'InceptionV3/InceptionV3/Mixed_7c/concat:0' # mocked
-        self.conv_layer = graph.get_tensor_by_name('last_conv')
+        last_conv = 'InceptionV3/InceptionV3/Mixed_7c/concat:0' # mocked
+        self.conv_layer = graph.get_tensor_by_name(last_conv)
         self.gradients_node = tf.gradients(y, self.conv_layer)[0]
 
     def GetMask(self, x_value, feed_dict={}, should_resize=True, three_dims=True):

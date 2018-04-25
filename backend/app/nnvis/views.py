@@ -40,7 +40,7 @@ api.add_resource(Visualize, 'visualize/<int:model_id>/<int:alg_id>/<int:image_id
 api.add_resource(ImageList, 'images/<int:model_id>')
 api.add_resource(Images, 'image/<int:image_id>')
 api.add_resource(Algorithms, 'list_algorithms')
-api.add_resource(Postprocessing, 'list_postprocessing')
+api.add_resource(Postprocessing, 'list_postprocessing/<int:alg_id>')
 
 api.add_resource(TrainNewModel, 'train_new_model/<int:arch_id>')
 api.add_resource(TrainModel, 'train_model/<int:model_id>')

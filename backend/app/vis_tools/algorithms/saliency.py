@@ -3,88 +3,96 @@
 import numpy as np
 import tensorflow as tf
 
+from app.vis_tools.postprocessing.Grayscale import Grayscale
+from app.vis_tools.postprocessing.RGB import RGB
+
+
 class SaliencyMask(object):
-  """Base class for saliency masks. Alone, this class doesn't do anything."""
-  def __init__(self, graph, session, y, x):
-    """Constructs a SaliencyMask by computing dy/dx.
+    """Base class for saliency masks. Alone, this class doesn't do anything."""
 
-    Args:
-      graph: The TensorFlow graph to evaluate masks on.
-      session: The current TensorFlow session.
-      y: The output tensor to compute the SaliencyMask against. This tensor
-          should be of size 1.
-      x: The input tensor to compute the SaliencyMask against. The outer
-          dimension should be the batch size.
-    """
+    def __init__(self, graph, session, y, x):
+        """Constructs a SaliencyMask by computing dy/dx.
 
-    # y must be of size one, otherwise the gradient we get from tf.gradients
-    # will be summed over all ys.
-    size = 1
-    for shape in y.shape:
-      size *= shape
-    assert size == 1
+        Args:
+          graph: The TensorFlow graph to evaluate masks on.
+          session: The current TensorFlow session.
+          y: The output tensor to compute the SaliencyMask against. This tensor
+              should be of size 1.
+          x: The input tensor to compute the SaliencyMask against. The outer
+              dimension should be the batch size.
+        """
 
-    self.graph = graph
-    self.session = session
-    self.y = y
-    self.x = x
+        # y must be of size one, otherwise the gradient we get from tf.gradients
+        # will be summed over all ys.
+        size = 1
+        for shape in y.shape:
+            size *= shape
+        assert size == 1
 
-  def GetMask(self, x_value, feed_dict={}):
-    """Returns an unsmoothed mask.
+        self.graph = graph
+        self.session = session
+        self.y = y
+        self.x = x
 
-    Args:
-      x_value: Input value, not batched.
-      feed_dict: (Optional) feed dictionary to pass to the session.run call.
-    """
-    raise NotImplementedError('A derived class should implemented GetMask()')
+    def GetMask(self, x_value, feed_dict={}):
+        """Returns an unsmoothed mask.
 
-  def GetSmoothedMask(
-      self, x_value, feed_dict={}, stdev_spread=.15, nsamples=25,
-      magnitude=True, **kwargs):
-    """Returns a mask that is smoothed with the SmoothGrad method.
+        Args:
+          x_value: Input value, not batched.
+          feed_dict: (Optional) feed dictionary to pass to the session.run call.
+        """
+        raise NotImplementedError('A derived class should implemented GetMask()')
 
-    Args:
-      x_value: Input value, not batched.
-      feed_dict: (Optional) feed dictionary to pass to the session.run call.
-      stdev_spread: Amount of noise to add to the input, as fraction of the
-                    total spread (x_max - x_min). Defaults to 15%.
-      nsamples: Number of samples to average across to get the smooth gradient.
-      magnitude: If true, computes the sum of squares of gradients instead of
-                 just the sum. Defaults to true.
-    """
-    stdev = stdev_spread * (np.max(x_value) - np.min(x_value))
+    def GetSmoothedMask(
+            self, x_value, feed_dict={}, stdev_spread=.15, nsamples=25,
+            magnitude=True, **kwargs):
+        """Returns a mask that is smoothed with the SmoothGrad method.
 
-    total_gradients = np.zeros_like(x_value)
-    for i in range(nsamples):
-      noise = np.random.normal(0, stdev, x_value.shape)
-      x_plus_noise = x_value + noise
-      grad = self.GetMask(x_plus_noise, feed_dict, **kwargs)
-      if magnitude:
-        total_gradients += (grad * grad)
-      else:
-        total_gradients += grad
+        Args:
+          x_value: Input value, not batched.
+          feed_dict: (Optional) feed dictionary to pass to the session.run call.
+          stdev_spread: Amount of noise to add to the input, as fraction of the
+                        total spread (x_max - x_min). Defaults to 15%.
+          nsamples: Number of samples to average across to get the smooth gradient.
+          magnitude: If true, computes the sum of squares of gradients instead of
+                     just the sum. Defaults to true.
+        """
+        stdev = stdev_spread * (np.max(x_value) - np.min(x_value))
 
-    return total_gradients / nsamples
+        total_gradients = np.zeros_like(x_value)
+        for i in range(nsamples):
+            noise = np.random.normal(0, stdev, x_value.shape)
+            x_plus_noise = x_value + noise
+            grad = self.GetMask(x_plus_noise, feed_dict, **kwargs)
+            if magnitude:
+                total_gradients += (grad * grad)
+            else:
+                total_gradients += grad
+
+        return total_gradients / nsamples
 
 
 class Saliency(SaliencyMask):
-  r"""A SaliencyMask class that computes saliency masks with a gradient."""
+    r"""A SaliencyMask class that computes saliency masks with a gradient."""
+    postprocessings = {
+        0: Grayscale,
+        1: RGB,
+    }
 
-  def __init__(self, graph, session, y, x):
-    super().__init__(graph, session, y, x)
-    self.gradients_node = tf.gradients(y, x)[0]
+    def __init__(self, graph, session, y, x):
+        super().__init__(graph, session, y, x)
+        self.gradients_node = tf.gradients(y, x)[0]
 
-  def GetMask(self, x_value, feed_dict={}):
-    """Returns a vanilla gradient mask.
+    def GetMask(self, x_value, feed_dict={}):
+        """Returns a vanilla gradient mask.
 
-    Args:
-      x_value: Input value, not batched.
-      feed_dict: (Optional) feed dictionary to pass to the session.run call.
-    """
-    feed_dict[self.x] = [x_value]
-    return self.session.run(self.gradients_node, feed_dict=feed_dict)[0]
+        Args:
+          x_value: Input value, not batched.
+          feed_dict: (Optional) feed dictionary to pass to the session.run call.
+        """
+        feed_dict[self.x] = [x_value]
+        return self.session.run(self.gradients_node, feed_dict=feed_dict)[0]
 
-  @staticmethod
-  def name():
-    return 'saliency'
-
+    @staticmethod
+    def name():
+        return 'saliency'

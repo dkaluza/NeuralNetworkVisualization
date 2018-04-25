@@ -87,7 +87,7 @@ class Visualize(ProtectedResource):
         # get postprocessing
         if not on_image:
             original_image = None
-        postproc_class = visualize_utils.postprocessing_register[postprocessing_id]
+        postproc_class = alg_class.postprocessings[postprocessing_id]
         saliency = postproc_class.process(image_output, original_image)
 
         img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_rgb)
@@ -126,6 +126,7 @@ class ImageList(ProtectedResource):
         return {'images': [image.json() for image in images]}
 
 
+# /list_algorithms
 class Algorithms(ProtectedResource):
     def get(self):
         return {'algorithms': [{'id': a_id, 'name': algo.name()}
@@ -133,9 +134,10 @@ class Algorithms(ProtectedResource):
                                in visualize_utils.algorithms_register.items()]}
 
 
+# /list_postprocessing/<int:alg_id>'
 class Postprocessing(ProtectedResource):
-    def get(self):
+    def get(self, alg_id):
+        postprocessings = visualize_utils.algorithms_register[alg_id].postprocessings
         return {'postprocessing': [{'id': p_id, 'name': postprocessing.name()}
-                                   for p_id, postprocessing
-                                   in visualize_utils.postprocessing_register.items()]}
+                                   for p_id, postprocessing in postprocessings.items()]}
 
