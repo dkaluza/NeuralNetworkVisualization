@@ -4,11 +4,15 @@ from app import nnvis
 from app.nnvis.rests.architecture import (ArchitectureTask,
                                           UploadNewArchitecture,
                                           ListAllArchitectures,
-                                          ExportArchitecture)
+                                          ExportArchitecture,
+                                          ImportArchitecture)
+
 from app.nnvis.rests.model import (ModelTask,
                                    UploadNewModel,
                                    ListAllModels,
-                                   ExportModel)
+                                   ExportModel,
+                                   ImportModel)
+
 from app.nnvis.rests.dataset import (DatasetTask,
                                      UploadNewDataset,
                                      ListAllDatasets)
@@ -26,11 +30,13 @@ api = Api(nnvis)
 api.add_resource(ArchitectureTask, 'arch/<int:arch_id>')
 api.add_resource(UploadNewArchitecture, 'upload_arch')
 api.add_resource(ListAllArchitectures, 'list_archs')
+api.add_resource(ImportArchitecture, 'import_arch')
 api.add_resource(ExportArchitecture, 'export_arch/<int:arch_id>')
 
 api.add_resource(ModelTask, 'model/<int:model_id>')
 api.add_resource(UploadNewModel, 'upload_model/<int:arch_id>')
 api.add_resource(ListAllModels, 'list_models/<int:arch_id>')
+api.add_resource(ImportModel, 'import_model')
 api.add_resource(ExportModel, 'export_model/<int:model_id>')
 
 api.add_resource(DatasetTask, 'dataset/<int:dataset_id>')

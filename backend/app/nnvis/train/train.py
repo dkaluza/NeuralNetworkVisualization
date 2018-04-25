@@ -26,10 +26,7 @@ class TrainThread(threading.Thread):
         self._dataset_id = dataset_id
         dataset = Dataset.query.get(dataset_id)
         self._num_labels = len(dataset.labels.split(','))
-        arch = Architecture.query.get(arch_id)
-        graph = json.loads(arch.graph)
-        self._nodes = graph['nodes']
-        self._links = graph['links']
+        self._arch = Architecture.query.get(arch_id)
 
         self._nepochs = params['nepochs']
         self._batch_size = params['batch_size']
@@ -43,7 +40,7 @@ class TrainThread(threading.Thread):
         self.app_ctx = app.app_context()
 
     def __build_model(self):
-        self._tfmodel = TFModel(self._nodes, self._links)
+        self._tfmodel = TFModel(meta_file=self._arch.get_meta_file_path())
         self._X = self._tfmodel.get_inputs()
         self._pred = self._tfmodel.get_output()
         self._is_training = self._tfmodel.get_is_training()
@@ -71,11 +68,12 @@ class TrainThread(threading.Thread):
         if model is None:
             return
 
-        weights_dir = app.config['WEIGHTS_DIR']
-        model_dir = '{arch_id}/{model_id}/' \
-            .format(arch_id=self._arch_id, model_id=self._model_id)
-        path = os.path.join(weights_dir, model_dir)
-        saver.save(session, path + 'model.ckpt')
+        model_dir = os.path.join(
+                self._arch.get_folder_path(),
+                str(self._model_id))
+        path = os.path.join(model_dir, 'model')
+        saver.save(session, path)
+        os.remove(os.path.join(model_dir, 'model.meta'))
 
         model.training_params = json.dumps(self._params)
         model.validation_loss = self._validation_loss

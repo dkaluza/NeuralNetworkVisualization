@@ -72,20 +72,12 @@ def save_image(image, proc=None):
 
 
 # mocked for now
-def load_model(model):
-    model_folder = model.weights_path
-    model_files = os.listdir(model_folder)
-    meta_file = list(filter(lambda x: '.meta' in x, model_files))
-    if len(meta_file) != 1:
-        raise Exception("Something wrong with either weight_path={} or folder contents".format(model_folder))
-    meta_file = os.path.join(model_folder, meta_file[0])
-
+def load_model(meta_file, weight_path):
     graph = tf.Graph()
     with graph.as_default():
-        # mocked model
         saver = tf.train.import_meta_graph(meta_file)
         sess = tf.Session(graph=graph)
-        saver.restore(sess, tf.train.latest_checkpoint(model_folder))
+        saver.restore(sess, weight_path)
 
         logits = graph.get_tensor_by_name('logits:0')
         x = graph.get_tensor_by_name('input/1:0')

@@ -59,6 +59,7 @@ class Architecture(db.Model, CRUD):
             last_used = self.last_used.strftime('%Y-%m-%d')
         else:
             last_used = 'None'
+
         return {
                 'id': self.id,
                 'name': self.name,
@@ -132,15 +133,21 @@ class Model(db.Model, CRUD):
             rmtree(self.weights_path, True)
         super().delete()
 
+    def get_folder_path(self):
+        return os.path.join(
+                app.config['WEIGHTS_DIR'],
+                str(self.arch_id),
+                str(self.id))
+
     def get_data_file_path(self):
         return os.path.join(
-                self.weights_path,
-                'model.ckpt.data-00000-of-00001')
+                self.get_folder_path(),
+                'model.data-00000-of-00001')
 
     def get_index_file_path(self):
         return os.path.join(
-                self.weights_path,
-                'model.ckpt.index')
+                self.get_folder_path(),
+                'model.index')
 
     def to_dict(self):
         if self.training_params is not None:

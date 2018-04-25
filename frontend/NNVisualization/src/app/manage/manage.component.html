@@ -1,6 +1,6 @@
 <div fxLayout="row"
      fxLayoutAlign="center start">
-    <div fxFlex="30%"
+    <div fxFlex="40%"
          fxLayout="column"
          fxLayoutAlign="center stretch">
         <h2 fxLayout="column"
@@ -29,8 +29,18 @@
                 </mat-row>
             </mat-table>
         </div>
+        <div class="import-file">
+            <input type="file"
+                   (change)="onArchitectureFileChange($event)"
+                   accept=".meta">
+            <button mat-button
+                   (click)="importArchitecture()"
+                   [disabled]="!importedArchitecture">
+                Import
+            </button>
+        </div>
     </div>
-    <div fxFlex="30%"
+    <div fxFlex="40%"
          fxLayout="column"
          fxLayoutAlign="center stretch">
         <h2 fxLayout="column"
@@ -58,6 +68,16 @@
                          [class.selected-row]="row.id == selectedModelId">
                 </mat-row>
             </mat-table>
+        </div>
+        <div class="import-file">
+            <input type="file"
+                   (change)="onModelFileChange($event)"
+                   accept=".zip">
+            <button mat-button
+                   (click)="importModel()"
+                   [disabled]="!importedModel">
+                Import
+            </button>
         </div>
     </div>
 </div>
