@@ -27,6 +27,9 @@ export class ManageComponent implements OnInit {
     selectedArchId: number;
     selectedModelId: number;
 
+    importedArchitecture: File;
+    importedModel: File;
+
     constructor(private selArchService: SelectedArchitectureService,
         private restangular: Restangular,
         private genericDialogs: GenericDialogsService) {
@@ -88,23 +91,25 @@ export class ManageComponent implements OnInit {
     }
 
     selectArchitecture(archElem: Element) {
-        this.selectedArchId = archElem.id;
         this.restangular.one('arch', archElem.id)
             .get().subscribe(
-                (arch) => {
-                    const newArch = new Architecture(
-                        arch.id, arch.name,
-                        arch.description,
-                        arch.architecture.nodes,
-                        arch.architecture.links,
-                        arch.last_used,
-                        arch.last_modified
-                    );
-                    this.selArchService.architecture = newArch;
-                    this._updateModelList();
-                },
+                arch => this._selectArchitecture(arch),
                 (e) => { this.genericDialogs.createWarning(e); }
             );
+    }
+
+    private _selectArchitecture(arch) {
+        this.selectedArchId = arch.id;
+        const newArch = new Architecture(
+            arch.id, arch.name,
+            arch.description,
+            arch.architecture.nodes,
+            arch.architecture.links,
+            arch.last_used,
+            arch.last_modified
+        );
+        this.selArchService.architecture = newArch;
+        this._updateModelList();
     }
 
     selectModel(modelElem: Element) {
@@ -230,6 +235,73 @@ export class ManageComponent implements OnInit {
                 },
                 (e) => { this.genericDialogs.createWarning(e); }
             );
+    }
+
+    onArchitectureFileChange(event) {
+        this.importedArchitecture = event.target.files[0];
+    }
+
+    onModelFileChange(event) {
+        this.importedModel = event.target.files[0];
+    }
+
+    importArchitecture() {
+        this.genericDialogs.createInputs(['Name', 'Description'])
+            .afterClosed().subscribe(response => {
+                if (response) {
+                    const formData = new FormData();
+                    formData.append('name', response['Name']);
+                    formData.append('file', this.importedArchitecture);
+                    if (response['Description']) {
+                        formData.append('desc', response['Description']);
+                    }
+                    this.restangular.all('import_arch').post(formData).subscribe(
+                        uploadResponse => {
+                            this.genericDialogs.createSuccess(
+                                'Architecture successfully imported');
+                            this._updateArchitectureList();
+                        },
+                        error => {
+                            this.genericDialogs.createWarning(error, 'Error');
+                        }
+                    );
+                }
+            });
+    }
+
+    importModel() {
+        const fields = [
+            'Architecture name',
+            'Architecture description',
+            'Model name',
+            'Model description'
+        ];
+        this.genericDialogs.createInputs(fields)
+            .afterClosed().subscribe(response => {
+                if (response) {
+                    const formData = new FormData();
+                    formData.append('arch_name', response['Architecture name']);
+                    formData.append('model_name', response['Model name']);
+                    formData.append('file', this.importedModel);
+                    if (response['Architecture escription']) {
+                        formData.append('arch_desc', response['Architecture description']);
+                    }
+                    if (response['Model escription']) {
+                        formData.append('model_desc', response['Model description']);
+                    }
+                    this.restangular.all('import_model').post(formData).subscribe(
+                        data => {
+                            this.genericDialogs.createSuccess(
+                                'Model successfully imported');
+                            this._updateArchitectureList();
+                            this._selectArchitecture(data.arch);
+                        },
+                        error => {
+                            this.genericDialogs.createWarning(error, 'Error');
+                        }
+                    );
+                }
+            });
     }
 
     exportCurrentModel(): void {

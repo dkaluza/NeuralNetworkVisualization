@@ -39,17 +39,52 @@ class FindUnion:
 
 
 class TFModel:
-    def __init__(self, nodes, links):
-        self._nodes = {int(node['id']): node for node in nodes}
-        self._links = links
-        self._ops, self._graph = self._build_model(self._nodes, links)
-        self.__rename_logits_and_output()
+    def __init__(self, nodes=None, links=None, meta_file=None):
+        if meta_file is None:
+            _nodes = {int(node['id']): node for node in nodes}
+            self._graph, self._ops = self._build_model(_nodes, links)
+            self.__rename_logits_and_output(_nodes, links)
+        else:
+            self._graph = self.__load_from_meta_graph(meta_file)
+        self._inputs = self.__find_input_ops()
+        self._is_training = self.__find_is_training()
 
-    def __rename_logits_and_output(self):
-        ids = list(map(str, self._nodes.keys()))
+    @staticmethod
+    def __load_from_meta_graph(meta_def):
+        graph = tf.Graph()
+        with graph.as_default():
+            tf.train.import_meta_graph(meta_def)
+        return graph
+
+    def __find_input_ops(self):
+        input_names = []
+        input_num = 1
+        while True:
+            input_name = 'input/{0}:0'.format(input_num)
+            try:
+                # just check if this input is in graph
+                self._graph.get_tensor_by_name(input_name)
+                input_names.append(input_name)
+                input_num += 1
+            except KeyError:
+                break
+        return input_names
+
+    def __find_is_training(self):
+        try:
+            op = self._graph.get_tensor_by_name('is_training:0')
+        except KeyError:
+            # create mockup is_training op
+            with self._graph.as_default():
+                op = tf.placeholder(tf.bool, name='is_training')
+
+        return op
+
+    def __rename_logits_and_output(self, nodes, links):
+        ids = list(map(str, nodes.keys()))
         num_outputs = {id: 0 for id in ids}
 
-        for l in self._links:
+        for l in links:
             num_outputs[l['source']] += 1
 
         output_ids = list(filter(lambda id: num_outputs[id] == 0, ids))
@@ -66,10 +101,8 @@ class TFModel:
     def get_graph(self):
         return self._graph
 
-    def get_ops_map(self):
-        return self._ops
-
-    def _build_model(self, nodes, links):
+    @staticmethod
+    def _build_model(nodes, links):
         ids = list(nodes.keys())
 
         outputs = {id: [] for id in ids}
@@ -90,7 +123,7 @@ class TFModel:
 
         graph = tf.Graph()
         with graph.as_default():
-            self._is_training = tf.placeholder(tf.bool, name='is_training')
+            is_training = tf.placeholder(tf.bool, name='is_training')
 
             map_op = {}
             for id in ids:
@@ -99,7 +132,7 @@ class TFModel:
                     while stack:
                         v = stack.pop()
                         map_op[v] = build_op(nodes[v], map_op,
-                                             inputs[v], self._is_training)
+                                             inputs[v], is_training)
                         for u in outputs[v]:
                             num_inputs[u] -= 1
                             if num_inputs[u] == 0:
@@ -112,17 +145,12 @@ class TFModel:
         for k, v in map_op.items():
             ret[str(k)] = v
 
-        return ret, graph
+        return graph, ret
 
     def get_inputs(self):
-        ids = list(map(str, self._nodes.keys()))
-        num_inputs = {id: 0 for id in ids}
-
-        for l in self._links:
-            num_inputs[l['target']] += 1
-
-        input_ids = list(filter(lambda id: num_inputs[id] == 0, ids))
-        return [self._ops[id] for id in input_ids]
+        ops = [self._graph.get_tensor_by_name(name)
+               for name in self._inputs]
+        return ops
 
     def get_logits(self):
         return self._graph.get_tensor_by_name('logits:0')

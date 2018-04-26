@@ -6,7 +6,7 @@ import json
 import os
 
 from flask import current_app as app
-from app.nnvis.models import Architecture, Model, Dataset
+from app.nnvis.models import Architecture, Model, Dataset, TrainingHistory
 
 from app.nnvis.train import TFModel
 from app.nnvis.train.losses import calculate_loss
@@ -26,10 +26,7 @@ class TrainThread(threading.Thread):
         self._dataset_id = dataset_id
         dataset = Dataset.query.get(dataset_id)
         self._num_labels = len(dataset.labels.split(','))
-        arch = Architecture.query.get(arch_id)
-        graph = json.loads(arch.graph)
-        self._nodes = graph['nodes']
-        self._links = graph['links']
+        self._arch = Architecture.query.get(arch_id)
 
         self._nepochs = params['nepochs']
         self._batch_size = params['batch_size']
@@ -43,8 +40,7 @@ class TrainThread(threading.Thread):
         self.app_ctx = app.app_context()
 
     def __build_model(self):
-        print('building graph...')
-        self._tfmodel = TFModel(self._nodes, self._links)
+        self._tfmodel = TFModel(meta_file=self._arch.get_meta_file_path())
         self._X = self._tfmodel.get_inputs()
         self._pred = self._tfmodel.get_output()
         self._is_training = self._tfmodel.get_is_training()
@@ -72,12 +68,12 @@ class TrainThread(threading.Thread):
         if model is None:
             return
 
-        print('saving model')
-        weights_dir = app.config['WEIGHTS_DIR']
-        model_dir = '{arch_id}/{model_id}/' \
-            .format(arch_id=self._arch_id, model_id=self._model_id)
-        path = os.path.join(weights_dir, model_dir)
-        saver.save(session, path + 'model.ckpt')
+        model_dir = os.path.join(
+                self._arch.get_folder_path(),
+                str(self._model_id))
+        path = os.path.join(model_dir, 'model')
+        saver.save(session, path)
+        os.remove(os.path.join(model_dir, 'model.meta'))
 
         model.training_params = json.dumps(self._params)
         model.validation_loss = self._validation_loss
@@ -95,8 +91,8 @@ class TrainThread(threading.Thread):
                         for bx, xshape in zip(batch_xs, self._X_shapes)]
             batch_y = np.reshape(batch_y, self._y_shape)
             feed_dict = {
-                    x: batch_x for x, batch_x in zip(self._X, batch_xs)
-                    }
+                x: batch_x for x, batch_x in zip(self._X, batch_xs)
+            }
             feed_dict[self._y] = batch_y
             feed_dict[self._is_training] = train
 
@@ -122,7 +118,10 @@ class TrainThread(threading.Thread):
                     split_into_train_and_valid(train_ids, 0.7)
                 self.__build_model()
 
-                print('starting training')
+                training_history = TrainingHistory(self._model_id, self._batch_size, 0,
+                                                   self._nepochs, self._training_loss,
+                                                   self._validation_loss)
+                training_history.add()
                 start_time = time.time()
                 with self._tfmodel.get_graph().as_default():
                     saver = tf.train.Saver()
@@ -132,33 +131,32 @@ class TrainThread(threading.Thread):
 
                         for e in range(self._nepochs):
                             start_epoch = time.time()
-                            print('---- Epoch {e} ----'.format(e=e))
                             train_ids = shuffle(train_ids)
-                            average_loss, average_acc =\
-                                self.__runepoch(sess, train_ids, train=True)
+                            average_loss, average_acc = self.__runepoch(
+                                sess, train_ids, train=True)
                             self._training_loss += average_loss
                             end_epoch = time.time()
 
-                            print('[Epoch {e}] Avg. loss = {loss}'
-                                  .format(e=e, loss=average_loss))
-                            print('[Epoch {e}] Avg. acc = {acc}'
-                                  .format(e=e, acc=average_acc))
-                            print('[Epoch {e}] Time = {t}'
-                                  .format(e=e, t=end_epoch-start_epoch))
-                        print('finished training')
+                            self.__update_history(training_history, e + 1, average_loss,
+                                                  average_acc)
+
                         self._training_loss /= float(self._nepochs)
 
-                        print('staring validation')
-                        self._validation_loss, average_acc = \
-                            self.__runepoch(sess, valid_ids, train=False)
-                        print('Validation loss = {loss}'
-                              .format(loss=self._validation_loss))
-                        print('Validation acc = {acc}'.format(acc=average_acc))
-                        print('finished validation')
+                        self._validation_loss, average_acc = self.__runepoch(
+                            sess, valid_ids, train=False)
+                        training_history.validation_loss = self._validation_loss
+                        training_history.validation_acc = average_acc
+                        training_history.update()
+
                         self.__save_model(sess, saver)
                 end_time = time.time()
-                print('Model training time = {0}'
-                      .format(end_time - start_time))
             except:
                 Model.query.get(self._model_id).delete()
                 raise
+
+    def __update_history(self, training_history, current_epoch, training_loss,
+                         training_acc):
+        training_history.training_loss = training_loss
+        training_history.training_acc = training_acc
+        training_history.current_epoch = current_epoch
+        training_history.update()
