@@ -4,7 +4,7 @@ from flask_jwt_extended import get_current_user
 from flask import current_app as app
 
 from app import db
-from app.nnvis.models import Dataset, Model, Image#, TrainingSample
+from app.nnvis.models import Dataset, Model, Image, TrainingSample
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.utils import NnvisException
 
@@ -12,6 +12,7 @@ import os
 import shutil
 import pandas as pd
 import numpy as np
+from functools import reduce
 from zipfile import ZipFile
 
 SUPPORTED_EXTENSIONS = [
@@ -24,22 +25,22 @@ SUPPORTED_EXTENSIONS = [
 ]
 
 
-# class TrainingSampleBuilder(object):
+class TrainingSampleBuilder(object):
 
-#     def __init__(self, name, label, dataset_id):
-#         self.name = name
-#         self.label = label
-#         self.dataset_id = dataset_id
+    def __init__(self, name, label, dataset_id):
+        self.name = name
+        self.label = label
+        self.dataset_id = dataset_id
 
-#     def add_img(self):
-#         return self
+    def add_img(self):
+        return self
 
-#     def build(self):
-#         return TrainingSample(
-#             name=self.name,
-#             label=self.label,
-#             dataset_id=self.dataset_id
-#         )
+    def build(self):
+        return TrainingSample(
+            name=self.name,
+            label=self.label,
+            dataset_id=self.dataset_id
+        )
 
 
 class DatasetBuilder(object):
@@ -50,10 +51,11 @@ class DatasetBuilder(object):
         self._path = path
 
         self._label_list = self._parse_class_mapping(path)
-        self._img_to_label, self._imgs_per_sample = self._parse_labels_mapping(path, len(self._label_list))
+        self._img_to_label, self._img_to_ts, self._imgs_per_sample, ts_no =\
+            self._parse_labels_mapping(path, len(self._label_list))
 
         self.imgs = []
-        self.training_samples = []
+        self.training_samples = [None] * ts_no
 
     @staticmethod
     def _parse_class_mapping(path):
@@ -72,13 +74,17 @@ class DatasetBuilder(object):
         labels_filename = app.config['LABELS_FILENAME']
         labelsmapdf = pd.read_csv(os.path.join(path, labels_filename))
         lcols = labelsmapdf.columns
-        labelsmapdf[lcols[1]] = labelsmapdf[lcols[1]].astype(np.int32)
-        labelsmap_vals = labelsmapdf[lcols[1]].values
+        labelsmapdf[lcols[-1]] = labelsmapdf[lcols[-1]].astype(np.int32)
+        labelsmap_vals = labelsmapdf[lcols[-1]].values
         DatasetBuilder._assert_labels_in_range(labelsmap_vals, class_no)
 
-        labelsdict = pd.Series(labelsmap_vals,
-                               index=labelsmapdf[lcols[0]]).to_dict()
-        return labelsdict, 1
+        labeldicts = [pd.Series(labelsmap_vals, index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
+        row_no = labelsmapdf.count()
+        tsdicts = [pd.Series(np.arange(row_no), index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
+
+        labelsdict_sum = reduce(lambda x, y: {**x, **y}, labeldicts)
+        tsdict_sum = reduce(lambda x, y: {**x, **y}, tsdicts)
+        return labelsdict_sum, tsdict_sum, (len(lcols) - 1), row_no
 
     @staticmethod
     def _assert_labels_are_consecutive_numbers(array):
@@ -98,8 +104,8 @@ class DatasetBuilder(object):
 
     def process_file(self, fname):
         if self._check_supported_extension(fname):
-            img = self._create_image(fname)
-            self.imgs.append(img)
+            self._create_trainingsample(fname)
+            self._create_image(fname)
         else:
             labels_filename = app.config['LABELS_FILENAME']
             classmap_filename = app.config['CLASSMAP_FILENAME']
@@ -109,17 +115,35 @@ class DatasetBuilder(object):
     def _check_supported_extension(fname):
         return fname.rsplit('.', 1)[1] in SUPPORTED_EXTENSIONS
 
-    def _create_image(self, fname):
-        l = str(self._img_to_label[fname])
+    def _create_trainingsample(self, fname):
+        ts_no = self._img_to_ts[fname]
+        existing_ts = self._training_samples[ts_no]
+
+        if not existing_ts:
+            label = str(self._img_to_label[fname])
+            self.training_samples[ts_no] = TrainingSample(
+                name='Training sample {}'.format(ts_no),
+                label=label,
+                dataset_id=self._dataset_id
+            )
+
+    def _create_image(self, fname, ts_id):
         new_image = Image(imageName=fname.rsplit('.', 1)[0],
                           relPath=fname,
-                          label=l,
-                          dataset_id=self._dataset_id)
-        return new_image
+                          trainingsample_id='To be inserted')
+        
+        self.imgs.append(new_image)
     
     def build(self):
+        db.session.bulk_save_objects(self.training_samples)
+        self._update_ts_ids()
         db.session.bulk_save_objects(self.imgs)
         db.session.commit()
+
+    def _update_ts_ids(self):
+        for img in self.imgs:
+            ts_no = self._img_to_ts[img.relative_path]
+            img.trainsample_id = self.training_samples[ts_no].id
 
 
 def dataset_to_dict(dataset):
