@@ -276,8 +276,6 @@ class Image(db.Model, CRUD):
     def __init__(self, imageName, relPath, trainingsample_id):
         self.name = imageName
         self.relative_path = relPath
-        # self.label = label
-        # self.dataset_id = dataset_id
         self.trainsample_id = trainingsample_id
 
     def json(self):
@@ -285,7 +283,8 @@ class Image(db.Model, CRUD):
                 'label': self.label, 'dataset_id': self.dataset_id}
 
     def full_path(self):
-        ds_path = Dataset.query.get(self.dataset_id).path
+        ts = TrainingSample.query.get(self.trainsample_id)
+        ds_path = Dataset.query.get(ts.dataset_id).path
         return os.path.join(ds_path, self.relative_path)
 
 

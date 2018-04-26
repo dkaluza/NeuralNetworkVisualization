@@ -2,7 +2,7 @@ from test import NNvisTestCase
 from test.utils import response_json, authorized_post
 from test_config import LABELS_FILENAME, CLASSMAP_FILENAME
 
-from app.nnvis.models import Dataset, Image
+from app.nnvis.models import Dataset, Image, TrainingSample
 from app.utils import NnvisException
 
 import zipfile
@@ -186,6 +186,7 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(rv.status_code, 201)
         ds_id = self._assertDatasetCreated()
         self.assertEqual(len(Image.query.all()), 0)
+        self.assertEqual(len(TrainingSample.query.all()), 0)
 
         dataset_folder = os.path.join(
                 self.app.config['DATASET_FOLDER'], str(ds_id))
@@ -222,16 +223,13 @@ class UploadNewDatasetTest(NNvisTestCase):
         if labels:
             self.assertEqual(ds.labels.split(','), labels)
         self.assertEqual(ds.description, DATASET_DESCRIPTION)
+        self.assertEqual(ds.imgs_per_sample, 1)
 
         return ds.id
 
     def _assertImagesCreated(self):
         images = Image.query.all()
-        ds_id = Dataset.query.all()[0].id
         self.assertEqual(len(images), 3)
-
-        for image in images:
-            self.assertEqual(image.dataset_id, ds_id)
 
         image_names = map(lambda x: x.name, images)
         self.assertIn('02', image_names)
@@ -243,10 +241,28 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertIn('01.jpg', image_paths)
         self.assertIn('69.jpg', image_paths)
 
-        image_labels = map(lambda x: x.label, images)
-        self.assertIn('10', image_labels)
-        self.assertIn('0', image_labels)
-        self.assertIn('2', image_labels)
+        image_ts_ids = map(lambda x: x.trainsample_id, images)
+        self.assertIn('0', image_ts_ids)
+        self.assertIn('1', image_ts_ids)
+        self.assertIn('2', image_ts_ids)
+
+    def _assertTrainingSamplesCreated(self):
+        tss = TrainingSample.query.all()
+        ds_id = Dataset.query.all()[0].id
+
+        for ts in tss:
+            self.assertEqual(ts.dataset_id, ds_id)
+
+        self.assertEqual(len(tss), 3)
+
+        ts_names = map(lambda x: x.name, tss)
+        for i in range(3):
+            self.assertIn('Training sample {}'.format(i), ts_names)
+
+        ts_labels = map(lambda x: x.label, tss)
+        self.assertIn('10', ts_labels)
+        self.assertIn('0', ts_labels)
+        self.assertIn('2', ts_labels)
 
     def test_zipfile_someimgs(self):
         labels_content = [
@@ -294,6 +310,7 @@ class UploadNewDatasetTest(NNvisTestCase):
             ]
         )
         self._assertImagesCreated()
+        self._assertTrainingSamplesCreated()
 
         dataset_folder = os.path.join(
                 self.app.config['DATASET_FOLDER'], str(ds_id))
