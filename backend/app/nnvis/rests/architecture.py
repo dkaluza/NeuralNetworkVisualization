@@ -11,6 +11,7 @@ from app.nnvis.models import Architecture, Model
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.train.build_model import TFModel
 
+from app.nnvis.graph_parse.parse import GraphParser, IncorrectMetaGraph
 
 class ArchitectureUtils(object):
     @staticmethod
@@ -98,11 +99,13 @@ class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
         try:
             new_arch.add()
         except Exception as e:
+            print(e)
             abort(403, message=e)
 
         try:
             self._save_meta_file(new_arch)
         except Exception as e:
+            print(e)
             new_arch.delete()
             abort(403, message=str(e))
 
@@ -138,11 +141,20 @@ class ImportArchitecture(ProtectedResource):
                 user_id=get_current_user())
         try:
             new_arch.add()
+        except Exception as e:
+            abort(403, message=e)
 
+        try:
             path = new_arch.get_meta_file_path()
             with open(path, 'wb') as fd:
                 fd.write(postfile.stream.read())
+            parser = GraphParser(path)
+            graph = parser.parse()
+            new_arch.graph = json.dumps(graph)
+            new_arch.update()
         except Exception as e:
+            print(e)
+            new_arch.delete()
             abort(403, message=e)
 
         return new_arch.to_dict(), 201

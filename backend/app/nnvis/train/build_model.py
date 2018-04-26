@@ -107,7 +107,7 @@ class TFModel:
 
         outputs = {id: [] for id in ids}
         inputs = {id: [] for id in ids}
-        findunion = FindUnion(len(ids))
+        findunion = FindUnion(max(ids))
         for id in ids:
             sharedId = nodes[id]['shareWeightsFrom']
             if sharedId != 0:
