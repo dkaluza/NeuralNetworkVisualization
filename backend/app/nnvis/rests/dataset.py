@@ -136,6 +136,7 @@ class DatasetBuilder(object):
     
     def build(self):
         db.session.bulk_save_objects(self.training_samples)
+        db.session.flush()
         self._update_ts_ids()
         db.session.bulk_save_objects(self.imgs)
         db.session.commit()
@@ -143,7 +144,9 @@ class DatasetBuilder(object):
     def _update_ts_ids(self):
         for img in self.imgs:
             ts_no = self._img_to_ts[img.relative_path]
-            img.trainsample_id = self.training_samples[ts_no].id
+            ts = self.training_samples[ts_no]
+            db.session.refresh(ts)
+            img.trainsample_id = ts.id
 
 
 def dataset_to_dict(dataset):
