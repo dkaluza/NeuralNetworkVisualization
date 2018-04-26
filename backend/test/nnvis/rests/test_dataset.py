@@ -101,8 +101,9 @@ def good_zipfile_imgs(labels_content, classmap_content):
             retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
         thezip.writestr(LABELS_FILENAME, labelfilestr)
         thezip.writestr(CLASSMAP_FILENAME, classfilestr)
-        for l in labels_content[1:]:
-            thezip.writestr(l[0], 'raboerijbaoeribriribv')
+        for row in labels_content[1:]:
+            for img in row[:-1]:
+                thezip.writestr(img, 'raboerijbaoeribriribv')
 
     retfile.seek(0)
     return (retfile, 'imgs.zip')
@@ -227,24 +228,21 @@ class UploadNewDatasetTest(NNvisTestCase):
 
         return ds.id
 
-    def _assertImagesCreated(self):
+    def _assertImagesCreated(self, imgs, imgs_per_sample):
         images = Image.query.all()
-        self.assertEqual(len(images), 3)
+        self.assertEqual(len(images), len(imgs))
 
         image_names = map(lambda x: x.name, images)
-        self.assertIn('02', image_names)
-        self.assertIn('01', image_names)
-        self.assertIn('69', image_names)
+        for img in imgs:
+            self.assertIn(img.split('.', 1)[0], image_names)
 
         image_paths = map(lambda x: x.relative_path, images)
-        self.assertIn('02.jpg', image_paths)
-        self.assertIn('01.jpg', image_paths)
-        self.assertIn('69.jpg', image_paths)
+        for img in imgs:
+            self.assertIn(img, image_paths)
 
         image_ts_ids = map(lambda x: x.trainsample_id, images)
-        self.assertIn('0', image_ts_ids)
-        self.assertIn('1', image_ts_ids)
-        self.assertIn('2', image_ts_ids)
+        for i in range(len(images) // imgs_per_sample):
+            self.assertIn(str(i), image_ts_ids)
 
     def _assertTrainingSamplesCreated(self):
         tss = TrainingSample.query.all()
@@ -309,7 +307,81 @@ class UploadNewDatasetTest(NNvisTestCase):
                 'class10',
             ]
         )
-        self._assertImagesCreated()
+        self._assertImagesCreated([
+            '01.jpg', '02.jpg', '69.jpg'
+        ], 1)
+        self._assertTrainingSamplesCreated()
+
+        dataset_folder = os.path.join(
+                self.app.config['DATASET_FOLDER'], str(ds_id))
+        self.assertTrue(os.path.exists(dataset_folder))
+        dataset_files = os.listdir(dataset_folder)
+        self.assertEqual(len(dataset_files), 5)
+        self.assertIn('02.jpg', dataset_files)
+        self.assertIn('01.jpg', dataset_files)
+        self.assertIn('69.jpg', dataset_files)
+        self.assertIn(LABELS_FILENAME, dataset_files)
+        self.assertIn(CLASSMAP_FILENAME, dataset_files)
+
+        self._assertCsvContent(
+            os.path.join(dataset_folder, LABELS_FILENAME),
+            labels_content
+        )
+
+        self._assertCsvContent(
+            os.path.join(dataset_folder, CLASSMAP_FILENAME),
+            classmap_content
+        )
+
+    def test_zipfile_multiimg_samples(self):
+        labels_content = [
+            ['image', 'label'],
+            ['01.jpg', '02.jpg', '03.jpg', '0'],
+            ['04.jpg', '05.jpg', '06.jpg', '10'],
+            ['69.jpg', '70.jpg', '71.jpg', '2']
+        ]
+        classmap_content = [
+            ['class_number', 'class_name'],
+            ['0', 'class0'],
+            ['1', 'class1'],
+            ['2', 'class2'],
+            ['3', 'class3'],
+            ['4', 'class4'],
+            ['5', 'class5'],
+            ['6', 'class6'],
+            ['7', 'class7'],
+            ['8', 'class8'],
+            ['9', 'class9'],
+            ['10', 'class10'],
+        ]
+
+        rv = authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    name=DATASET_NAME,
+                    description=DATASET_DESCRIPTION,
+                    file=good_zipfile_imgs(labels_content, classmap_content)),
+                mimetype='multipart/form-data')
+        self.assertEqual(rv.status_code, 201)
+        ds_id = self._assertDatasetCreated(
+            labels=[
+                'class0',
+                'class1',
+                'class2',
+                'class3',
+                'class4',
+                'class5',
+                'class6',
+                'class7',
+                'class8',
+                'class9',
+                'class10',
+            ]
+        )
+        self._assertImagesCreated([
+            '01.jpg', '02.jpg', '03.jpg', '04.jpg', '05.jpg',
+            '06.jpg', '69.jpg', '70.jpg', '71.jpg'
+        ], 3)
         self._assertTrainingSamplesCreated()
 
         dataset_folder = os.path.join(
