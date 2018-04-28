@@ -26,24 +26,6 @@ SUPPORTED_EXTENSIONS = [
 ]
 
 
-class TrainingSampleBuilder(object):
-
-    def __init__(self, name, label, dataset_id):
-        self.name = name
-        self.label = label
-        self.dataset_id = dataset_id
-
-    def add_img(self):
-        return self
-
-    def build(self):
-        return TrainingSample(
-            name=self.name,
-            label=self.label,
-            dataset_id=self.dataset_id
-        )
-
-
 class DatasetBuilder(object):
     """Creates the Image and TrainingSample entries associated with a dataset"""
 
