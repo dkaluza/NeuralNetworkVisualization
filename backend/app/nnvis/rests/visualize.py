@@ -5,6 +5,8 @@ from app.nnvis.models import Trainingsample as TrainingSample
 from app.utils import fileToB64
 from app.vis_tools import visualize_utils
 
+from itertools import chain
+
 
 def safe_add_is_training(feed_dict, graph, train):
     try:
@@ -109,7 +111,7 @@ class Images(ProtectedResource):
 class ImageList(ProtectedResource):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        images = model.dataset.images
+        images = chain.from_iterable([ts.images for ts in model.dataset.training_samples])
         return {'images': [image.json() for image in images]}
 
 
