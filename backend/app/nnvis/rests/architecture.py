@@ -13,6 +13,7 @@ from app.nnvis.train.build_model import TFModel
 
 from app.nnvis.graph_parse.parse import GraphParser, IncorrectMetaGraph
 
+
 class ArchitectureUtils(object):
     @staticmethod
     def _save_meta_file(arch):
@@ -85,7 +86,7 @@ class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
         args = request.get_json(force=True)
 
         if 'name' not in args:
-            abort(404, message='No architecure name provided')
+            abort(404, message='No architecture name provided')
         if 'graph' not in args:
             abort(404, message='No graph provided')
         if 'description' not in args:
