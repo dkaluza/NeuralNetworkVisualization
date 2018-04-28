@@ -9,15 +9,13 @@ class FullyConnectedLayerParser(LayerParser):
     @staticmethod
     def parse(id, layer):
         weights_name = '{}/weights/read'.format(id)
-        weights = LayerParser.find_node(
-                lambda node: node.name == weights_name,
-                layer)[0]
+        weights_node = layer[weights_name]
 
         activation = LayerParser.get_activation(layer)
-        num_outputs = LayerParser._get_shape(weights)[-1]
+        num_outputs = LayerParser._get_shape(weights_node)[-1]
         return {
                 'id': str(id),
-                'label': 'fc {}'.format(id),
+                'label': 'fc',
                 'layerType': 'fc',
                 'params': {
                         'numOutputs': num_outputs,

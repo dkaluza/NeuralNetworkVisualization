@@ -29,9 +29,9 @@ class GraphParser():
                 continue
 
             if node_layer_id in layers:
-                layers[node_layer_id].append(node)
+                layers[node_layer_id][node.name] = node
             else:
-                layers[node_layer_id] = [node]
+                layers[node_layer_id] = {node.name: node}
         return layers
 
     def _check_inputs(self, node, name):
@@ -52,21 +52,21 @@ class GraphParser():
         input_to_layer = dict()
         for input_node in inputs:
             for output_id in layers.keys():
-                for node in layers[output_id]:
-                    if node.name.split('/')[-1] == 'logits':
+                for name, node in layers[output_id].items():
+                    if name.split('/')[-1] == 'logits':
                         if self._check_inputs(node, input_node.name):
                             input_to_layer[input_node.name] = output_id
                             break
         for input_node in inputs:
             for output_id in layers.keys():
-                for node in layers[output_id]:
-                    if node.name.split('/')[-1] != 'logits':
+                for name, node in layers[output_id].items():
+                    if name.split('/')[-1] != 'logits':
                         if self._check_inputs(node, input_node.name):
                             graph['links'].append({
                                 'source': str(input_to_layer[input_node.name]),
                                 'target': str(output_id)
                                 })
-                            layers[input_to_layer[input_node.name]].append(input_node)
+                            layers[input_to_layer[input_node.name]][input_node.name] = input_node
                             break
 
         for layer_id in layers.keys():

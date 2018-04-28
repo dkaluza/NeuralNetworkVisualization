@@ -14,7 +14,7 @@ class ConcatParser(LayerParser):
         axis = axis_node.attr['value'].tensor.int_val[0]
         return {
                 'id': str(id),
-                'label': 'concat {}'.format(id),
+                'label': 'concat',
                 'layerType': 'concat',
                 'params': {
                     'axis': axis

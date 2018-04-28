@@ -153,7 +153,6 @@ class ImportArchitecture(ProtectedResource):
             new_arch.graph = json.dumps(graph)
             new_arch.update()
         except Exception as e:
-            print(e)
             new_arch.delete()
             abort(403, message=e)
 

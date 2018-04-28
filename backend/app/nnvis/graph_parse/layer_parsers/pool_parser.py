@@ -21,16 +21,15 @@ class PoolLayerParser(LayerParser):
     @staticmethod
     def parse(id, layer):
         pool, pool_op = PoolLayerParser.get_pool(layer)
-        pool_node = LayerParser.find_node(
-                lambda node: node.op == pool_op,
-                layer)[0]
+        pool_node = LayerParser.find_node_by_op_type(layer, pool_op)[0]
+
         kernel_shape = pool_node.attr['ksize'].list.i[1:-1]
         strides = pool_node.attr['strides'].list.i[1:-1]
         padding = LayerParser.get_padding(pool_node)
 
         return {
                 'id': str(id),
-                'label': 'pool {}'.format(id),
+                'label': 'pool',
                 'layerType': 'pool',
                 'params': {
                         'pool': pool,

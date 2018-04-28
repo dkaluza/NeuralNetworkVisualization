@@ -1,7 +1,7 @@
 class LayerParser():
     @staticmethod
     def _get_ops_set(layer):
-        return set(list(map(lambda node: node.op, layer)))
+        return set([node.op for _, node in layer.items()])
 
     @staticmethod
     def _get_shape(node):
@@ -11,7 +11,13 @@ class LayerParser():
 
     @staticmethod
     def find_node(pred, layer):
-        return list(filter(pred, layer))
+        return list([node for _, node in layer.items() if pred(node)])
+
+    @staticmethod
+    def find_node_by_op_type(layer, op_type):
+        return LayerParser.find_node(
+                    lambda node: node.op == op_type,
+                    layer)
 
     @staticmethod
     def get_activation(layer):

@@ -8,12 +8,17 @@ class SoftmaxLayerParser(LayerParser):
 
     @staticmethod
     def parse(id, layer):
+        axis_op = layer.get('{}/concat/axis'.format(id))
+        if axis_op is None:
+            axis = -1
+        else:
+            axis = axis_op.attr['value'].tensor.int_val[0]
         return {
                 'id': str(id),
-                'label': 'softmax {}'.format(id),
+                'label': 'softmax',
                 'layerType': 'softmax',
                 'params': {
-                    'axis': -1
+                    'axis': axis
                     }
                 }
 

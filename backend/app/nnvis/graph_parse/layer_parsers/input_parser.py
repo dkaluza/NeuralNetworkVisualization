@@ -8,16 +8,15 @@ class InputLayerParser(LayerParser):
 
     @staticmethod
     def parse(id, layer):
-        input_node = LayerParser.find_node(
-                lambda node: node.name.split('/')[0] == 'input',
-                layer)[0]
+        input_node = LayerParser.find_node_by_op_type(layer, 'Placeholder')[0]
+        input_id = input_node.name.split('/')[-1]
         shape = LayerParser._get_shape(input_node)
         return {
                 'id': str(id),
-                'label': 'input {}'.format(id),
+                'label': 'input',
                 'layerType': 'input',
                 'params': {
-                    'inputId': input_node.name.split('/')[-1],
+                    'inputId': input_id,
                     'shape': shape
                     }
                 }

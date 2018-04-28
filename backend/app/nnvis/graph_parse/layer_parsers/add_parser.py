@@ -10,7 +10,7 @@ class AddParser(LayerParser):
     def parse(id, layer):
         return {
                 'id': str(id),
-                'label': 'add {}'.format(id),
+                'label': 'add',
                 'layerType': 'add',
                 'params': {}
                 }

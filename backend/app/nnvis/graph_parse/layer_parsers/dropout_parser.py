@@ -21,7 +21,7 @@ class DropoutParser(LayerParser):
 
         return {
                 'id': str(id),
-                'label': 'dropout {}'.format(id),
+                'label': 'dropout',
                 'layerType': 'dropout',
                 'params': {
                     'keepProb': keep_prob
@@ -30,4 +30,4 @@ class DropoutParser(LayerParser):
 
     @staticmethod
     def recognize(layer):
-        return 'Dropout' in set([node.name.split('/')[1] for node in layer])
+        return 'Dropout' in set([name.split('/')[1] for name in layer.keys()])
