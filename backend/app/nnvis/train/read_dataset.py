@@ -7,7 +7,8 @@ from app.nnvis.models import Trainingsample as TrainingSample
 
 
 def get_train_ids(dataset_id):
-    images = Image.query.filter_by(dataset_id=dataset_id).all()
+    trainingsamples = list(map(lambda ts: ts.id, TrainingSample.query.filter_by(dataset_id=dataset_id).all()))
+    images = Image.query.filter(Image.trainsample_id.in_(trainingsamples)).all()
     ids = np.array([image.id for image in images])
     return ids
 
