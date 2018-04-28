@@ -86,7 +86,7 @@ def _build_pool_op(node, input_ops, is_training):
                     kernel_size=kernel_size,
                     stride=strides,
                     padding=_get_padding(node))
-        elif node['params']['pool'] == 'Avarage':
+        elif node['params']['pool'] == 'Average':
             pool_op = layers.avg_pool2d(
                     x,
                     kernel_size=kernel_size,
