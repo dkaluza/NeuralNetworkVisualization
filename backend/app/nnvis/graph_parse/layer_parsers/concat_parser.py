@@ -7,7 +7,7 @@ class ConcatParser(LayerParser):
         return 'Concat'
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         axis_node = LayerParser.find_node(
                 lambda node: node.name.split('/')[-1] == 'axis',
                 layer)[0]
@@ -16,6 +16,7 @@ class ConcatParser(LayerParser):
                 'id': str(id),
                 'label': 'concat',
                 'layerType': 'concat',
+                'shareWeightsFrom': 0,
                 'params': {
                     'axis': axis
                     }

@@ -7,7 +7,7 @@ class SoftmaxLayerParser(LayerParser):
         return 'Softmax'
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         axis_op = layer.get('{}/concat/axis'.format(id))
         if axis_op is None:
             axis = -1
@@ -17,6 +17,7 @@ class SoftmaxLayerParser(LayerParser):
                 'id': str(id),
                 'label': 'softmax',
                 'layerType': 'softmax',
+                'shareWeightsFrom': 0,
                 'params': {
                     'axis': axis
                     }

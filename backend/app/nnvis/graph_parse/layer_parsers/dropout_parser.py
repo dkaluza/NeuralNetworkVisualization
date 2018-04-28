@@ -7,7 +7,7 @@ class DropoutParser(LayerParser):
         return 'Dropout'
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         keep_prob = LayerParser.find_node(
                 lambda node: node.name.split('/')[-1] == 'keep_prob',
                 layer)
@@ -23,6 +23,7 @@ class DropoutParser(LayerParser):
                 'id': str(id),
                 'label': 'dropout',
                 'layerType': 'dropout',
+                'shareWeightsFrom': 0,
                 'params': {
                     'keepProb': keep_prob
                     }

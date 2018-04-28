@@ -19,7 +19,7 @@ class PoolLayerParser(LayerParser):
         raise Exception('no pool')
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         pool, pool_op = PoolLayerParser.get_pool(layer)
         pool_node = LayerParser.find_node_by_op_type(layer, pool_op)[0]
 
@@ -31,6 +31,7 @@ class PoolLayerParser(LayerParser):
                 'id': str(id),
                 'label': 'pool',
                 'layerType': 'pool',
+                'shareWeightsFrom': 0,
                 'params': {
                         'pool': pool,
                         'kernelShape': kernel_shape,

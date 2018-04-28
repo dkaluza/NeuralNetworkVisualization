@@ -40,7 +40,7 @@ class LayerParser():
         raise NotImplementedError()
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         raise NotImplementedError()
 
     @staticmethod

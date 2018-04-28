@@ -7,16 +7,21 @@ class FullyConnectedLayerParser(LayerParser):
         return 'Fully connected'
 
     @staticmethod
-    def parse(id, layer):
-        weights_name = '{}/weights/read'.format(id)
-        weights_node = layer[weights_name]
+    def parse(id, layer, nodes):
+        fc_node = LayerParser.find_node_by_op_type(layer, 'MatMul')[0]
+        weights_name = fc_node.input[-1]
+        weights_node = list(filter(
+            lambda node: node.name == weights_name, nodes))[0]
 
         activation = LayerParser.get_activation(layer)
         num_outputs = LayerParser._get_shape(weights_node)[-1]
+        share_from = int(fc_node.input[-1].split('/')[0])
+        share_from = share_from if share_from != id else 0
         return {
                 'id': str(id),
                 'label': 'fc',
                 'layerType': 'fc',
+                'shareWeightsFrom': share_from,
                 'params': {
                         'numOutputs': num_outputs,
                         'activation': activation

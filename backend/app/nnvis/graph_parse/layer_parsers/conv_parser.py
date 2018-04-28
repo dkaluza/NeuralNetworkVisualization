@@ -7,10 +7,11 @@ class ConvLayerParser(LayerParser):
         return 'Conv2D'
 
     @staticmethod
-    def parse(id, layer):
-        weights_name = '{}/weights/read'.format(id)
+    def parse(id, layer, nodes):
         conv_node = LayerParser.find_node_by_op_type(layer, 'Conv2D')[0]
-        weights_node = layer[weights_name]
+        weights_name = conv_node.input[-1]
+        weights_node = list(filter(
+            lambda node: node.name == weights_name, nodes))[0]
 
         weights_shape = LayerParser._get_shape(weights_node)
         activation = LayerParser.get_activation(layer)
@@ -18,11 +19,14 @@ class ConvLayerParser(LayerParser):
         strides = conv_node.attr['strides'].list.i[1:-1]
         num_filters = weights_shape[-1]
         kernel_shape = weights_shape[:-2]
+        share_from = int(conv_node.input[-1].split('/')[0])
+        share_from = share_from if share_from != id else 0
 
         return {
                 'id': str(id),
                 'label': 'conv',
                 'layerType': 'conv',
+                'shareWeightsFrom': share_from,
                 'params': {
                         'numFilters': num_filters,
                         'kernelShape': kernel_shape,

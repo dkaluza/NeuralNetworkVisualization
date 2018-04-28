@@ -84,7 +84,7 @@ class GraphParser():
 
         for layer_id, layer in layers.items():
             try:
-                layer_node = get_node(layer_id, layer)
+                layer_node = get_node(layer_id, layer, nodes)
                 graph['nodes'].append(layer_node)
             except UnknownLayerError:
                 print('Unknown layer {}'.format(layer_id))

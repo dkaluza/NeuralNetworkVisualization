@@ -7,7 +7,7 @@ class InputLayerParser(LayerParser):
         return 'Input'
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         input_node = LayerParser.find_node_by_op_type(layer, 'Placeholder')[0]
         input_id = input_node.name.split('/')[-1]
         shape = LayerParser._get_shape(input_node)
@@ -15,6 +15,7 @@ class InputLayerParser(LayerParser):
                 'id': str(id),
                 'label': 'input',
                 'layerType': 'input',
+                'shareWeightsFrom': 0,
                 'params': {
                     'inputId': input_id,
                     'shape': shape

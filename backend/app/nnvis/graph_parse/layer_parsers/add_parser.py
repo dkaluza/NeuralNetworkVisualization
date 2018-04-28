@@ -7,11 +7,12 @@ class AddParser(LayerParser):
         return 'Add'
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         return {
                 'id': str(id),
                 'label': 'add',
                 'layerType': 'add',
+                'shareWeightsFrom': 0,
                 'params': {}
                 }
 

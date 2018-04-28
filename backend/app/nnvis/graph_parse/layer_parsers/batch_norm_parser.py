@@ -46,13 +46,14 @@ class BatchNormParser(LayerParser):
         return decay
 
     @staticmethod
-    def parse(id, layer):
+    def parse(id, layer, nodes):
         center, scale = BatchNormParser.check_center_and_scale(layer)
         decay = BatchNormParser.get_decay(id, layer)
         return {
                 'id': str(id),
                 'label': 'batch_norm',
                 'layerType': 'batch_norm',
+                'shareWeightsFrom': 0,
                 'params': {
                     'decay': decay,
                     'center': center,
