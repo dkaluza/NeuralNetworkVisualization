@@ -4,7 +4,8 @@ from flask_jwt_extended import get_current_user
 from flask import current_app as app
 
 from app import db
-from app.nnvis.models import Dataset, Model, Image, TrainingSample
+from app.nnvis.models import Dataset, Model, Image
+from app.nnvis.models import Trainingsample as TrainingSample
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.utils import NnvisException
 
@@ -79,7 +80,7 @@ class DatasetBuilder(object):
         DatasetBuilder._assert_labels_in_range(labelsmap_vals, class_no)
 
         labeldicts = [pd.Series(labelsmap_vals, index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
-        row_no = labelsmapdf.count()
+        row_no = len(labelsmapdf.index)
         tsdicts = [pd.Series(np.arange(row_no), index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
 
         labelsdict_sum = reduce(lambda x, y: {**x, **y}, labeldicts)
@@ -117,7 +118,7 @@ class DatasetBuilder(object):
 
     def _create_trainingsample(self, fname):
         ts_no = self._img_to_ts[fname]
-        existing_ts = self._training_samples[ts_no]
+        existing_ts = self.training_samples[ts_no]
 
         if not existing_ts:
             label = str(self._img_to_label[fname])
@@ -127,15 +128,15 @@ class DatasetBuilder(object):
                 dataset_id=self._dataset_id
             )
 
-    def _create_image(self, fname, ts_id):
+    def _create_image(self, fname):
         new_image = Image(imageName=fname.rsplit('.', 1)[0],
                           relPath=fname,
-                          trainingsample_id='To be inserted')
+                          trainsample_id=1)
         
         self.imgs.append(new_image)
     
     def build(self):
-        db.session.bulk_save_objects(self.training_samples)
+        db.session.add_all(self.training_samples)
         db.session.flush()
         self._update_ts_ids()
         db.session.bulk_save_objects(self.imgs)
@@ -145,7 +146,6 @@ class DatasetBuilder(object):
         for img in self.imgs:
             ts_no = self._img_to_ts[img.relative_path]
             ts = self.training_samples[ts_no]
-            db.session.refresh(ts)
             img.trainsample_id = ts.id
 
 

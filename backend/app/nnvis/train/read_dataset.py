@@ -2,7 +2,8 @@ import numpy as np
 import os
 import imageio
 
-from app.nnvis.models import Dataset, Image, TrainingSample
+from app.nnvis.models import Dataset, Image
+from app.nnvis.models import Trainingsample as TrainingSample
 
 
 def get_train_ids(dataset_id):

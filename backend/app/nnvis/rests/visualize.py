@@ -1,5 +1,6 @@
 from app.nnvis.rests.protected_resource import ProtectedResource
-from app.nnvis.models import Architecture, Model, Image, Dataset, TrainingSample
+from app.nnvis.models import Architecture, Model, Image, Dataset
+from app.nnvis.models import Trainingsample as TrainingSample
 
 from app.utils import fileToB64
 from app.vis_tools import visualize_utils

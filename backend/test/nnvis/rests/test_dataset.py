@@ -2,7 +2,8 @@ from test import NNvisTestCase
 from test.utils import response_json, authorized_post
 from test_config import LABELS_FILENAME, CLASSMAP_FILENAME
 
-from app.nnvis.models import Dataset, Image, TrainingSample
+from app.nnvis.models import Dataset, Image
+from app.nnvis.models import Trainingsample as TrainingSample
 from app.utils import NnvisException
 
 import zipfile
@@ -185,7 +186,7 @@ class UploadNewDatasetTest(NNvisTestCase):
                 mimetype='multipart/form-data')
 
         self.assertEqual(rv.status_code, 201)
-        ds_id = self._assertDatasetCreated()
+        ds_id = self._assertDatasetCreated(1)
         self.assertEqual(len(Image.query.all()), 0)
         self.assertEqual(len(TrainingSample.query.all()), 0)
 
@@ -216,7 +217,7 @@ class UploadNewDatasetTest(NNvisTestCase):
             for row, expected_row in zip(rows, expected_content):
                 self.assertEqual(row, expected_row)
 
-    def _assertDatasetCreated(self, labels=None):
+    def _assertDatasetCreated(self, imgs_per_sample, labels=None):
         datasets = Dataset.query.all()
         self.assertEqual(len(datasets), 1)
         ds = datasets[0]
@@ -224,7 +225,7 @@ class UploadNewDatasetTest(NNvisTestCase):
         if labels:
             self.assertEqual(ds.labels.split(','), labels)
         self.assertEqual(ds.description, DATASET_DESCRIPTION)
-        self.assertEqual(ds.imgs_per_sample, 1)
+        self.assertEqual(ds.imgs_per_sample, imgs_per_sample)
 
         return ds.id
 
@@ -232,16 +233,16 @@ class UploadNewDatasetTest(NNvisTestCase):
         images = Image.query.all()
         self.assertEqual(len(images), len(imgs))
 
-        image_names = map(lambda x: x.name, images)
+        image_names = list(map(lambda x: x.name, images))
         for img in imgs:
             self.assertIn(img.split('.', 1)[0], image_names)
 
-        image_paths = map(lambda x: x.relative_path, images)
+        image_paths = list(map(lambda x: x.relative_path, images))
         for img in imgs:
             self.assertIn(img, image_paths)
 
-        image_ts_ids = map(lambda x: x.trainsample_id, images)
-        for i in range(len(images) // imgs_per_sample):
+        image_ts_ids = list(map(lambda x: str(x.trainsample_id), images))
+        for i in range(1, len(images) // imgs_per_sample + 1):
             self.assertIn(str(i), image_ts_ids)
 
     def _assertTrainingSamplesCreated(self):
@@ -253,11 +254,11 @@ class UploadNewDatasetTest(NNvisTestCase):
 
         self.assertEqual(len(tss), 3)
 
-        ts_names = map(lambda x: x.name, tss)
+        ts_names = list(map(lambda x: x.name, tss))
         for i in range(3):
             self.assertIn('Training sample {}'.format(i), ts_names)
 
-        ts_labels = map(lambda x: x.label, tss)
+        ts_labels = list(map(lambda x: str(x.label), tss))
         self.assertIn('10', ts_labels)
         self.assertIn('0', ts_labels)
         self.assertIn('2', ts_labels)
@@ -292,7 +293,7 @@ class UploadNewDatasetTest(NNvisTestCase):
                     file=good_zipfile_imgs(labels_content, classmap_content)),
                 mimetype='multipart/form-data')
         self.assertEqual(rv.status_code, 201)
-        ds_id = self._assertDatasetCreated(
+        ds_id = self._assertDatasetCreated(1,
             labels=[
                 'class0',
                 'class1',
@@ -335,7 +336,7 @@ class UploadNewDatasetTest(NNvisTestCase):
 
     def test_zipfile_multiimg_samples(self):
         labels_content = [
-            ['image', 'label'],
+            ['img1', 'img2', 'img3', 'label'],
             ['01.jpg', '02.jpg', '03.jpg', '0'],
             ['04.jpg', '05.jpg', '06.jpg', '10'],
             ['69.jpg', '70.jpg', '71.jpg', '2']
@@ -363,7 +364,7 @@ class UploadNewDatasetTest(NNvisTestCase):
                     file=good_zipfile_imgs(labels_content, classmap_content)),
                 mimetype='multipart/form-data')
         self.assertEqual(rv.status_code, 201)
-        ds_id = self._assertDatasetCreated(
+        ds_id = self._assertDatasetCreated(3,
             labels=[
                 'class0',
                 'class1',
@@ -388,10 +389,16 @@ class UploadNewDatasetTest(NNvisTestCase):
                 self.app.config['DATASET_FOLDER'], str(ds_id))
         self.assertTrue(os.path.exists(dataset_folder))
         dataset_files = os.listdir(dataset_folder)
-        self.assertEqual(len(dataset_files), 5)
+        self.assertEqual(len(dataset_files), 11)
         self.assertIn('02.jpg', dataset_files)
         self.assertIn('01.jpg', dataset_files)
+        self.assertIn('03.jpg', dataset_files)
+        self.assertIn('04.jpg', dataset_files)
+        self.assertIn('05.jpg', dataset_files)
+        self.assertIn('06.jpg', dataset_files)
         self.assertIn('69.jpg', dataset_files)
+        self.assertIn('70.jpg', dataset_files)
+        self.assertIn('71.jpg', dataset_files)
         self.assertIn(LABELS_FILENAME, dataset_files)
         self.assertIn(CLASSMAP_FILENAME, dataset_files)
 

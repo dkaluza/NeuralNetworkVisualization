@@ -219,7 +219,7 @@ class Dataset(db.Model, CRUD):
     imgs_per_sample = db.Column(db.Integer, nullable=False)
     models = db.relationship('Model', backref='dataset', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    training_samples = db.relationship('TrainingSample', cascade='all, delete-orphan',
+    training_samples = db.relationship('Trainingsample', cascade='all, delete-orphan',
                              backref='trainingsample', lazy=True)
 
     __table_args__ = (
@@ -242,14 +242,18 @@ class Dataset(db.Model, CRUD):
         return {str(i): c for i, c in enumerate(self.labels.split(','))}
 
 
-class TrainingSample(db.Model, CRUD):
+class Trainingsample(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     label = db.Column(db.Text(256), nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
                            nullable=False)
     images = db.relationship('Image', cascade='all, delete-orphan',
-                             backref='dataset', lazy=True)
+                             backref='trainingsample', lazy=True)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'dataset_id', name='_name_dataset_id_uc'),
+    )
 
     def __init__(self, name, label, dataset_id):
         self.name = name
@@ -267,25 +271,30 @@ class Image(db.Model, CRUD):
     name = db.Column(db.String(64), nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
     trainsample_id = db.Column(db.Integer, db.ForeignKey('trainingsample.id'),
-                               backref='trainingsample', lazy=True)
+                               nullable=False)
 
     __table_args__ = (
-        db.UniqueConstraint('name', 'dataset_id', name='_name_dataset_id_uc'),
+        db.UniqueConstraint('name', 'trainsample_id', name='_name_trainsample_id_uc'),
     )
 
-    def __init__(self, imageName, relPath, trainingsample_id):
+    def __init__(self, imageName, relPath, trainsample_id):
         self.name = imageName
         self.relative_path = relPath
-        self.trainsample_id = trainingsample_id
+        self.trainsample_id = trainsample_id
 
     def json(self):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
                 'label': self.label, 'dataset_id': self.dataset_id}
 
     def full_path(self):
-        ts = TrainingSample.query.get(self.trainsample_id)
+        ts = Trainingsample.query.get(self.trainsample_id)
         ds_path = Dataset.query.get(ts.dataset_id).path
         return os.path.join(ds_path, self.relative_path)
+
+    def __repr__(self):
+        return '<Image {} located at {} of training sample {}'.format(
+            self.name, self.relative_path, self.trainsample_id
+        )
 
 
 class User(db.Model, CRUD):
