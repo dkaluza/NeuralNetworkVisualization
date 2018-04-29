@@ -34,7 +34,7 @@ class DatasetBuilder(object):
         self._path = path
 
         self._label_list = self._parse_class_mapping(path)
-        self._img_to_label, self._img_to_ts, self._imgs_per_sample, ts_no =\
+        self._img_to_label, self._img_to_ts, self._img_to_position, self._imgs_per_sample, ts_no =\
             self._parse_labels_mapping(path, len(self._label_list))
 
         self.imgs = []
@@ -64,10 +64,12 @@ class DatasetBuilder(object):
         labeldicts = [pd.Series(labelsmap_vals, index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
         row_no = len(labelsmapdf.index)
         tsdicts = [pd.Series(np.arange(row_no), index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
+        positiondicts = [pd.Series(np.repeat(i, row_no), index=labelsmapdf[col]).to_dict() for i, col in enumerate(lcols[:-1])]
 
         labelsdict_sum = reduce(lambda x, y: {**x, **y}, labeldicts)
         tsdict_sum = reduce(lambda x, y: {**x, **y}, tsdicts)
-        return labelsdict_sum, tsdict_sum, (len(lcols) - 1), row_no
+        positiondict_sum = reduce(lambda x, y: {**x, **y}, positiondicts)
+        return labelsdict_sum, tsdict_sum, positiondict_sum, (len(lcols) - 1), row_no
 
     @staticmethod
     def _assert_labels_are_consecutive_numbers(array):
@@ -111,9 +113,11 @@ class DatasetBuilder(object):
             )
 
     def _create_image(self, fname):
+        pos = self._img_to_position[fname]
         new_image = Image(imageName=fname.rsplit('.', 1)[0],
                           relPath=fname,
-                          trainsample_id=1)
+                          trainsample_id=1,
+                          trainsample_position=pos)
         
         self.imgs.append(new_image)
     

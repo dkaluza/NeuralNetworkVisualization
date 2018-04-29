@@ -272,15 +272,17 @@ class Image(db.Model, CRUD):
     relative_path = db.Column(db.Text(256), nullable=False)
     trainsample_id = db.Column(db.Integer, db.ForeignKey('trainingsample.id'),
                                nullable=False)
+    trainsample_position = db.Column(db.Integer, nullable=False)
 
     __table_args__ = (
         db.UniqueConstraint('name', 'trainsample_id', name='_name_trainsample_id_uc'),
     )
 
-    def __init__(self, imageName, relPath, trainsample_id):
+    def __init__(self, imageName, relPath, trainsample_id, trainsample_position):
         self.name = imageName
         self.relative_path = relPath
         self.trainsample_id = trainsample_id
+        self.trainsample_position = trainsample_position
 
     def json(self):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
