@@ -8,7 +8,7 @@ flask-jwt-extended==3.7.1
 Flask-SocketIO==2.9.6
 eventlet==0.22.1
 kombu==4.1.0
-tensorflow
+tensorflow==1.8.0
 pandas
 imageio
 numpy
