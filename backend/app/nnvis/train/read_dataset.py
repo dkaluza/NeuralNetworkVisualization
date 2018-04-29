@@ -3,10 +3,12 @@ import os
 import imageio
 
 from app.nnvis.models import Dataset, Image
+from app.nnvis.models import Trainingsample as TrainingSample
 
 
 def get_train_ids(dataset_id):
-    images = Image.query.filter_by(dataset_id=dataset_id).all()
+    trainingsamples = list(map(lambda ts: ts.id, TrainingSample.query.filter_by(dataset_id=dataset_id).all()))
+    images = Image.query.filter(Image.trainsample_id.in_(trainingsamples)).all()
     ids = np.array([image.id for image in images])
     return ids
 
@@ -28,7 +30,9 @@ def read_data(dataset_id, ids):
     for image in images:
         x = imageio.imread(os.path.join(dataset.path, image.relative_path))
         y = np.zeros(labels_num)
-        y[int(image.label)] = 1.
+        # To consider: retaining 'label' field in Image for speed
+        label = int(TrainingSample.query.get(image.trainsample_id).label)
+        y[label] = 1.
 
         xs.append(x)
         ys.append(y)
