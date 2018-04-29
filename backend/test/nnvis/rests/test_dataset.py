@@ -245,6 +245,10 @@ class UploadNewDatasetTest(NNvisTestCase):
         for i in range(1, len(images) // imgs_per_sample + 1):
             self.assertIn(str(i), image_ts_ids)
 
+        image_pos = list(map(lambda x: x.trainsample_position, images))
+        expected_pos = [y for y in list(range(imgs_per_sample)) for _ in range(len(imgs) // imgs_per_sample)]
+        self.assertEqual(sorted(image_pos), sorted(expected_pos))
+
     def _assertTrainingSamplesCreated(self):
         tss = TrainingSample.query.all()
         ds_id = Dataset.query.all()[0].id
