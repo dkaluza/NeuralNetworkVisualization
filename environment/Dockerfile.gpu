@@ -4,7 +4,7 @@ ADD requirements.gpu /
 WORKDIR /shared/frontend/NNVisualization
 
 RUN     apt-get update -y \
-    && apt-get -o Dpkg::Options::="--force-confmiss" install --reinstall netbase -y
+    && apt-get -o Dpkg::Options::="--force-confmiss" install --reinstall netbase -y \
     && apt-get install wget -y \
     && echo "deb http://www.rabbitmq.com/debian/ testing main"  | tee  /etc/apt/sources.list.d/rabbitmq.list > /dev/null \
     && wget https://www.rabbitmq.com/rabbitmq-signing-key-public.asc \
