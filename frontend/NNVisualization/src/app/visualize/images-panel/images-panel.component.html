@@ -46,7 +46,7 @@
         <div fxLayout="row"
              fxLayoutAlign="center">
             <div fxLayoutAlign="left">
-                <button mat-icon-button class="icon-button" (click)="onGetPreviousImage()">
+                <button mat-icon-button class="icon-button" (click)="onGetPreviousImage(select)">
                     <mat-icon>skip_previous</mat-icon>
                 </button>
             </div>
@@ -62,7 +62,7 @@
             </ng-select>
 
             <div fxLayoutAlign="right">
-                <button mat-icon-button class="icon-button" (click)="onGetNextImage()">
+                <button mat-icon-button class="icon-button" (click)="onGetNextImage(select)">
                     <mat-icon>skip_next</mat-icon>
                 </button>
             </div>
