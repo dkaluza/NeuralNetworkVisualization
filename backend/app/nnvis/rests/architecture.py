@@ -11,7 +11,7 @@ from app.nnvis.models import Architecture, Model
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.train.build_model import TFModel
 
-from app.nnvis.graph_parse.parse import GraphParser, IncorrectMetaGraph
+from app.nnvis.graph_parse.parse import GraphParser
 
 
 class ArchitectureUtils(object):
@@ -100,13 +100,11 @@ class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
         try:
             new_arch.add()
         except Exception as e:
-            print(e)
             abort(403, message=e)
 
         try:
             self._save_meta_file(new_arch)
         except Exception as e:
-            print(e)
             new_arch.delete()
             abort(403, message=str(e))
 

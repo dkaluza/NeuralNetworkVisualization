@@ -122,6 +122,7 @@ class Model(db.Model, CRUD):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
+        # TODO: think about some better solution for this
         super().add()
         self.weights_path = os.path.join(
                 app.config['WEIGHTS_DIR'],

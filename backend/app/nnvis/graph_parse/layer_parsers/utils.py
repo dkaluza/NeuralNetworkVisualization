@@ -23,15 +23,18 @@ LAYER_PARSERS = [
         ]
 
 
-def get_node(id, layer, nodes):
+def _search_for_layer_parser(layer):
     for layer_parser in LAYER_PARSERS:
         if layer_parser.recognize(layer):
-            return layer_parser.parse(id, layer, nodes)
+            return layer_parser
     raise UnknownLayerError()
+
+
+def get_node(id, layer, nodes):
+    parser = _search_for_layer_parser(layer)
+    return parser.parse(id, layer, nodes)
 
 
 def get_type(layer):
-    for layer_parser in LAYER_PARSERS:
-        if layer_parser.recognize(layer):
-            return layer_parser.layer_name()
-    raise UnknownLayerError()
+    parser = _search_for_layer_parser(layer)
+    return parser.parse(layer)
