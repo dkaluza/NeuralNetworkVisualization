@@ -5,7 +5,7 @@ import { VisualizeService } from '../visualize.service';
 import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
 import { Postprocessing } from '../postprocessing.model';
 import { Algorithm } from '../algorithm.model';
-
+import { NgSelectComponent } from '@ng-select/ng-select';
 
 
 @Component({
@@ -15,10 +15,10 @@ import { Algorithm } from '../algorithm.model';
 })
 export class ImagesPanelComponent implements OnInit {
     placeholder_img = 'api/static/placeholder2.jpg';
-    currentImage: Image; // = new Image(-1, -1, '', '', -1);
+    currentImage: Image;
     currentImageVis = '';
 
-    currentImageName: any;
+    currentImageName: string;
     imagesList: Image[] = [];
     onImageChecked = false;
 
@@ -36,7 +36,7 @@ export class ImagesPanelComponent implements OnInit {
         this.onGetAlgorithms();
     }
 
-    onGetNextImage() {
+    onGetNextImage(select: NgSelectComponent) {
         let index = this.imagesList.findIndex((img) => {
             return img.imageId === this.currentImage.imageId;
         });
@@ -49,7 +49,7 @@ export class ImagesPanelComponent implements OnInit {
         this.onGetImage(this.currentImage);
     }
 
-    onGetPreviousImage() {
+    onGetPreviousImage(select: NgSelectComponent) {
         let index = this.imagesList.findIndex((img) => {
             return img.imageId === this.currentImage.imageId;
         });
@@ -86,7 +86,9 @@ export class ImagesPanelComponent implements OnInit {
     onGetImage(image: Image) {
         this.visualizeService.getImage(image.imageId)
             .subscribe(response => {
-                this._parseb64(response['img'], (result) => { this.currentImage.display_path = result; });
+                this._parseb64(response['img'], (result) => {
+                    this.currentImage.display_path = result;
+                });
             });
         this.currentImageVis = '';
     }
@@ -95,7 +97,9 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.visualizeService.getImageVis(model.id, this.currentImage.imageId, this.onImageChecked)
             .subscribe(response => {
-                this._parseb64(response['img'], (result) => { this.currentImageVis = result; });
+                this._parseb64(response['img'], (result) => {
+                    this.currentImageVis = result;
+                });
             });
     }
 
