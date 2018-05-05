@@ -1,17 +1,9 @@
-import os
-import shutil
-
-from flask import current_app as app
-import base64
-
 from app.nnvis.models import Dataset
 from app.nnvis.models import Image
 from app.nnvis.models import Model
 from app.nnvis.rests.protected_resource import ProtectedResource
-from app.vis_tools import visualize_utils
-
-
 from app.utils import fileToB64
+from app.vis_tools import visualize_utils
 
 
 def safe_add_is_training(feed_dict, graph, train):
@@ -20,6 +12,7 @@ def safe_add_is_training(feed_dict, graph, train):
         feed_dict[is_training] = train
     except KeyError:
         pass
+
 
 # inference/<int:model_id>/<int:image_id>
 class Inference(ProtectedResource):
@@ -35,8 +28,8 @@ class Inference(ProtectedResource):
         image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
 
         feed_dict = {
-                x: [image_input]
-                }
+            x: [image_input]
+        }
         safe_add_is_training(feed_dict, graph, False)
 
         predictions = output_op.eval(feed_dict=feed_dict, session=sess)
@@ -93,13 +86,12 @@ class Visualize(ProtectedResource):
         img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_rgb)
         img_b64 = fileToB64(img_stream)
         return {
-                'base64': [{
-                    'name': 'img',
-                    'contentType': 'image/png'
-                    }],
-                'img': img_b64
-                }
-
+            'base64': [{
+                'name': 'img',
+                'contentType': 'image/png'
+            }],
+            'img': img_b64
+        }
 
 
 # /image/<string:image_id>
@@ -110,12 +102,12 @@ class Images(ProtectedResource):
         with open(img_path, 'rb') as img_f:
             img_b64 = fileToB64(img_f)
         return {
-                'base64': [{
-                    'name': 'img',
-                    'contentType': 'image/png'
-                    }],
-                'img': img_b64
-                }
+            'base64': [{
+                'name': 'img',
+                'contentType': 'image/png'
+            }],
+            'img': img_b64
+        }
 
 
 # /images/<int:model_id>
@@ -140,4 +132,3 @@ class Postprocessing(ProtectedResource):
         postprocessings = visualize_utils.algorithms_register[alg_id].postprocessings
         return {'postprocessing': [{'id': p_id, 'name': postprocessing.name()}
                                    for p_id, postprocessing in postprocessings.items()]}
-
