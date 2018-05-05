@@ -34,6 +34,7 @@ export class ImagesPanelComponent implements OnInit {
     ngOnInit() {
         this.onGetDataset();
         this.onGetAlgorithms();
+        this.onSetNAs();
     }
 
     onGetNextImage(select: NgSelectComponent) {
@@ -91,6 +92,7 @@ export class ImagesPanelComponent implements OnInit {
                 });
             });
         this.currentImageVis = '';
+        this.onSetNAs();
     }
 
     onVisualize() {
@@ -120,6 +122,18 @@ export class ImagesPanelComponent implements OnInit {
                 const scores3 = scores2.slice(0, 10);
                 this.dataSource = new MatTableDataSource(scores3);
             });
+    }
+
+    onSetNAs() {
+        const scores = [];
+        for (let i = 0; i < 10; i++) {
+            scores.push({
+                'class_number': 'N/A',
+                'class_name': 'N/A',
+                'score': 'N/A',
+            });
+        }
+        this.dataSource = new MatTableDataSource(scores);
     }
 
     onSelectPostprocessing(event) {
