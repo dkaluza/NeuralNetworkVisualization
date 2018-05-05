@@ -40,8 +40,8 @@ def _build_input_op(node, input_ops, is_training):
 
 def _build_fc_op(node, input_ops, is_training):
     x = input_ops[0]
-    x = layers.flatten(x)
     with tf.name_scope(node['id']):
+        x = layers.flatten(x)
         scope = str(node['weightId'])
         op = layers.fully_connected(
                 x, num_outputs=node['params']['numOutputs'],
@@ -86,7 +86,7 @@ def _build_pool_op(node, input_ops, is_training):
                     kernel_size=kernel_size,
                     stride=strides,
                     padding=_get_padding(node))
-        elif node['params']['pool'] == 'Avarage':
+        elif node['params']['pool'] == 'Average':
             pool_op = layers.avg_pool2d(
                     x,
                     kernel_size=kernel_size,
@@ -103,8 +103,8 @@ def _build_pool_op(node, input_ops, is_training):
 def _build_dropout_op(node, input_ops, is_training):
     x = input_ops[0]
     keep_prob = float(node['params']['keepProb'])
-    keep_prob = tf.where(is_training, keep_prob, 1.0)
     with tf.name_scope(node['id']):
+        keep_prob = tf.where(is_training, keep_prob, 1.0)
         op = layers.dropout(x, keep_prob=keep_prob)
         # add new name for logits tensor
         tf.identity(op, name='logits')
@@ -128,13 +128,19 @@ def _build_batch_norm_op(node, input_ops, is_training):
 
 def _build_add_op(node, input_ops, is_training):
     with tf.name_scope(node['id']):
-        return tf.add_n(input_ops, name='logits')
+        op = tf.add_n(input_ops)
+        # add new name for logits tensor
+        tf.identity(op, name='logits')
+        return op
 
 
 def _build_concat_op(node, input_ops, is_training):
     with tf.name_scope(node['id']):
         axis = int(node['params']['axis'])
-        return tf.concat(input_ops, axis=axis, name='logits')
+        op = tf.concat(input_ops, axis=axis)
+        # add new name for logits tensor
+        tf.identity(op, name='logits')
+        return op
 
 
 def _build_softmax_op(node, input_ops, is_training):

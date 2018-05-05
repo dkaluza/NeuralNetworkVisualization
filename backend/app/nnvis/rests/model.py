@@ -4,10 +4,14 @@ from flask_jwt_extended import get_current_user
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO
 import os
+import json
 
 from app.utils import NnvisException, fileToB64
 from app.nnvis.models import Model, Architecture
 from app.nnvis.rests.protected_resource import ProtectedResource
+
+from app.nnvis.train import TFModel
+from app.nnvis.graph_parse.parse import GraphParser, IncorrectMetaGraph
 
 
 class ModelUtils:
@@ -97,13 +101,13 @@ class ImportModel(ProtectedResource):
             lambda name: '.data' in name,
             files))
         if len(data_files) != 1:
-            abort(400, 'Wrong number of .ckpt.data files')
+            abort(400, 'Wrong number of .data files')
 
         index_files = list(filter(
             lambda name: '.index' in name,
             files))
         if len(index_files) != 1:
-            abort(400, 'Wrong number of .ckpt.index files')
+            abort(400, 'Wrong number of .index files')
 
         return meta_files[0], data_files[0], index_files[0]
 
@@ -134,6 +138,10 @@ class ImportModel(ProtectedResource):
             meta_path = new_arch.get_meta_file_path()
             with open(meta_path, 'wb') as fd:
                 fd.write(zipdata.read(meta))
+            parser = GraphParser(meta_path)
+            graph = parser.parse()
+            new_arch.graph = json.dumps(graph)
+            new_arch.update()
         except Exception as e:
             new_arch.delete()
             abort(403, message=e)
@@ -150,7 +158,7 @@ class ImportModel(ProtectedResource):
             abort(403, message=e)
 
         try:
-            os.mkdir(new_model.weights_path)
+            os.mkdir(new_model.get_folder_path())
             data_path = new_model.get_data_file_path()
             with open(data_path, 'wb') as fd:
                 fd.write(zipdata.read(data))
@@ -161,6 +169,12 @@ class ImportModel(ProtectedResource):
             new_model.delete()
             new_arch.delete()
             abort(403, message=e)
+
+        model = TFModel(meta_file=meta_path)
+        if not model.check_weights(new_model.weights_path):
+            new_model.delete()
+            new_arch.delete()
+            abort(403, message='Model and architecture don\'t match')
 
         return {
                 'arch': new_arch.to_dict(),

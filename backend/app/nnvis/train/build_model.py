@@ -166,3 +166,15 @@ class TFModel:
         with self._graph.as_default():
             saver = tf.train.Saver()
             saver.export_meta_graph(saver_path)
+
+    def check_weights(self, weights_path):
+        try:
+            with self._graph.as_default():
+                saver = tf.train.Saver()
+                with tf.Session() as sess:
+                    saver.restore(sess, weights_path)
+            return True
+        except Exception:
+            # something went wrong during weights loading
+            #   weights doesn't match graph
+            return False

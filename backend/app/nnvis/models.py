@@ -121,11 +121,14 @@ class Model(db.Model, CRUD):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
+        # TODO: think about some better solution for this
+        super().add()
         self.weights_path = os.path.join(
                 app.config['WEIGHTS_DIR'],
                 str(self.arch_id),
-                str(self.id))
-        super().add()
+                str(self.id),
+                'model')
+        super().update()
 
     def delete(self):
         if os.path.isdir(self.weights_path):
