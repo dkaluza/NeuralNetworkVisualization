@@ -37,4 +37,4 @@ def get_node(id, layer, nodes):
 
 def get_type(layer):
     parser = _search_for_layer_parser(layer)
-    return parser.parse(layer)
+    return parser.name(layer)

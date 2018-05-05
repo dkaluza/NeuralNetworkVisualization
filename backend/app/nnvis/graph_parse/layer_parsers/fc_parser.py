@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class FullyConnectedLayerParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'Fully connected'
+
+    def __init__(self):
+        super().__init__('Fully connected')
 
     @staticmethod
     def parse(id, layer, nodes):

@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class AddParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'Add'
+
+    def __init__(self):
+        super().__init__('Add')
 
     @staticmethod
     def parse(id, layer, nodes):

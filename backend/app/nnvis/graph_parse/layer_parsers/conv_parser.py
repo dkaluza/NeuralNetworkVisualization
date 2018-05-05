@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class ConvLayerParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'Conv2D'
+
+    def __init__(self):
+        super().__init__('Conv2D')
 
     @staticmethod
     def parse(id, layer, nodes):

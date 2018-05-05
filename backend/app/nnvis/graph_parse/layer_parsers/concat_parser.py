@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class ConcatParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'Concat'
+
+    def __init__(self):
+        super().__init__('Concat')
 
     @staticmethod
     def parse(id, layer, nodes):

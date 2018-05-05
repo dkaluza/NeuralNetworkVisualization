@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class DropoutParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'Dropout'
+
+    def __init__(self):
+        super().__init__('Dropout')
 
     @staticmethod
     def parse(id, layer, nodes):

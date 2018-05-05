@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class SoftmaxLayerParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'Softmax'
+
+    def __init__(self):
+        super().__init__('Softmax')
 
     @staticmethod
     def parse(id, layer, nodes):

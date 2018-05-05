@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class BatchNormParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'BatchNorm'
+
+    def __init__(self):
+        super().__init__('BatchNorm')
 
     @staticmethod
     def check_center_and_scale(layer):

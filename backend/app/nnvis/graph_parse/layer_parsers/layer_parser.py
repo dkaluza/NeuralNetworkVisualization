@@ -1,4 +1,11 @@
 class LayerParser():
+
+    def __init__(self, layer_name):
+        self._layer_name = layer_name
+
+    def name(self):
+        return self._layer_name
+
     @staticmethod
     def _get_ops_set(layer):
         return set([node.op for _, node in layer.items()])
@@ -34,10 +41,6 @@ class LayerParser():
     @staticmethod
     def get_padding(node):
         return node.attr['padding'].s.decode('utf-8').title()
-
-    @staticmethod
-    def layer_name():
-        raise NotImplementedError()
 
     @staticmethod
     def parse(id, layer, nodes):

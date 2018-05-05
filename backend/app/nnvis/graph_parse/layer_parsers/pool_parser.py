@@ -2,9 +2,9 @@ from .layer_parser import LayerParser
 
 
 class PoolLayerParser(LayerParser):
-    @staticmethod
-    def layer_name():
-        return 'Pool'
+
+    def __init__(self):
+        super().__init__('Pool')
 
     @staticmethod
     def get_pool(layer):
