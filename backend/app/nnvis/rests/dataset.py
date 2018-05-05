@@ -5,6 +5,7 @@ from flask import current_app as app
 
 from app import db
 from app.nnvis.models import Dataset, Model, Image
+from app.nnvis.models import Trainingsample as TrainingSample
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.utils import NnvisException
 
@@ -12,6 +13,7 @@ import os
 import shutil
 import pandas as pd
 import numpy as np
+from functools import reduce
 from zipfile import ZipFile
 
 SUPPORTED_EXTENSIONS = [
@@ -22,6 +24,115 @@ SUPPORTED_EXTENSIONS = [
     'png',
     'PNG'
 ]
+
+
+class DatasetBuilder(object):
+    """Creates the Image and TrainingSample entries associated with a dataset"""
+
+    def __init__(self, dataset_id, path):
+        self._dataset_id = dataset_id
+        self._path = path
+
+        self._label_list = self._parse_class_mapping(path)
+        self._img_to_label, self._img_to_ts, self._img_to_position, self._imgs_per_sample, ts_no =\
+            self._parse_labels_mapping(path, len(self._label_list))
+
+        self.imgs = []
+        self.training_samples = [None] * ts_no
+
+    @staticmethod
+    def _parse_class_mapping(path):
+        classmap_filename = app.config['CLASSMAP_FILENAME']
+        classmapdf = pd.read_csv(os.path.join(path, classmap_filename))
+        ccols = classmapdf.columns
+        classmapdf[ccols[0]] = classmapdf[ccols[0]].astype(np.int32)
+        classnums = sorted(classmapdf[ccols[0]].tolist())
+        DatasetBuilder._assert_labels_are_consecutive_numbers(classnums)
+
+        label_list = classmapdf.sort_values([ccols[0]])[ccols[1]].tolist()
+        return label_list
+
+    @staticmethod
+    def _parse_labels_mapping(path, class_no):
+        labels_filename = app.config['LABELS_FILENAME']
+        labelsmapdf = pd.read_csv(os.path.join(path, labels_filename))
+        lcols = labelsmapdf.columns
+        labelsmapdf[lcols[-1]] = labelsmapdf[lcols[-1]].astype(np.int32)
+        labelsmap_vals = labelsmapdf[lcols[-1]].values
+        DatasetBuilder._assert_labels_in_range(labelsmap_vals, class_no)
+
+        labeldicts = [pd.Series(labelsmap_vals, index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
+        row_no = len(labelsmapdf.index)
+        tsdicts = [pd.Series(np.arange(row_no), index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
+        positiondicts = [pd.Series(np.repeat(i, row_no), index=labelsmapdf[col]).to_dict() for i, col in enumerate(lcols[:-1])]
+
+        labelsdict_sum = reduce(lambda x, y: {**x, **y}, labeldicts)
+        tsdict_sum = reduce(lambda x, y: {**x, **y}, tsdicts)
+        positiondict_sum = reduce(lambda x, y: {**x, **y}, positiondicts)
+        return labelsdict_sum, tsdict_sum, positiondict_sum, (len(lcols) - 1), row_no
+
+    @staticmethod
+    def _assert_labels_are_consecutive_numbers(array):
+        for i, classnum in enumerate(array):
+            _assert(classnum == i, "Class numbers must be a consecutive numbers starting from 0")
+
+    @staticmethod
+    def _assert_labels_in_range(array, class_no):
+        for classnum in array:
+            _assert(classnum < class_no, "Data point has a class number without a corresponding name mapping")
+
+    def label_list(self):
+        return self._label_list
+
+    def imgs_per_sample(self):
+        return self._imgs_per_sample
+
+    def process_file(self, fname):
+        if self._check_supported_extension(fname):
+            self._create_trainingsample(fname)
+            self._create_image(fname)
+        else:
+            labels_filename = app.config['LABELS_FILENAME']
+            classmap_filename = app.config['CLASSMAP_FILENAME']
+            _assert(fname == labels_filename or fname == classmap_filename, 'Unexpected file found in archive')
+
+    @staticmethod
+    def _check_supported_extension(fname):
+        return fname.rsplit('.', 1)[1] in SUPPORTED_EXTENSIONS
+
+    def _create_trainingsample(self, fname):
+        ts_no = self._img_to_ts[fname]
+        existing_ts = self.training_samples[ts_no]
+
+        if not existing_ts:
+            label = str(self._img_to_label[fname])
+            self.training_samples[ts_no] = TrainingSample(
+                name='Training sample {}'.format(ts_no),
+                label=label,
+                dataset_id=self._dataset_id
+            )
+
+    def _create_image(self, fname):
+        pos = self._img_to_position[fname]
+        new_image = Image(imageName=fname.rsplit('.', 1)[0],
+                          relPath=fname,
+                          trainsample_id=1,
+                          trainsample_position=pos)
+        
+        self.imgs.append(new_image)
+    
+    def build(self):
+        db.session.add_all(self.training_samples)
+        db.session.flush()
+        self._update_ts_ids()
+        db.session.bulk_save_objects(self.imgs)
+        db.session.commit()
+
+    def _update_ts_ids(self):
+        for img in self.imgs:
+            ts_no = self._img_to_ts[img.relative_path]
+            ts = self.training_samples[ts_no]
+            img.trainsample_id = ts.id
 
 
 def dataset_to_dict(dataset):
@@ -37,69 +148,21 @@ def _assert(b, msg):
         raise NnvisException(msg)
 
 
-def check_supported_extension(fname):
-    return fname.rsplit('.', 1)[1] in SUPPORTED_EXTENSIONS
-
-
-def create_image(fname, labelsdict, dataset_id):
-    _assert(check_supported_extension(fname), "Unsupported extension found")
-
-    l = str(labelsdict[fname])
-    new_image = Image(imageName=fname.rsplit('.', 1)[0],
-                      relPath=fname,
-                      label=l,
-                      dataset_id=dataset_id)
-    return new_image
-
-
 def unzip_validate_archive(path, file, dataset_id):
-
-    def _assert_labels_are_consecutive_numbers(nparray):
-        for i, classnum in enumerate(nparray):
-            _assert(classnum == i, "Class numbers must be a consecutive numbers starting from 0")
-
-    def _assert_labels_in_set(nparray, permitted_vals):
-        for classnum in nparray:
-            _assert(classnum in permitted_vals, "Data point has a class number without a corresponding name mapping")
-
-    labels_filename = app.config['LABELS_FILENAME']
-    classmap_filename = app.config['CLASSMAP_FILENAME']
     try:
         os.makedirs(path, exist_ok=True)
         archive = ZipFile(file)
         archive.extractall(path)
 
-        classmapdf = pd.read_csv(os.path.join(path, classmap_filename))
-        ccols = classmapdf.columns
-        classmapdf[ccols[0]] = classmapdf[ccols[0]].astype(np.int32)
-        classnums = sorted(classmapdf[ccols[0]].tolist())
-        _assert_labels_are_consecutive_numbers(classnums)
-
-        label_list = classmapdf.sort_values([ccols[0]])[ccols[1]].tolist()
-
-        labelsmapdf = pd.read_csv(os.path.join(path, labels_filename))
-        lcols = labelsmapdf.columns
-        labelsmapdf[lcols[1]] = labelsmapdf[lcols[1]].astype(np.int32)
-        labelsmap_vals = labelsmapdf[lcols[1]].values
-        _assert_labels_in_set(labelsmap_vals, classnums)
-
-        labelsdict = pd.Series(labelsmap_vals,
-                               index=labelsmapdf[lcols[0]]).to_dict()
-
-        images = []
+        ds_builder = DatasetBuilder(dataset_id, path)
 
         for entry in os.scandir(path):
             _assert(entry.is_file(), "Unexpected directory found in archive")
-            if check_supported_extension(entry.name):
-                image = create_image(entry.name, labelsdict, dataset_id)
-                images.append(image)
-            else:
-                _assert(entry.name == labels_filename or entry.name == classmap_filename, 'Unexpected file found in archive')
+            ds_builder.process_file(entry.name)
 
-        db.session.bulk_save_objects(images)
-        db.session.commit()
+        ds_builder.build()
 
-        return label_list
+        return ds_builder.label_list(), ds_builder.imgs_per_sample()
 
     except:
         shutil.rmtree(path, ignore_errors=True)
@@ -163,17 +226,19 @@ class UploadNewDataset(ProtectedResource):
                               description=postdata.get('description'),
                               path='',
                               labels='',
+                              imgs_per_sample=0,
                               user_id=get_current_user())
 
         try:
             new_dataset.add()
             new_dataset.path = os.path.join(app.config['DATASET_FOLDER'],
                                             str(new_dataset.id))
-            unique_labels = unzip_validate_archive(
+            unique_labels, imgs_per_sample = unzip_validate_archive(
                                 new_dataset.path,
                                 postfile.stream,
                                 new_dataset.id)
             new_dataset.labels = ','.join(map(str, unique_labels))
+            new_dataset.imgs_per_sample = imgs_per_sample
             new_dataset.update()
         except:
             new_dataset.delete()

@@ -1,7 +1,6 @@
-import base64
-
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Architecture, Model, Image, Dataset
+from app.nnvis.models import Trainingsample as TrainingSample
 
 from app.utils import fileToB64
 from app.vis_tools import visualize_utils
@@ -58,6 +57,8 @@ class Visualize(ProtectedResource):
 
         image = Image.query.get(image_id)
         image_path = image.full_path()
+        ts = TrainingSample.query.get(image.trainsample_id)
+        label = int(ts.label)
 
         model = Model.query.get(model_id)
         weights_path = model.weights_path
@@ -68,7 +69,7 @@ class Visualize(ProtectedResource):
         vis_algorithm = alg_class(graph, sess, y, x)
 
         feed_dict = {
-                neuron_selector: int(image.label)
+                neuron_selector: label
                 }
         safe_add_is_training(feed_dict, graph, False)
 
@@ -108,7 +109,7 @@ class Images(ProtectedResource):
 class ImageList(ProtectedResource):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        images = model.dataset.images
+        images = Image.query.join(TrainingSample.images).filter(TrainingSample.dataset_id == model.dataset.id).all()
         return {'images': [image.json() for image in images]}
 
 
