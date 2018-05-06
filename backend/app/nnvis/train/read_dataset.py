@@ -33,7 +33,6 @@ def read_data(dataset_id, ids):
         ts_dict[image.trainsample_id].append(image)
 
     for ts_id, ts_images in ts_dict.items():
-        # sort images by their trainsample_position
         ts_images.sort(key=lambda im: im.trainsample_position)
 
         y = np.zeros(labels_num)
@@ -41,7 +40,7 @@ def read_data(dataset_id, ids):
             x.append(imageio.imread(
                 os.path.join(dataset.path, image.relative_path)))
         # To consider: retaining 'label' field in Image for speed
-        label = int(TrainingSample.query.get(image.trainsample_id).label)
+        label = int(TrainingSample.query.get(ts_id).label)
         y[label] = 1.
         ys.append(y)
 
