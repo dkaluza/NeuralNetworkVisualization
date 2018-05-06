@@ -37,7 +37,7 @@ export class ImagesPanelComponent implements OnInit {
         this.onSetNAs();
     }
 
-    onGetNextImage(select: NgSelectComponent) {
+    onGetNextImage() {
         let index = this.imagesList.findIndex((img) => {
             return img.imageId === this.currentImage.imageId;
         });
@@ -50,7 +50,7 @@ export class ImagesPanelComponent implements OnInit {
         this.onGetImage(this.currentImage);
     }
 
-    onGetPreviousImage(select: NgSelectComponent) {
+    onGetPreviousImage() {
         let index = this.imagesList.findIndex((img) => {
             return img.imageId === this.currentImage.imageId;
         });

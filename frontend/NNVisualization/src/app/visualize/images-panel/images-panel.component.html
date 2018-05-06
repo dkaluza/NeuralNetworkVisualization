@@ -46,13 +46,12 @@
         <div fxLayout="row"
              fxLayoutAlign="center">
             <div fxLayoutAlign="left">
-                <button mat-icon-button class="icon-button" (click)="onGetPreviousImage(select)">
+                <button mat-icon-button class="icon-button" (click)="onGetPreviousImage()">
                     <mat-icon>skip_previous</mat-icon>
                 </button>
             </div>
 
             <ng-select [items]="imagesList"
-                       #select
                        [virtualScroll]="true"
                        bindLabel="imageName"
                        bindValue="imageName"
@@ -62,7 +61,7 @@
             </ng-select>
 
             <div fxLayoutAlign="right">
-                <button mat-icon-button class="icon-button" (click)="onGetNextImage(select)">
+                <button mat-icon-button class="icon-button" (click)="onGetNextImage()">
                     <mat-icon>skip_next</mat-icon>
                 </button>
             </div>
