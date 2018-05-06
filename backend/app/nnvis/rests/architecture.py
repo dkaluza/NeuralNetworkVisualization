@@ -11,6 +11,8 @@ from app.nnvis.models import Architecture, Model
 from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.train.build_model import TFModel
 
+from app.nnvis.graph_parse.parse import GraphParser
+
 
 class ArchitectureUtils(object):
     @staticmethod
@@ -84,7 +86,7 @@ class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
         args = request.get_json(force=True)
 
         if 'name' not in args:
-            abort(404, message='No architecure name provided')
+            abort(404, message='No architecture name provided')
         if 'graph' not in args:
             abort(404, message='No graph provided')
         if 'description' not in args:
@@ -97,9 +99,14 @@ class UploadNewArchitecture(ProtectedResource, ArchitectureUtils):
 
         try:
             new_arch.add()
-            self._save_meta_file(new_arch)
         except Exception as e:
             abort(403, message=e)
+
+        try:
+            self._save_meta_file(new_arch)
+        except Exception as e:
+            new_arch.delete()
+            abort(403, message=str(e))
 
         return new_arch.to_dict(), 201
 
@@ -108,6 +115,47 @@ class ListAllArchitectures(ProtectedResource, ArchitectureUtils):
     def get(self):
         archs = Architecture.query.filter_by(user_id=get_current_user())
         return [arch.to_dict() for arch in archs]
+
+
+class ImportArchitecture(ProtectedResource):
+    def __verify_postdata(self, data):
+        if 'name' not in data:
+            abort(400, 'Name is required')
+
+    def post(self):
+        if 'file' not in request.files:
+            abort(400, message='No file attached')
+
+        postfile = request.files['file']
+        if postfile.filename == '':
+            abort(400, message='No file attached')
+
+        postdata = request.form
+        self.__verify_postdata(postdata)
+
+        new_arch = Architecture(
+                name=postdata['name'],
+                description=postdata.get('desc'),
+                graph='{\"nodes\": [], \"links\": []}',
+                user_id=get_current_user())
+        try:
+            new_arch.add()
+        except Exception as e:
+            abort(403, message=e)
+
+        try:
+            path = new_arch.get_meta_file_path()
+            with open(path, 'wb') as fd:
+                fd.write(postfile.stream.read())
+            parser = GraphParser(path)
+            graph = parser.parse()
+            new_arch.graph = json.dumps(graph)
+            new_arch.update()
+        except Exception as e:
+            new_arch.delete()
+            abort(403, message=e)
+
+        return new_arch.to_dict(), 201
 
 
 class ExportArchitecture(ProtectedResource, ArchitectureUtils):

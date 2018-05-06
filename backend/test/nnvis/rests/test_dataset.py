@@ -3,6 +3,7 @@ from test.utils import response_json, authorized_post
 from test_config import LABELS_FILENAME, CLASSMAP_FILENAME
 
 from app.nnvis.models import Dataset, Image
+from app.nnvis.models import Trainingsample as TrainingSample
 from app.utils import NnvisException
 
 import zipfile
@@ -101,8 +102,9 @@ def good_zipfile_imgs(labels_content, classmap_content):
             retfile, mode="w", compression=zipfile.ZIP_DEFLATED) as thezip:
         thezip.writestr(LABELS_FILENAME, labelfilestr)
         thezip.writestr(CLASSMAP_FILENAME, classfilestr)
-        for l in labels_content[1:]:
-            thezip.writestr(l[0], 'raboerijbaoeribriribv')
+        for row in labels_content[1:]:
+            for img in row[:-1]:
+                thezip.writestr(img, 'raboerijbaoeribriribv')
 
     retfile.seek(0)
     return (retfile, 'imgs.zip')
@@ -184,8 +186,9 @@ class UploadNewDatasetTest(NNvisTestCase):
                 mimetype='multipart/form-data')
 
         self.assertEqual(rv.status_code, 201)
-        ds_id = self._assertDatasetCreated()
+        ds_id = self._assertDatasetCreated(1)
         self.assertEqual(len(Image.query.all()), 0)
+        self.assertEqual(len(TrainingSample.query.all()), 0)
 
         dataset_folder = os.path.join(
                 self.app.config['DATASET_FOLDER'], str(ds_id))
@@ -214,7 +217,7 @@ class UploadNewDatasetTest(NNvisTestCase):
             for row, expected_row in zip(rows, expected_content):
                 self.assertEqual(row, expected_row)
 
-    def _assertDatasetCreated(self, labels=None):
+    def _assertDatasetCreated(self, imgs_per_sample, labels=None):
         datasets = Dataset.query.all()
         self.assertEqual(len(datasets), 1)
         ds = datasets[0]
@@ -222,31 +225,47 @@ class UploadNewDatasetTest(NNvisTestCase):
         if labels:
             self.assertEqual(ds.labels.split(','), labels)
         self.assertEqual(ds.description, DATASET_DESCRIPTION)
+        self.assertEqual(ds.imgs_per_sample, imgs_per_sample)
 
         return ds.id
 
-    def _assertImagesCreated(self):
+    def _assertImagesCreated(self, imgs, imgs_per_sample):
         images = Image.query.all()
+        self.assertEqual(len(images), len(imgs))
+
+        image_names = list(map(lambda x: x.name, images))
+        for img in imgs:
+            self.assertIn(img.split('.', 1)[0], image_names)
+
+        image_paths = list(map(lambda x: x.relative_path, images))
+        for img in imgs:
+            self.assertIn(img, image_paths)
+
+        image_ts_ids = list(map(lambda x: str(x.trainsample_id), images))
+        for i in range(1, len(images) // imgs_per_sample + 1):
+            self.assertIn(str(i), image_ts_ids)
+
+        image_pos = list(map(lambda x: x.trainsample_position, images))
+        expected_pos = [y for y in list(range(imgs_per_sample)) for _ in range(len(imgs) // imgs_per_sample)]
+        self.assertEqual(sorted(image_pos), sorted(expected_pos))
+
+    def _assertTrainingSamplesCreated(self):
+        tss = TrainingSample.query.all()
         ds_id = Dataset.query.all()[0].id
-        self.assertEqual(len(images), 3)
 
-        for image in images:
-            self.assertEqual(image.dataset_id, ds_id)
+        for ts in tss:
+            self.assertEqual(ts.dataset_id, ds_id)
 
-        image_names = map(lambda x: x.name, images)
-        self.assertIn('02', image_names)
-        self.assertIn('01', image_names)
-        self.assertIn('69', image_names)
+        self.assertEqual(len(tss), 3)
 
-        image_paths = map(lambda x: x.relative_path, images)
-        self.assertIn('02.jpg', image_paths)
-        self.assertIn('01.jpg', image_paths)
-        self.assertIn('69.jpg', image_paths)
+        ts_names = list(map(lambda x: x.name, tss))
+        for i in range(3):
+            self.assertIn('Training sample {}'.format(i), ts_names)
 
-        image_labels = map(lambda x: x.label, images)
-        self.assertIn('10', image_labels)
-        self.assertIn('0', image_labels)
-        self.assertIn('2', image_labels)
+        ts_labels = list(map(lambda x: str(x.label), tss))
+        self.assertIn('10', ts_labels)
+        self.assertIn('0', ts_labels)
+        self.assertIn('2', ts_labels)
 
     def test_zipfile_someimgs(self):
         labels_content = [
@@ -278,7 +297,7 @@ class UploadNewDatasetTest(NNvisTestCase):
                     file=good_zipfile_imgs(labels_content, classmap_content)),
                 mimetype='multipart/form-data')
         self.assertEqual(rv.status_code, 201)
-        ds_id = self._assertDatasetCreated(
+        ds_id = self._assertDatasetCreated(1,
             labels=[
                 'class0',
                 'class1',
@@ -293,7 +312,10 @@ class UploadNewDatasetTest(NNvisTestCase):
                 'class10',
             ]
         )
-        self._assertImagesCreated()
+        self._assertImagesCreated([
+            '01.jpg', '02.jpg', '69.jpg'
+        ], 1)
+        self._assertTrainingSamplesCreated()
 
         dataset_folder = os.path.join(
                 self.app.config['DATASET_FOLDER'], str(ds_id))
@@ -303,6 +325,84 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertIn('02.jpg', dataset_files)
         self.assertIn('01.jpg', dataset_files)
         self.assertIn('69.jpg', dataset_files)
+        self.assertIn(LABELS_FILENAME, dataset_files)
+        self.assertIn(CLASSMAP_FILENAME, dataset_files)
+
+        self._assertCsvContent(
+            os.path.join(dataset_folder, LABELS_FILENAME),
+            labels_content
+        )
+
+        self._assertCsvContent(
+            os.path.join(dataset_folder, CLASSMAP_FILENAME),
+            classmap_content
+        )
+
+    def test_zipfile_multiimg_samples(self):
+        labels_content = [
+            ['img1', 'img2', 'img3', 'label'],
+            ['01.jpg', '02.jpg', '03.jpg', '0'],
+            ['04.jpg', '05.jpg', '06.jpg', '10'],
+            ['69.jpg', '70.jpg', '71.jpg', '2']
+        ]
+        classmap_content = [
+            ['class_number', 'class_name'],
+            ['0', 'class0'],
+            ['1', 'class1'],
+            ['2', 'class2'],
+            ['3', 'class3'],
+            ['4', 'class4'],
+            ['5', 'class5'],
+            ['6', 'class6'],
+            ['7', 'class7'],
+            ['8', 'class8'],
+            ['9', 'class9'],
+            ['10', 'class10'],
+        ]
+
+        rv = authorized_post(
+                self.client, '/upload_dataset', self.access_token,
+                data=dict(
+                    name=DATASET_NAME,
+                    description=DATASET_DESCRIPTION,
+                    file=good_zipfile_imgs(labels_content, classmap_content)),
+                mimetype='multipart/form-data')
+        self.assertEqual(rv.status_code, 201)
+        ds_id = self._assertDatasetCreated(3,
+            labels=[
+                'class0',
+                'class1',
+                'class2',
+                'class3',
+                'class4',
+                'class5',
+                'class6',
+                'class7',
+                'class8',
+                'class9',
+                'class10',
+            ]
+        )
+        self._assertImagesCreated([
+            '01.jpg', '02.jpg', '03.jpg', '04.jpg', '05.jpg',
+            '06.jpg', '69.jpg', '70.jpg', '71.jpg'
+        ], 3)
+        self._assertTrainingSamplesCreated()
+
+        dataset_folder = os.path.join(
+                self.app.config['DATASET_FOLDER'], str(ds_id))
+        self.assertTrue(os.path.exists(dataset_folder))
+        dataset_files = os.listdir(dataset_folder)
+        self.assertEqual(len(dataset_files), 11)
+        self.assertIn('02.jpg', dataset_files)
+        self.assertIn('01.jpg', dataset_files)
+        self.assertIn('03.jpg', dataset_files)
+        self.assertIn('04.jpg', dataset_files)
+        self.assertIn('05.jpg', dataset_files)
+        self.assertIn('06.jpg', dataset_files)
+        self.assertIn('69.jpg', dataset_files)
+        self.assertIn('70.jpg', dataset_files)
+        self.assertIn('71.jpg', dataset_files)
         self.assertIn(LABELS_FILENAME, dataset_files)
         self.assertIn(CLASSMAP_FILENAME, dataset_files)
 

@@ -3,15 +3,15 @@ import { Padding, StrToPadding } from '../conv/conv';
 
 export enum Pool {
     Max,
-    Avarage
+    Average
 }
 
 export function StrToPool(str: string): Pool {
     switch (str) {
         case 'Max':
             return Pool.Max;
-        case 'Avarage':
-            return Pool.Avarage;
+        case 'Average':
+            return Pool.Average;
         default:
             return Pool.Max;
     }

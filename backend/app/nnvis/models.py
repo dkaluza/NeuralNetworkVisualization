@@ -1,5 +1,4 @@
 from app import db
-from app.utils import NnvisException
 
 from flask import current_app as app
 from datetime import datetime
@@ -52,13 +51,14 @@ class Architecture(db.Model, CRUD):
 
     def __repr__(self):
         return '<Archtecture {id} {name} of user {user_id}>'.format(
-                id=self.id, name=self.name, user_id=self.user_id)
+            id=self.id, name=self.name, user_id=self.user_id)
 
     def to_dict(self):
         if self.last_used is not None:
             last_used = self.last_used.strftime('%Y-%m-%d')
         else:
             last_used = 'None'
+
         return {
                 'id': self.id,
                 'name': self.name,
@@ -97,6 +97,8 @@ class Model(db.Model, CRUD):
     training_params = db.Column(db.Text)
     validation_loss = db.Column(db.Float)
     training_loss = db.Column(db.Float)
+    training_history = db.relationship('TrainingHistory', backref='model', lazy=True,
+                                       cascade="all, delete-orphan")
 
     __table_args__ = (
         db.UniqueConstraint('name', 'arch_id',
@@ -119,26 +121,35 @@ class Model(db.Model, CRUD):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
 
     def add(self):
+        # TODO: think about some better solution for this
+        super().add()
         self.weights_path = os.path.join(
                 app.config['WEIGHTS_DIR'],
                 str(self.arch_id),
-                str(self.id))
-        super().add()
+                str(self.id),
+                'model')
+        super().update()
 
     def delete(self):
         if os.path.isdir(self.weights_path):
             rmtree(self.weights_path, True)
         super().delete()
 
+    def get_folder_path(self):
+        return os.path.join(
+                app.config['WEIGHTS_DIR'],
+                str(self.arch_id),
+                str(self.id))
+
     def get_data_file_path(self):
         return os.path.join(
-                self.weights_path,
-                'model.ckpt.data-00000-of-00001')
+                self.get_folder_path(),
+                'model.data-00000-of-00001')
 
     def get_index_file_path(self):
         return os.path.join(
-                self.weights_path,
-                'model.ckpt.index')
+                self.get_folder_path(),
+                'model.index')
 
     def to_dict(self):
         if self.training_params is not None:
@@ -177,61 +188,118 @@ class Model(db.Model, CRUD):
         }
 
 
+class TrainingHistory(db.Model, CRUD):
+    id = db.Column(db.Integer, primary_key=True)
+    model_id = db.Column(db.Integer, db.ForeignKey('model.id'),
+                         nullable=False)
+    batch_size = db.Column(db.Integer)
+    current_epoch = db.Column(db.Integer)
+    number_of_epochs = db.Column(db.Integer)
+    training_loss = db.Column(db.Float)
+    training_acc = db.Column(db.Float)
+    validation_loss = db.Column(db.Float)
+    validation_acc = db.Column(db.Float)
+
+    def __init__(self, model_id, batch_size, current_epoch,
+                 number_of_epochs, training_loss, validation_loss):
+        self.model_id = model_id
+        self.batch_size = batch_size
+        self.current_epoch = current_epoch
+        self.number_of_epochs = number_of_epochs
+        self.validation_loss = validation_loss
+        self.training_loss = training_loss
+
+    def __repr__(self):
+        return '<Training {id} model {model_id}>'.format(id=self.id, name=self.model_id)
+
+
 class Dataset(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text(256))
     path = db.Column(db.Text(256), nullable=False)
     labels = db.Column(db.Text(256), nullable=False)
+    imgs_per_sample = db.Column(db.Integer, nullable=False)
     models = db.relationship('Model', backref='dataset', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    images = db.relationship('Image', cascade='all, delete-orphan',
-                             backref='dataset', lazy=True)
+    training_samples = db.relationship('Trainingsample', cascade='all, delete-orphan',
+                             backref='trainingsample', lazy=True)
 
     __table_args__ = (
         db.UniqueConstraint('name', 'user_id', name='_name_userid_uc'),
     )
 
-    def __init__(self, name, description, path, labels, user_id):
+    def __init__(self, name, description, path, labels, user_id, imgs_per_sample):
         self.name = name
         self.description = description
         self.path = path
         self.labels = labels
         self.user_id = user_id
+        self.imgs_per_sample = imgs_per_sample
 
     def __repr__(self):
         return '<Dataset {id} {name} of user {user_id}>'.format(
-                id=self.id, name=self.name, user_id=self.user_id)
+            id=self.id, name=self.name, user_id=self.user_id)
 
     def class_num_to_name_dict(self):
         return {str(i): c for i, c in enumerate(self.labels.split(','))}
+
+
+class Trainingsample(db.Model, CRUD):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), nullable=False)
+    label = db.Column(db.Text(256), nullable=False)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
+                           nullable=False)
+    images = db.relationship('Image', cascade='all, delete-orphan',
+                             backref='trainingsample', lazy=True)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'dataset_id', name='_name_dataset_id_uc'),
+    )
+
+    def __init__(self, name, label, dataset_id):
+        self.name = name
+        self.label = label
+        self.dataset_id = dataset_id
+
+    def __repr__(self):
+        return '<Sample {} id {} of dataset {}'.format(self.name,
+                                                       self.id,
+                                                       self.dataset_id)
 
 
 class Image(db.Model, CRUD):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     relative_path = db.Column(db.Text(256), nullable=False)
-    label = db.Column(db.Text(256), nullable=False)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'),
-                           nullable=False)
+    trainsample_id = db.Column(db.Integer, db.ForeignKey('trainingsample.id'),
+                               nullable=False)
+    trainsample_position = db.Column(db.Integer, nullable=False)
 
     __table_args__ = (
-        db.UniqueConstraint('name', 'dataset_id', name='_name_dataset_id_uc'),
+        db.UniqueConstraint('name', 'trainsample_id', name='_name_trainsample_id_uc'),
     )
 
-    def __init__(self, imageName, relPath, label, dataset_id):
+    def __init__(self, imageName, relPath, trainsample_id, trainsample_position):
         self.name = imageName
         self.relative_path = relPath
-        self.label = label
-        self.dataset_id = dataset_id
+        self.trainsample_id = trainsample_id
+        self.trainsample_position = trainsample_position
 
     def json(self):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
-                'label': self.label, 'dataset_id': self.dataset_id}
+                'trainsample_id': self.trainsample_id}
 
     def full_path(self):
-        ds_path = Dataset.query.get(self.dataset_id).path
+        ts = Trainingsample.query.get(self.trainsample_id)
+        ds_path = Dataset.query.get(ts.dataset_id).path
         return os.path.join(ds_path, self.relative_path)
+
+    def __repr__(self):
+        return '<Image {} located at {} of training sample {}'.format(
+            self.name, self.relative_path, self.trainsample_id
+        )
 
 
 class User(db.Model, CRUD):
@@ -249,4 +317,4 @@ class User(db.Model, CRUD):
 
     def __repr__(self):
         return '<User {id} {username}>'.format(
-                id=self.id, username=self.username)
+            id=self.id, username=self.username)

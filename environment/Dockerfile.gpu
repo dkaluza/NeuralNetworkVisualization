@@ -1,9 +1,15 @@
-FROM tensorflow/tensorflow:latest-gpu-py3
+FROM tensorflow/tensorflow:1.8.0-gpu-py3
 
 ADD requirements.gpu /
 WORKDIR /shared/frontend/NNVisualization
 
-RUN    apt-get update -y \
+RUN     apt-get update -y \
+    && apt-get -o Dpkg::Options::="--force-confmiss" install --reinstall netbase -y \
+    && apt-get install wget -y \
+    && echo "deb http://www.rabbitmq.com/debian/ testing main"  | tee  /etc/apt/sources.list.d/rabbitmq.list > /dev/null \
+    && wget https://www.rabbitmq.com/rabbitmq-signing-key-public.asc \
+    && apt-key add rabbitmq-signing-key-public.asc \
+    && apt-get update -y \
     && apt-get install software-properties-common -y \
     && apt-add-repository ppa:git-core/ppa \
     && apt-get install python3-pip -y \
@@ -15,7 +21,10 @@ RUN    apt-get update -y \
     && apt-get install -y libsm6 libxext6 \
     && apt-get install -y libgtk2.0-dev \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y nodejs \
+    && apt-get install rabbitmq-server -y --allow-unauthenticated \
+    && mkdir /var/run/rabbitmq \
+    && rabbitmq-plugins enable rabbitmq_management --offline
 
 RUN useradd -ou 0 -g 0 -m node
 
