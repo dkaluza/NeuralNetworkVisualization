@@ -1,7 +1,6 @@
-from app.nnvis.models import Dataset
-from app.nnvis.models import Image
-from app.nnvis.models import Model
 from app.nnvis.rests.protected_resource import ProtectedResource
+from app.nnvis.models import Architecture, Model, Image, Dataset
+from app.nnvis.models import Trainingsample as TrainingSample
 from app.utils import fileToB64
 from app.vis_tools import visualize_utils
 
@@ -21,7 +20,9 @@ class Inference(ProtectedResource):
         image_path = image.full_path()
 
         model = Model.query.get(model_id)
-        graph, sess, x, *_ = visualize_utils.load_model(model)
+        weights_path = model.weights_path
+        meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
+        graph, sess, x, *_ = visualize_utils.load_model(meta_file, weights_path)
 
         output_op = graph.get_tensor_by_name('output:0')
 
@@ -57,14 +58,23 @@ class Visualize(ProtectedResource):
 
         image = Image.query.get(image_id)
         image_path = image.full_path()
+        ts = TrainingSample.query.get(image.trainsample_id)
+        label = int(ts.label)
 
         model = Model.query.get(model_id)
-        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(model)
+        weights_path = model.weights_path
+        meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
+        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(meta_file, weights_path)
 
         alg_class = visualize_utils.algorithms_register[alg_id]
         vis_algorithm = alg_class(graph, sess, y, x)
 
         original_image = visualize_utils.load_image(image_path, x.shape.as_list()[1:])
+
+        feed_dict = {
+                neuron_selector: label
+                }
+        safe_add_is_training(feed_dict, graph, False)
 
         image_input = visualize_utils.preprocess(original_image)
 
@@ -107,7 +117,7 @@ class Images(ProtectedResource):
 class ImageList(ProtectedResource):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        images = model.dataset.images
+        images = Image.query.join(TrainingSample.images).filter(TrainingSample.dataset_id == model.dataset.id).all()
         return {'images': [image.json() for image in images]}
 
 

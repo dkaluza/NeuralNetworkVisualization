@@ -10,7 +10,8 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { ManageComponent } from './manage/manage.component';
-import { TrainComponent } from './train/train.component';
+import { TrainParamsService } from './train/train-params.serivce';
+import { TrainModule, TrainComponent } from './train/train.module';
 import { ImagesPanelComponent } from './visualize/images-panel/images-panel.component';
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
@@ -32,23 +33,23 @@ import { TimeoutAlertComponent } from './generic-dialogs/timeout-alert/timeout-a
 import { GenericDialogsService } from './generic-dialogs/generic-dialogs.service';
 import { InputsDialogComponent } from './generic-dialogs/inputs-dialog/inputs-dialog.component';
 import { DatasetsComponent } from './datasets/datasets.component';
-
+import { IOSocketService } from './iosocket/iosocket.service';
 
 const appRoutes: Routes = [
-    {path: '', redirectTo: 'manage', pathMatch: 'full'},
-    {path: 'manage', component: ManageComponent, canActivate: [AuthGuard]},
-    {path: 'build', component: BuildComponent, canActivate: [AuthGuard]},
-    {path: 'datasets', component: DatasetsComponent, canActivate: [AuthGuard]},
-    {path: 'train', component: TrainComponent, canActivate: [AuthGuard]},
-    {path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard]},
-    {path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard]},
-    {path: 'unauthorized', component: UnauthorizedComponent},
+    { path: '', redirectTo: 'manage', pathMatch: 'full' },
+    { path: 'manage', component: ManageComponent, canActivate: [AuthGuard] },
+    { path: 'build', component: BuildComponent, canActivate: [AuthGuard] },
+    { path: 'datasets', component: DatasetsComponent, canActivate: [AuthGuard] },
+    { path: 'train', component: TrainComponent, canActivate: [AuthGuard] },
+    { path: 'visualize', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'visualize/:algorithm/:image_id', component: VisualizeComponent, canActivate: [AuthGuard] },
+    { path: 'unauthorized', component: UnauthorizedComponent },
 ];
 
 // Function for setting the default restangular configuration
 export function RestangularConfigFactory(RestangularProvider,
-                                         authService: AuthenticationWithoutLoginService,
-                                         genericDialogs: GenericDialogsService) {
+    authService: AuthenticationWithoutLoginService,
+    genericDialogs: GenericDialogsService) {
     RestangularProvider.setBaseUrl('/api');
 
     RestangularProvider.addFullRequestInterceptor((element, operation, path, url, headers, params) => {
@@ -56,7 +57,7 @@ export function RestangularConfigFactory(RestangularProvider,
             const bearerToken = authService.getToken();
 
             return {
-                headers: Object.assign({}, headers, {Authorization: `Bearer ${bearerToken}`})
+                headers: Object.assign({}, headers, { Authorization: `Bearer ${bearerToken}` })
             };
         }
         return {};
@@ -131,7 +132,6 @@ export function RestangularConfigFactory(RestangularProvider,
         HeaderComponent,
         NavbarComponent,
         ManageComponent,
-        TrainComponent,
         SelectedBarComponent,
         VisualizeComponent,
         ImagesPanelComponent,
@@ -165,7 +165,8 @@ export function RestangularConfigFactory(RestangularProvider,
             }
         }),
         BuildModule,
-        NgSelectModule,
+        TrainModule,
+        NgSelectModule
     ],
     providers: [
         SelectedArchitectureService,
@@ -174,7 +175,8 @@ export function RestangularConfigFactory(RestangularProvider,
         AuthGuard,
         JwtHelper,
         GenericDialogsService,
-        TrainParamsService
+        TrainParamsService,
+        IOSocketService
     ],
     bootstrap: [AppComponent]
 })

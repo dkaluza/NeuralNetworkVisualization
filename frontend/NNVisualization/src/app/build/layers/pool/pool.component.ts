@@ -42,8 +42,8 @@ export class PoolComponent extends LayerComponent {
             'value': Pool.Max,
             'viewValue': Pool[Pool.Max]
         }, {
-            'value': Pool.Avarage,
-            'viewValue': Pool[Pool.Avarage]
+            'value': Pool.Average,
+            'viewValue': Pool[Pool.Average]
         }
     ];
 

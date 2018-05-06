@@ -3,10 +3,15 @@ from flask_restful import abort
 from flask_jwt_extended import get_current_user
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO
+import os
+import json
 
 from app.utils import NnvisException, fileToB64
 from app.nnvis.models import Model, Architecture
 from app.nnvis.rests.protected_resource import ProtectedResource
+
+from app.nnvis.train import TFModel
+from app.nnvis.graph_parse.parse import GraphParser, IncorrectMetaGraph
 
 
 class ModelUtils:
@@ -74,6 +79,109 @@ class ListAllModels(ProtectedResource, ModelUtils):
         return [model.to_dict() for model in models]
 
 
+class ImportModel(ProtectedResource):
+    def __verify_postdata(self, data):
+        if 'arch_name' not in data:
+            abort(400, 'Architecture name is required')
+        if 'model_name' not in data:
+            abort(400, 'Model name is required')
+
+    def __verify_zip(self, zipdata):
+        files = zipdata.namelist()
+        if len(files) != 3:
+            abort(400, 'Wrong number of files')
+
+        meta_files = list(filter(
+            lambda name: '.meta' in name,
+            files))
+        if len(meta_files) != 1:
+            abort(400, 'Wrong number of .meta files')
+
+        data_files = list(filter(
+            lambda name: '.data' in name,
+            files))
+        if len(data_files) != 1:
+            abort(400, 'Wrong number of .data files')
+
+        index_files = list(filter(
+            lambda name: '.index' in name,
+            files))
+        if len(index_files) != 1:
+            abort(400, 'Wrong number of .index files')
+
+        return meta_files[0], data_files[0], index_files[0]
+
+    def post(self):
+        if 'file' not in request.files:
+            abort(400, message='No file attached')
+
+        postfile = request.files['file']
+        if postfile.filename == '':
+            abort(400, message='No file attached')
+
+        postdata = request.form
+        self.__verify_postdata(postdata)
+        zipdata = ZipFile(postfile.stream)
+        meta, data, index = self.__verify_zip(zipdata)
+
+        new_arch = Architecture(
+                name=postdata['arch_name'],
+                description=postdata.get('arch_desc'),
+                graph='{\"nodes\": [], \"links\": []}',
+                user_id=get_current_user())
+        try:
+            new_arch.add()
+        except Exception as e:
+            abort(403, message=e)
+
+        try:
+            meta_path = new_arch.get_meta_file_path()
+            with open(meta_path, 'wb') as fd:
+                fd.write(zipdata.read(meta))
+            parser = GraphParser(meta_path)
+            graph = parser.parse()
+            new_arch.graph = json.dumps(graph)
+            new_arch.update()
+        except Exception as e:
+            new_arch.delete()
+            abort(403, message=e)
+
+        new_model = Model(
+                name=postdata['model_name'],
+                description=postdata.get('model_desc'),
+                weights_path='',
+                arch_id=new_arch.id)
+        try:
+            new_model.add()
+        except Exception as e:
+            new_arch.delete()
+            abort(403, message=e)
+
+        try:
+            os.mkdir(new_model.get_folder_path())
+            data_path = new_model.get_data_file_path()
+            with open(data_path, 'wb') as fd:
+                fd.write(zipdata.read(data))
+            index_path = new_model.get_index_file_path()
+            with open(index_path, 'wb') as fd:
+                fd.write(zipdata.read(index))
+        except Exception as e:
+            new_model.delete()
+            new_arch.delete()
+            abort(403, message=e)
+
+        model = TFModel(meta_file=meta_path)
+        if not model.check_weights(new_model.weights_path):
+            new_model.delete()
+            new_arch.delete()
+            abort(403, message='Model and architecture don\'t match')
+
+        return {
+                'arch': new_arch.to_dict(),
+                'model': new_model.to_dict()
+                }
+
+
 class ExportModel(ProtectedResource, ModelUtils):
     def get(self, model_id):
         model = Model.query.get(model_id)
@@ -89,8 +197,8 @@ class ExportModel(ProtectedResource, ModelUtils):
             return {}, 400
 
         name = model.name.replace(' ', '_') + '.{}'
-        data_name = name.format('ckpt.data-00000-of-00001')
-        index_name = name.format('ckpt.index')
+        data_name = name.format('data-00000-of-00001')
+        index_name = name.format('index')
         meta_name = name.format('meta')
 
         # create zip file
