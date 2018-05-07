@@ -7,10 +7,10 @@ from app.nnvis.models import Trainingsample as TrainingSample
 
 
 def get_train_ids(dataset_id):
-    trainingsamples = list(map(lambda ts: ts.id, TrainingSample.query.filter_by(dataset_id=dataset_id).all()))
-    images = Image.query.filter(Image.trainsample_id.in_(trainingsamples)).all()
-    ids = np.array([image.id for image in images])
-    return ids
+    trainingsamples = TrainingSample.query.\
+            filter_by(dataset_id=dataset_id).all()
+    train_sample_ids = list(map(lambda ts: ts.id, trainingsamples))
+    return np.array(train_sample_ids)
 
 
 def get_valid_ids(dataset_id):
@@ -19,25 +19,32 @@ def get_valid_ids(dataset_id):
 
 
 def read_data(dataset_id, ids):
-    xs = []
-    ys = []
-
     dataset = Dataset.query.get(dataset_id)
+    imgs_per_sample = dataset.imgs_per_sample
     labels_num = len(dataset.labels.split(','))
 
-    _ids = list(map(int, ids))
-    images = Image.query.filter(Image.id.in_(_ids)).all()
-    for image in images:
-        x = imageio.imread(os.path.join(dataset.path, image.relative_path))
-        y = np.zeros(labels_num)
-        # To consider: retaining 'label' field in Image for speed
-        label = int(TrainingSample.query.get(image.trainsample_id).label)
-        y[label] = 1.
+    xs = [[] for _ in range(imgs_per_sample)]
+    ys = []
 
-        xs.append(x)
+    _ids = list(map(int, ids))
+    images = Image.query.filter(Image.trainsample_id.in_(_ids)).all()
+    ts_dict = {id: [] for id in _ids}
+    for image in images:
+        ts_dict[image.trainsample_id].append(image)
+
+    for ts_id, ts_images in ts_dict.items():
+        ts_images.sort(key=lambda im: im.trainsample_position)
+
+        y = np.zeros(labels_num)
+        for image, x in zip(ts_images, xs):
+            x.append(imageio.imread(
+                os.path.join(dataset.path, image.relative_path)))
+        # To consider: retaining 'label' field in Image for speed
+        label = int(TrainingSample.query.get(ts_id).label)
+        y[label] = 1.
         ys.append(y)
 
-    return [np.array(xs)], np.array(ys)
+    return [np.array(x) for x in xs], np.array(ys)
 
 
 def shuffle(ids):
