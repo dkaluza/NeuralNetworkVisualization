@@ -73,8 +73,12 @@ class GraphParser():
             for output_id, output in layers.items():
                 if layer_id == output_id:
                     continue
+
+                def pred(_input):
+                    return _input.split('/')[0] == str(layer_id) \
+                            and 'read' not in _input.split('/')
                 ns = LayerParser.find_node(
-                        lambda node: any(_input.split('/')[0] == str(layer_id) for _input in node.input),
+                        lambda node: any(pred(_input) for _input in node.input),
                         output)
                 if len(ns) > 0:
                     graph['links'].append({
