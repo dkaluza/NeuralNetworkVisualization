@@ -5,7 +5,6 @@ import { VisualizeService } from '../visualize.service';
 import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
 import { Postprocessing } from '../postprocessing.model';
 import { Algorithm } from '../algorithm.model';
-import { NgSelectComponent } from '@ng-select/ng-select';
 
 
 @Component({
@@ -70,7 +69,8 @@ export class ImagesPanelComponent implements OnInit {
             const len = response['images'].length;
             for (let i = 0; i < len; i++) {
                 const im = response['images'][i];
-                const image = new Image(im.id, im.dataset_id, im.name, im.relative_path, im.label);
+                const image = new Image(im.id, im.dataset_id, im.name, im.relative_path,
+                    im.label, im.trainsample_position, im.trainsample_id);
                 this.imagesList.push(image);
             }
             // this looks like wierd hack but it is needed for ng-select to detect changes
@@ -97,7 +97,8 @@ export class ImagesPanelComponent implements OnInit {
 
     onVisualize() {
         const model = this.selectedService.model;
-        this.visualizeService.getImageVis(model.id, this.currentImage.imageId, this.onImageChecked)
+        this.visualizeService.getImageVis(model.id, this.currentImage.trainsample_id,
+            this.currentImage.trainsample_position, this.onImageChecked)
             .subscribe(response => {
                 this._parseb64(response['img'], (result) => {
                     this.currentImageVis = result;
@@ -107,7 +108,7 @@ export class ImagesPanelComponent implements OnInit {
 
     onInference() {
         const model = this.selectedService.model;
-        this.visualizeService.doInference(model.id, this.currentImage.imageId)
+        this.visualizeService.doInference(model.id, this.currentImage.trainsample_id)
             .subscribe(response => {
                 const scores = [];
                 for (let i = 0; i < response['class_scores'].length; i++) {
