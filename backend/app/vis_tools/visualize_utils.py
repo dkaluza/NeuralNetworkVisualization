@@ -30,7 +30,8 @@ postprocessing_register = {
 
 
 def preprocess(img):
-    img = img / 255.0
+    img = img / 127.5
+    img = img - 1.0
     return img
 
 
@@ -73,12 +74,16 @@ def normalize_gray_pos(img):
 def load_image(image_path, dst_shape, proc=None):
     if len(dst_shape) == 2 or (len(dst_shape) == 3 and dst_shape[-1] == 1):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        image = np.reshape(image, dst_shape)
+        height, width = dst_shape[1], dst_shape[0]
+        image = cv2.resize(image, (height, width))
+        image = np.expand_dims(image, axis=2)
     else:
         image = cv2.imread(image_path)
 
     if proc:
         image = proc(image)
+
+    image = np.expand_dims(image, axis=0)
     return image
 
 
@@ -88,18 +93,19 @@ def save_image(image, proc=None):
     return BytesIO(cv2.imencode('.png', image)[1].tostring())
 
 
-# mocked for now
-def load_model(meta_file, weight_path):
+def load_model(meta_file, weight_path, number_of_inputs):
     graph = tf.Graph()
     with graph.as_default():
         saver = tf.train.import_meta_graph(meta_file)
         sess = tf.Session(graph=graph)
         saver.restore(sess, weight_path)
 
-        logits = graph.get_tensor_by_name('logits:0')
-        x = graph.get_tensor_by_name('input/1:0')
+        xs = []
+        for i in range(number_of_inputs):
+            tensor_name = 'input/{}:0'.format(i + 1)
+            xs.append(graph.get_tensor_by_name(tensor_name))
 
+        logits = graph.get_tensor_by_name('logits:0')
         neuron_selector = tf.placeholder(tf.int32)
         y = logits[0][neuron_selector]
-
-    return graph, sess, x, y, neuron_selector, logits
+    return graph, sess, xs, y, neuron_selector, logits
