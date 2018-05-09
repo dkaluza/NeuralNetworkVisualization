@@ -66,7 +66,8 @@ def crudModel(args):
                       description=args.desc,
                       arch_id=args.arch_id,
                       dataset_id=args.dataset_id,
-                      weights_path='')
+                      weights_path='',
+                      last_conv_tensor_name='last_conv:0')
         model.add()
     elif args.method == 'update':
         model = Model.query.get(args.id)

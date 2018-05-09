@@ -97,6 +97,8 @@ class Model(db.Model, CRUD):
     training_params = db.Column(db.Text)
     validation_loss = db.Column(db.Float)
     training_loss = db.Column(db.Float)
+    last_conv_tensor_name = db.Column(db.Text(256))
+
     training_history = db.relationship('TrainingHistory', backref='model', lazy=True,
                                        cascade="all, delete-orphan")
 
@@ -107,7 +109,8 @@ class Model(db.Model, CRUD):
 
     def __init__(self, name, description, weights_path,
                  arch_id, dataset_id=None, params=None,
-                 valid_loss=None, train_loss=None):
+                 valid_loss=None, train_loss=None,
+                 last_conv_tensor_name=None):
         self.name = name
         self.description = description
         self.weights_path = weights_path
@@ -116,6 +119,7 @@ class Model(db.Model, CRUD):
         self.training_params = params
         self.validation_loss = valid_loss
         self.training_loss = train_loss
+        self.last_conv_tensor_name = last_conv_tensor_name
 
     def __repr__(self):
         return '<Model {id} {name}>'.format(id=self.id, name=self.name)
@@ -289,7 +293,7 @@ class Image(db.Model, CRUD):
 
     def json(self):
         return {'id': self.id, 'name': self.name, 'relative_path': self.relative_path,
-                'trainsample_id': self.trainsample_id}
+                'trainsample_id': self.trainsample_id, 'trainsample_position': self.trainsample_position}
 
     def full_path(self):
         ts = Trainingsample.query.get(self.trainsample_id)
