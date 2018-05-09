@@ -37,7 +37,7 @@ class Inference(ProtectedResource):
             noise = graph.get_tensor_by_name('gauss_noise_std:0')
             nodropout = graph.get_tensor_by_name('nodropout:0')
             wtf = graph.get_tensor_by_name('Placeholder_6:0') # nie wiem co to ale tensorflow narzekal
-            feed_dict[noise] = 0.003
+            feed_dict[noise] = 0.005
             feed_dict[nodropout] = 1.00
             feed_dict[wtf] = 0.0
 
