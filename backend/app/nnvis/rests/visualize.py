@@ -37,9 +37,9 @@ class Inference(ProtectedResource):
             noise = graph.get_tensor_by_name('gauss_noise_std:0')
             nodropout = graph.get_tensor_by_name('nodropout:0')
             wtf = graph.get_tensor_by_name('Placeholder_6:0') # nie wiem co to ale tensorflow narzekal
-            feed_dict[noise] = 0.5
+            feed_dict[noise] = 0.003
             feed_dict[nodropout] = 1.00
-            feed_dict[wtf] = 1.0
+            feed_dict[wtf] = 0.0
 
         safe_add_is_training(feed_dict, graph, False)
         predictions = output_op.eval(feed_dict=feed_dict, session=sess)
@@ -81,19 +81,20 @@ class Visualize(ProtectedResource):
             for image_path in image_paths
         ]
 
-        feed_dict = {xs[i]: image_inputs[i] for i in range(len(xs))}
+        feed_dict = {xs[i]: image_inputs[i] for i in range(number_of_inputs)}
 
         if model.name == 'BIRADS_covnet_model':  # mocked super sieć Krzyśka
             noise = graph.get_tensor_by_name('gauss_noise_std:0')
             nodropout = graph.get_tensor_by_name('nodropout:0')
             wtf = graph.get_tensor_by_name('Placeholder_6:0')  # nie wiem co to ale tensorflow narzekal
-            feed_dict[noise] = 0.01 # gdy 0 to model zwraca NaNs
+            feed_dict[noise] = 0.005 # gdy 0 to model zwraca NaNs
             feed_dict[nodropout] = 1.0
             feed_dict[wtf] = 0.0
 
         safe_add_is_training(feed_dict, graph, False)
 
         label = int(ts.label)
+        print(label)
         feed_dict[neuron_selector] = label
 
         alg_class = visualize_utils.algorithms_register[alg_id]
@@ -108,7 +109,7 @@ class Visualize(ProtectedResource):
         else:
             vis_algorithm = alg_class(graph, sess, y, x)
 
-        image_output = vis_algorithm.GetMask(image_inputs[0], feed_dict=feed_dict)
+        image_output = vis_algorithm.GetMask(image_inputs[trainsample_position], feed_dict=feed_dict)
         sess.close()
 
         original_image_path = image_paths[trainsample_position] if on_image else None
