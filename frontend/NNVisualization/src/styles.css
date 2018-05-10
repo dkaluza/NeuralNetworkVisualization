@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+
 @import "~@ng-select/ng-select/themes/material.theme.css";
 @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
 .warning-dialog .mat-dialog-container {
@@ -63,4 +64,14 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.1;
     color: inherit;
     margin: 10px 0;
+}
+
+.block-component {
+    display: block;
+    height: auto;
+    width: auto;
+}
+
+.centered {
+    text-align: center;
 }

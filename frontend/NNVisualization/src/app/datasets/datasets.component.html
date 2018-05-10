@@ -29,25 +29,11 @@
         </div>
     </div>
 </div>
+<mat-divider></mat-divider>
 <div fxLayout="row"
      fxLayoutAlign="center">
     <div fxFlex="50%"
-         fxLayout="column"
-         fxLayoutAlign="start center">
-        <ng-container *ngIf="selectedDatasetId; else noDataset">
-            <h2>Selected dataset</h2>
-            <h4>ID: {{ selectedDatasetId }}</h4>
-            <h4>Name: {{ selectedDatasetName }}</h4>
-            <h4>Description: {{ selectedDatasetDesc }}</h4>
-            <button mat-button
-                    (click)="deleteDataset()"
-                    [disabled]="!selectedDatasetId">
-                    Delete
-            </button>
-        </ng-container>
-        <ng-template #noDataset>
-            No dataset selected
-        </ng-template>
+         class="centered">
         <div>
             <input type="file"
                    (change)="onDatasetFileChange($event)"
@@ -58,5 +44,23 @@
                 Add as dataset
             </button>
         </div>
+        <ng-container *ngIf="selectedDatasetId; else noDataset">
+            <app-details [header]="'Selected dataset'"
+                         [details]="[
+                            ['ID', selectedDatasetId],
+                            ['Name', selectedDatasetName],
+                            ['Description', selectedDatasetDesc]
+                         ]"
+                         [width]="'50%'">
+            </app-details>
+            <button mat-button
+                    (click)="deleteDataset()"
+                    [disabled]="!selectedDatasetId">
+                    Delete
+            </button>
+        </ng-container>
+        <ng-template #noDataset>
+            No dataset selected
+        </ng-template>
     </div>
 </div>

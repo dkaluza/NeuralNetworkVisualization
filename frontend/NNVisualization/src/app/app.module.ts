@@ -17,7 +17,7 @@ import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
 import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
-
+import { UtilsModule } from './utils/utils.module';
 import { BuildComponent, BuildModule } from './build/build.module';
 
 import { RouterModule, Routes } from '@angular/router';
@@ -95,7 +95,7 @@ export function RestangularConfigFactory(RestangularProvider,
             const end = Math.min(begin + sliceSize, bytesLength);
 
             const bytes = new Array(end - begin);
-            for (let offset = begin, i = 0 ; offset < end; ++i, ++offset) {
+            for (let offset = begin, i = 0; offset < end; ++i, ++offset) {
                 bytes[i] = byteCharacters[offset].charCodeAt(0);
             }
             byteArrays[sliceIndex] = new Uint8Array(bytes);
@@ -168,7 +168,8 @@ export function RestangularConfigFactory(RestangularProvider,
         }),
         BuildModule,
         TrainModule,
-        NgSelectModule
+        NgSelectModule,
+        UtilsModule
     ],
     providers: [
         SelectedArchitectureService,
