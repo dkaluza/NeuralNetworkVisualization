@@ -121,28 +121,11 @@
     </mat-step>
     <mat-step>
         <ng-template matStepLabel>Train!</ng-template>
-        <div>
-            <div class="centered params-container">
-                <div>Selected dataset: {{ selectedDatasetName }}</div>
-                <div>Selected batch size: {{ batchSize }}</div>
-                <div>Selected num. of epochs: {{ nepochs }}</div>
-                <ng-container *ngIf="optimizer; else noOpt">
-                    <div>Selected optimizer: {{ optimizer.name }}</div>
-                    <div *ngFor="let param of optimizer.params">
-                        {{ param.name }}: {{ param.value }}
-                    </div>
-                </ng-container>
-                <ng-template #noOpt>
-                    <div class="error-param">No optimizer selected</div>
-                </ng-template>
-                <ng-container *ngIf="loss; else noLoss">
-                    <div>Selected loss function: {{ loss.name }}</div>
-                </ng-container>
-                <ng-template #noLoss>
-                    <div class="error-param">No loss selected</div>
-                </ng-template>
-            </div>
-        </div>
+        <app-details *ngIf="optimizer && loss"
+                     [header]="''"
+                     [details]="trainSummaryDetails"
+                     [width]="'40%'">
+        </app-details>
         <div class="centered">
             <button class="train-button"
                     mat-button
