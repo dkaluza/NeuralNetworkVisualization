@@ -3,8 +3,10 @@ import { Restangular } from 'ngx-restangular';
 import { SelectedArchitectureService } from '../selected-architecture/selected-architecture.service';
 import { GenericDialogsService } from '../generic-dialogs/generic-dialogs.service';
 import { MatTableDataSource } from '@angular/material';
-import { TrainParamsService, LossFunction,
-         Optimizer, OptimizerParam } from './train-params.serivce';
+import {
+    TrainParamsService, LossFunction,
+    Optimizer, OptimizerParam
+} from './train-params.serivce';
 
 interface Element {
     position: number;
@@ -26,6 +28,22 @@ export class TrainComponent implements OnInit {
 
     loss: LossFunction;
     optimizer: Optimizer;
+
+    private _trainSummaryDetails: [string, string][];
+    get trainSummaryDetails() {
+        this._trainSummaryDetails = [
+            ['Selected dataset', this.selectedDatasetName],
+            ['Selected batch size', String(this.batchSize)],
+            ['Selected num. of epochs', String(this.nepochs)],
+            ['Selected optimizer', this.optimizer.name],
+        ];
+        const optizerParams =
+            this.optimizer.params.map(param => [param.name, String(param.value)]);
+        this._trainSummaryDetails.push.apply(this._trainSummaryDetails, optizerParams);
+        this._trainSummaryDetails.push(['Selected loss function', this.loss.name]);
+        return this._trainSummaryDetails;
+    }
+
 
     displayedColumns = ['position', 'name'];
 
@@ -51,8 +69,8 @@ export class TrainComponent implements OnInit {
 
     isSecondStepCompleted(): boolean {
         return this.nepochs &&
-               this.batchSize &&
-               this.loss !== undefined;
+            this.batchSize &&
+            this.loss !== undefined;
     }
 
     isThirdStepCompleted(): boolean {
