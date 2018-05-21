@@ -5,6 +5,8 @@ import { TrainComponent } from './train.component';
 import { TrainedModelsComponent } from './trained-models/trained-models.component';
 import { FormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { UtilsModule } from '../utils/utils.module';
+
 
 export { TrainComponent };
 
@@ -14,7 +16,8 @@ export { TrainComponent };
         CommonModule,
         MaterialImportsModule,
         FormsModule,
-        FlexLayoutModule
+        FlexLayoutModule,
+        UtilsModule
     ],
     declarations: [
         TrainComponent,
