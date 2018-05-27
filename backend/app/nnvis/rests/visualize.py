@@ -35,14 +35,6 @@ class Inference(ProtectedResource):
         image_inputs = [visualize_utils.exapnd_dim(img) for img in image_inputs]
         feed_dict = {xs[i]: image_inputs[i] for i in range(number_of_inputs)}
 
-        if model.name == 'BIRADS_covnet_model':  # mocked super sieć Krzyśka
-            noise = graph.get_tensor_by_name('gauss_noise_std:0')
-            nodropout = graph.get_tensor_by_name('nodropout:0')
-            wtf = graph.get_tensor_by_name('Placeholder_6:0')  # nie wiem co to ale tensorflow narzekal
-            feed_dict[noise] = 0.005
-            feed_dict[nodropout] = 1.00
-            feed_dict[wtf] = 0.0
-
         safe_add_is_training(feed_dict, graph, False)
         predictions = output_op.eval(feed_dict=feed_dict, session=sess)
         predictions = predictions[0]
@@ -86,14 +78,6 @@ class Visualize(ProtectedResource):
 
         feed_dict = {xs[i]: image_inputs[i] for i in range(number_of_inputs)}
 
-        if model.name == 'BIRADS_covnet_model':  # mocked super sieć Krzyśka
-            noise = graph.get_tensor_by_name('gauss_noise_std:0')
-            nodropout = graph.get_tensor_by_name('nodropout:0')
-            wtf = graph.get_tensor_by_name('Placeholder_6:0')  # nie wiem co to ale tensorflow narzekal
-            feed_dict[noise] = 0.005  # gdy 0 to model zwraca NaNs
-            feed_dict[nodropout] = 1.0
-            feed_dict[wtf] = 0.0
-
         safe_add_is_training(feed_dict, graph, False)
 
         label = int(ts.label)
@@ -101,12 +85,7 @@ class Visualize(ProtectedResource):
 
         alg_class = visualize_utils.algorithms_register[alg_id]
         if alg_class == GradCAM:
-            if model.name == 'BIRADS_covnet_model':
-                last_conv_tensor_names = ['conv5c_CC/conv5c_CC/Relu:0', 'conv5c_CC/conv5c_CC/Relu:0',
-                                          'conv5c_MLO/conv5c_MLO/Relu:0', 'conv5c_MLO/conv5c_MLO/Relu:0']
-                vis_algorithm = alg_class(graph, sess, y, xs, last_conv_tensor_names)
-            else:
-                vis_algorithm = alg_class(graph, sess, y, xs, [model.last_conv_tensor_name])
+            vis_algorithm = alg_class(graph, sess, y, xs, [model.last_conv_tensor_name])
         else:
             vis_algorithm = alg_class(graph, sess, y, xs)
 
