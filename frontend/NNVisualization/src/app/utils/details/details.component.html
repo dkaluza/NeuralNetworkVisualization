@@ -1,0 +1,7 @@
+<h3 class="header">{{header}}</h3>
+<dl [style.width]="width">
+    <div *ngFor="let detail of details">
+        <dt>{{detail[0]}}</dt>
+        <dd>{{detail[1]}}</dd>
+    </div>
+</dl>
