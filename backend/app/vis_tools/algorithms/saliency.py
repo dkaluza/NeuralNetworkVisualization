@@ -8,7 +8,7 @@ from app.vis_tools.postprocessing.RGB import RGB
 
 
 class SaliencyMask(object):
-    def __init__(self, graph, session, y, x):
+    def __init__(self, graph, session, y, xs):
         size = 1
         for shape in y.shape:
             size *= shape
@@ -17,7 +17,7 @@ class SaliencyMask(object):
         self.graph = graph
         self.session = session
         self.y = y
-        self.x = x
+        self.xs = xs
 
     def GetMask(self, x_value, feed_dict={}):
         raise NotImplementedError('A derived class should implemented GetMask()')
@@ -30,14 +30,21 @@ class Saliency(SaliencyMask):
         1: RGB,
     }
 
-    def __init__(self, graph, session, y, x):
-        super().__init__(graph, session, y, x)
-        self.gradients_node = tf.gradients(y, x)[0]
+    def __init__(self, graph, session, y, xs):
+        super().__init__(graph, session, y, xs)
+        self.gradients_nodes = [tf.gradients(y, x)[0] for x in xs]
 
-    def GetMask(self, x_value, feed_dict={}):
-        print(x_value.shape)
-        feed_dict[self.x] = x_value
-        return self.session.run(self.gradients_node, feed_dict=feed_dict)[0]
+    def GetMask(self, x_values, feed_dict={}):
+        for i, x_value in enumerate(x_values):
+            feed_dict[self.xs[i]] = x_value
+
+
+        results = self.session.run(
+            self.gradients_nodes,
+            feed_dict=feed_dict
+        )
+
+        return [result[0] for result in results]
 
     @staticmethod
     def name():

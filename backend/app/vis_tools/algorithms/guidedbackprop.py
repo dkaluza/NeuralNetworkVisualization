@@ -1,4 +1,3 @@
-import numpy as np
 import tensorflow as tf
 
 from app.vis_tools.algorithms.saliency import SaliencyMask
@@ -14,10 +13,10 @@ class GuidedBackprop(SaliencyMask):
 
     GuidedReluRegistered = False
 
-    def __init__(self, graph, session, y, x):
-        super(GuidedBackprop, self).__init__(graph, session, y, x)
+    def __init__(self, graph, session, y, xs):
+        super(GuidedBackprop, self).__init__(graph, session, y, xs)
 
-        self.x = x
+        self.xs = xs
 
         if GuidedBackprop.GuidedReluRegistered is False:
             #### Acknowledgement to Chris Olah ####
@@ -43,22 +42,31 @@ class GuidedBackprop(SaliencyMask):
                 saver.restore(self.guided_sess, '/tmp/guided_backprop_ckpt')
 
                 imported_y = self.guided_graph.get_tensor_by_name(y.name)
-                imported_x = self.guided_graph.get_tensor_by_name(x.name)
+                imported_xs = [
+                    self.guided_graph.get_tensor_by_name(x.name)
+                    for x in self.xs
+                ]
 
-                self.guided_grads_node = tf.gradients(imported_y, imported_x)[0]
+                self.guided_grads_nodes = [
+                    tf.gradients(imported_y, imported_x)[0]
+                    for imported_x in imported_xs
+                ]
 
-    def GetMask(self, x_value, feed_dict={}):
+    def GetMask(self, x_values, feed_dict={}):
         """Returns a GuidedBackprop mask."""
         with self.guided_graph.as_default():
-            # Move all the feed dict tensor keys to refer to the same tensor on the
-            # new graph.
             guided_feed_dict = {}
             for tensor in feed_dict:
                 guided_feed_dict[tensor.name] = feed_dict[tensor]
-            guided_feed_dict[self.x.name] = x_value
+            for i, x_value in enumerate(x_values):
+                guided_feed_dict[self.xs[i].name] = x_value
 
-        return self.guided_sess.run(
-            self.guided_grads_node, feed_dict=guided_feed_dict)[0]
+        results = self.guided_sess.run(
+            self.guided_grads_nodes,
+            feed_dict=guided_feed_dict
+        )
+
+        return [result[0] for result in results]
 
     @staticmethod
     def name():
