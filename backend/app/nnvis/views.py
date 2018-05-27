@@ -44,9 +44,9 @@ api.add_resource(UploadNewDataset, 'upload_dataset')
 api.add_resource(ListAllDatasets, 'list_datasets')
 
 api.add_resource(Inference, 'inference/<int:model_id>/<int:trainsample_id>')
-api.add_resource(Visualize, 'visualize/<int:model_id>/<int:alg_id>/<int:trainsample_id>/<int:trainsample_position>/<int:postprocessing_id>/<int:on_image>')
+api.add_resource(Visualize, 'visualize/<int:model_id>/<int:alg_id>/<int:trainsample_id>/<int:postprocessing_id>/<int:on_image>')
 api.add_resource(ImageList, 'images/<int:model_id>')
-api.add_resource(Images, 'image/<int:image_id>')
+api.add_resource(Images, 'image/<int:id>')
 api.add_resource(Algorithms, 'list_algorithms')
 api.add_resource(Postprocessing, 'list_postprocessing/<int:alg_id>')
 

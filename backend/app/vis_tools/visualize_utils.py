@@ -1,11 +1,10 @@
 import tensorflow as tf
 import numpy as np
 import cv2
-import os
+import scipy.misc
 
 from app.vis_tools.algorithms.saliency import Saliency
 from app.vis_tools.algorithms.guidedbackprop import GuidedBackprop
-from app.vis_tools.algorithms.occlusion import Occlusion
 from app.vis_tools.algorithms.gradcam import GradCAM
 
 
@@ -71,8 +70,11 @@ def normalize_gray_pos(img):
     return img
 
 
-def load_image(image_path, dst_shape, proc=None):
-    if len(dst_shape) == 2 or (len(dst_shape) == 3 and dst_shape[-1] == 1):
+def load_image(image_path, dst_shape=None, proc=None):
+    if dst_shape == None:
+        image = cv2.imread(image_path)
+
+    elif len(dst_shape) == 2 or (len(dst_shape) == 3 and dst_shape[-1] == 1):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
         height, width = dst_shape[1], dst_shape[0]
         image = cv2.resize(image, (height, width))
@@ -83,8 +85,13 @@ def load_image(image_path, dst_shape, proc=None):
     if proc:
         image = proc(image)
 
-    image = np.expand_dims(image, axis=0)
     return image
+
+def exapnd_dim(image):
+    """
+    Expands numpy array image dim so it fits tensorflow dims [1, H, W, C]
+    """
+    return np.expand_dims(image, axis=0)
 
 
 def save_image(image, proc=None):
@@ -109,3 +116,42 @@ def load_model(meta_file, weight_path, number_of_inputs):
         neuron_selector = tf.placeholder(tf.int32)
         y = logits[0][neuron_selector]
     return graph, sess, xs, y, neuron_selector, logits
+
+
+def combine(images, shape=None, from_paths=False):
+    """
+    Combines images into one image for multi-input networks
+    """
+    n = len(images)
+
+    if from_paths:
+        images = [load_image(img_path) for img_path in images]
+
+    if shape is None:
+        shape = images[0].shape
+
+    if n == 1:
+        return images[0]
+
+    w, h, c = shape
+    if n < 4:
+        new_img = np.zeros((w * n, h, c))
+        for i, image in enumerate(images):
+            start, end = i * w, (i + 1) * w
+            new_img[start:end, :, :] = image
+
+    elif n == 4:
+        new_img = np.zeros((w * 2, h * 2, c))
+        new_img[:w, :h, :] = images[0]
+        new_img[w:, :h, :] = images[1]
+        new_img[:w, h:, :] = images[2]
+        new_img[w:, h:, :] = images[3]
+
+    else:
+        raise NotImplementedError
+
+    return new_img
+
+
+def downsize(img, height=800, width=600):
+    return scipy.misc.imresize(img, (height, width, img.shape[-1]))

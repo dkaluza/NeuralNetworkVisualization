@@ -1,10 +1,9 @@
-from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Architecture, Model, Image, Dataset
 from app.nnvis.models import Trainingsample as TrainingSample
-from app.utils import fileToB64
+from app.nnvis.rests.protected_resource import ProtectedResource
+from app.utils import fileToB64, numpyToB64
 from app.vis_tools import visualize_utils
 from app.vis_tools.algorithms.gradcam import GradCAM
-
 
 def safe_add_is_training(feed_dict, graph, train):
     try:
@@ -18,7 +17,8 @@ def safe_add_is_training(feed_dict, graph, train):
 class Inference(ProtectedResource):
     def get(self, model_id, trainsample_id):
         ts = TrainingSample.query.get(trainsample_id)
-        image_paths = [image.full_path() for image in ts.images]
+        images = sorted(ts.images, key=lambda im: im.trainsample_position)
+        image_paths = [image.full_path() for image in images]
 
         model = Model.query.get(model_id)
         weights_path = model.weights_path
@@ -31,12 +31,14 @@ class Inference(ProtectedResource):
             visualize_utils.load_image(image_path, xs[0].shape.as_list()[1:], proc=visualize_utils.preprocess)
             for image_path in image_paths
         ]
-        feed_dict = {xs[i]: image_inputs[i] for i in range(len(xs))}
 
-        if model.name == 'BIRADS_covnet_model': # mocked super sieć Krzyśka
+        image_inputs = [visualize_utils.exapnd_dim(img) for img in image_inputs]
+        feed_dict = {xs[i]: image_inputs[i] for i in range(number_of_inputs)}
+
+        if model.name == 'BIRADS_covnet_model':  # mocked super sieć Krzyśka
             noise = graph.get_tensor_by_name('gauss_noise_std:0')
             nodropout = graph.get_tensor_by_name('nodropout:0')
-            wtf = graph.get_tensor_by_name('Placeholder_6:0') # nie wiem co to ale tensorflow narzekal
+            wtf = graph.get_tensor_by_name('Placeholder_6:0')  # nie wiem co to ale tensorflow narzekal
             feed_dict[noise] = 0.005
             feed_dict[nodropout] = 1.00
             feed_dict[wtf] = 0.0
@@ -56,9 +58,9 @@ class Inference(ProtectedResource):
         return {'class_scores': scores}
 
 
-# visualize/<int:model_id>/<int:alg_id>/<int:trainsample_id>/<int:trainsample_position>/<int:postprocessing_id>/<int:on_image>
+# visualize/<int:model_id>/<int:alg_id>/<int:trainsample_id>/<int:postprocessing_id>/<int:on_image>
 class Visualize(ProtectedResource):
-    def get(self, model_id, alg_id, trainsample_id, trainsample_position, postprocessing_id, on_image):
+    def get(self, model_id, alg_id, trainsample_id, postprocessing_id, on_image):
         if alg_id not in visualize_utils.algorithms_register:
             return {'errormsg': "Bad algorithm id"}, 400
 
@@ -74,12 +76,13 @@ class Visualize(ProtectedResource):
         meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
         number_of_inputs = Dataset.query.get(model.dataset_id).imgs_per_sample
         graph, sess, xs, y, neuron_selector, *_ = visualize_utils.load_model(meta_file, weights_path, number_of_inputs)
-        x = xs[trainsample_position]
 
         image_inputs = [
             visualize_utils.load_image(image_path, xs[0].shape.as_list()[1:], proc=visualize_utils.preprocess)
             for image_path in image_paths
         ]
+
+        image_inputs = [visualize_utils.exapnd_dim(img) for img in image_inputs]
 
         feed_dict = {xs[i]: image_inputs[i] for i in range(number_of_inputs)}
 
@@ -87,38 +90,42 @@ class Visualize(ProtectedResource):
             noise = graph.get_tensor_by_name('gauss_noise_std:0')
             nodropout = graph.get_tensor_by_name('nodropout:0')
             wtf = graph.get_tensor_by_name('Placeholder_6:0')  # nie wiem co to ale tensorflow narzekal
-            feed_dict[noise] = 0.005 # gdy 0 to model zwraca NaNs
+            feed_dict[noise] = 0.005  # gdy 0 to model zwraca NaNs
             feed_dict[nodropout] = 1.0
             feed_dict[wtf] = 0.0
 
         safe_add_is_training(feed_dict, graph, False)
 
         label = int(ts.label)
-        print(label)
         feed_dict[neuron_selector] = label
 
         alg_class = visualize_utils.algorithms_register[alg_id]
         if alg_class == GradCAM:
             if model.name == 'BIRADS_covnet_model':
                 last_conv_tensor_names = ['conv5c_CC/conv5c_CC/Relu:0', 'conv5c_CC/conv5c_CC/Relu:0',
-                                         'conv5c_MLO/conv5c_MLO/Relu:0', 'conv5c_MLO/conv5c_MLO/Relu:0']
-                last_conv_tensor_name = last_conv_tensor_names[trainsample_position]
-                vis_algorithm = alg_class(graph, sess, y, x, last_conv_tensor_name)
+                                          'conv5c_MLO/conv5c_MLO/Relu:0', 'conv5c_MLO/conv5c_MLO/Relu:0']
+                vis_algorithm = alg_class(graph, sess, y, xs, last_conv_tensor_names)
             else:
-                vis_algorithm = alg_class(graph, sess, y, x, model.last_conv_tensor_name)
+                vis_algorithm = alg_class(graph, sess, y, xs, [model.last_conv_tensor_name])
         else:
-            vis_algorithm = alg_class(graph, sess, y, x)
+            vis_algorithm = alg_class(graph, sess, y, xs)
 
-        image_output = vis_algorithm.GetMask(image_inputs[trainsample_position], feed_dict=feed_dict)
+        image_outputs = vis_algorithm.GetMask(image_inputs, feed_dict=feed_dict)
+
         sess.close()
 
-        original_image_path = image_paths[trainsample_position] if on_image else None
+        original_image_paths = [
+            image_paths[i] if on_image else None
+            for i in range(number_of_inputs)
+        ]
 
         postproc_class = alg_class.postprocessings[postprocessing_id]
-        saliency = postproc_class.process(image_output, original_image_path)
+        saliency_maps = postproc_class.process(image_outputs, original_image_paths)
+        img = visualize_utils.combine(saliency_maps)
+        img = visualize_utils.downsize(img)
 
-        img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_rgb)
-        img_b64 = fileToB64(img_stream)
+        img_b64 = numpyToB64(img)
+
         return {
             'base64': [{
                 'name': 'img',
@@ -128,13 +135,19 @@ class Visualize(ProtectedResource):
         }
 
 
-# /image/<string:image_id>
+# /image/<string:id>
 class Images(ProtectedResource):
-    def get(self, image_id):
-        image = Image.query.get(image_id)
-        img_path = image.full_path()
-        with open(img_path, 'rb') as img_f:
-            img_b64 = fileToB64(img_f)
+    def get(self, id):
+        ts = TrainingSample.query.get(id)
+
+        images = sorted(ts.images, key=lambda im: im.trainsample_position)
+        img_paths = [image.full_path() for image in images]
+
+        img = visualize_utils.combine(img_paths, from_paths=True)
+        img = visualize_utils.downsize(img)
+
+        img_b64 = numpyToB64(img)
+
         return {
             'base64': [{
                 'name': 'img',
@@ -148,8 +161,8 @@ class Images(ProtectedResource):
 class ImageList(ProtectedResource):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        images = Image.query.join(TrainingSample.images).filter(TrainingSample.dataset_id == model.dataset.id).all()
-        return {'images': [image.json() for image in images]}
+        trainingsamples = TrainingSample.query.filter(TrainingSample.dataset_id == model.dataset_id).all()
+        return {'trainingsamples': [trainingsample.json() for trainingsample in trainingsamples]}
 
 
 # /list_algorithms

@@ -267,6 +267,10 @@ class Trainingsample(db.Model, CRUD):
         self.label = label
         self.dataset_id = dataset_id
 
+    def json(self):
+        return {'id': self.id, 'name': self.name, 'label': self.label,
+                'dataset_id': self.dataset_id}
+
     def __repr__(self):
         return '<Sample {} id {} of dataset {}'.format(self.name,
                                                        self.id,
