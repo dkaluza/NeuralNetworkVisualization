@@ -28,15 +28,14 @@ export class VisualizeService implements OnInit {
         return this.restangular.one('list_algorithms').get();
     }
 
-    getImage(image_id: number) {
-        return this.restangular.one('image/' + image_id.toString()).get();
+    getImage(id: number) {
+        return this.restangular.one('image/' + id.toString()).get();
     }
 
-    getImageVis(model_id: number, trainsample_id: number, trainsample_position: number, onImage: boolean) {
+    getImageVis(model_id: number, trainsample_id: number, onImage: boolean) {
         return this.restangular.one('visualize/' + model_id.toString() + '/'
             + this.currentAlgorithm.toString() + '/' + trainsample_id.toString() + '/'
-            + trainsample_position.toString() + '/' + this.currentPostprocessing.toString() + '/'
-            + (onImage ? 1 : 0).toString()).get();
+            + this.currentPostprocessing.toString() + '/' + (onImage ? 1 : 0).toString()).get();
     }
 
     doInference(model_id: number, trainsample_id: number) {

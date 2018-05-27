@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Image } from '../image.model';
-import { MatTableDataSource } from '@angular/material';
+import { Trainsample } from '../trainsample.model';
 import { VisualizeService } from '../visualize.service';
 import { SelectedArchitectureService } from '../../selected-architecture/selected-architecture.service';
 import { Postprocessing } from '../postprocessing.model';
 import { Algorithm } from '../algorithm.model';
+import { MatTableDataSource } from '@angular/material';
 
 
 @Component({
@@ -14,15 +14,14 @@ import { Algorithm } from '../algorithm.model';
 })
 export class ImagesPanelComponent implements OnInit {
     placeholder_img = 'api/static/placeholder2.jpg';
-    currentImage: Image;
+    currentImage: Trainsample;
     currentImageVis = '';
 
     currentImageName: string;
-    imagesList: Image[] = [];
+    imagesList: Trainsample[] = [];
     onImageChecked = false;
 
-
-    displayedColumns = ['class_number', 'class_name', 'score'];
+    displayedColumns = ['class_name', 'score'];
     dataSource = new MatTableDataSource();
 
     constructor(private visualizeService: VisualizeService,
@@ -33,32 +32,31 @@ export class ImagesPanelComponent implements OnInit {
     ngOnInit() {
         this.onGetDataset();
         this.onGetAlgorithms();
-        this.onSetNAs();
     }
 
     onGetNextImage() {
         let index = this.imagesList.findIndex((img) => {
-            return img.imageId === this.currentImage.imageId;
+            return img.id === this.currentImage.id;
         });
         index++;
         if (index >= this.imagesList.length) {
             index %= this.imagesList.length;
         }
         this.currentImage = this.imagesList[index];
-        this.currentImageName = this.currentImage.imageName;
+        this.currentImageName = this.currentImage.name;
         this.onGetImage(this.currentImage);
     }
 
     onGetPreviousImage() {
         let index = this.imagesList.findIndex((img) => {
-            return img.imageId === this.currentImage.imageId;
+            return img.id === this.currentImage.id;
         });
         index--;
         if (index < 0) {
             index += this.imagesList.length;
         }
         this.currentImage = this.imagesList[index];
-        this.currentImageName = this.currentImage.imageName;
+        this.currentImageName = this.currentImage.name;
         this.onGetImage(this.currentImage);
     }
 
@@ -66,11 +64,10 @@ export class ImagesPanelComponent implements OnInit {
         const model = this.selectedService.model;
         this.imagesList = [];
         this.visualizeService.getDataset(model.id).subscribe(response => {
-            const len = response['images'].length;
+            const len = response['trainingsamples'].length;
             for (let i = 0; i < len; i++) {
-                const im = response['images'][i];
-                const image = new Image(im.id, im.dataset_id, im.name, im.relative_path,
-                    im.label, im.trainsample_position, im.trainsample_id);
+                const im = response['trainingsamples'][i];
+                const image = new Trainsample(im.id, im.dataset_id, im.name, im.label);
                 this.imagesList.push(image);
             }
             // this looks like wierd hack but it is needed for ng-select to detect changes
@@ -81,34 +78,33 @@ export class ImagesPanelComponent implements OnInit {
 
     onSelectorSelect(image) {
         this.currentImage = image;
-        this.onGetImage(this.currentImage);
+        this.onGetImage(image);
     }
 
-    onGetImage(image: Image) {
-        this.visualizeService.getImage(image.imageId)
+    onGetImage(image: Trainsample) {
+        this.visualizeService.getImage(image.id)
             .subscribe(response => {
-                this._parseb64(response['img'], (result) => {
-                    this.currentImage.display_path = result;
+                this._parseb64(response['img'], (results) => {
+                    this.currentImage.path = results;
+
                 });
             });
         this.currentImageVis = '';
-        this.onSetNAs();
     }
 
     onVisualize() {
         const model = this.selectedService.model;
-        this.visualizeService.getImageVis(model.id, this.currentImage.trainsample_id,
-            this.currentImage.trainsample_position, this.onImageChecked)
+        this.visualizeService.getImageVis(model.id, this.currentImage.id, this.onImageChecked)
             .subscribe(response => {
-                this._parseb64(response['img'], (result) => {
-                    this.currentImageVis = result;
+                this._parseb64(response['img'], (results) => {
+                    this.currentImageVis = results;
                 });
             });
     }
 
     onInference() {
         const model = this.selectedService.model;
-        this.visualizeService.doInference(model.id, this.currentImage.trainsample_id)
+        this.visualizeService.doInference(model.id, this.currentImage.id)
             .subscribe(response => {
                 const scores = [];
                 for (let i = 0; i < response['class_scores'].length; i++) {
@@ -120,27 +116,14 @@ export class ImagesPanelComponent implements OnInit {
                     });
                 }
                 const scores2 = scores.sort((n1, n2) => n2.score - n1.score);
-                const scores3 = scores2.slice(0, 10);
+                const scores3 = scores2.slice(0, Math.min(10, scores.length));
                 this.dataSource = new MatTableDataSource(scores3);
             });
-    }
-
-    onSetNAs() {
-        const scores = [];
-        for (let i = 0; i < 10; i++) {
-            scores.push({
-                'class_number': 'N/A',
-                'class_name': 'N/A',
-                'score': 'N/A',
-            });
-        }
-        this.dataSource = new MatTableDataSource(scores);
     }
 
     onSelectPostprocessing(event) {
         this.visualizeService.currentPostprocessing = event.value;
         this.visualizeService.disabledButton = false;
-        // this.visualizeService.selectedPostprocessing = this.visualizeService.postprocessingList[event.value];
     }
 
     onSelectorAlgorithm(event) {
