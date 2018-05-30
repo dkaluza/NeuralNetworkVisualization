@@ -1,10 +1,9 @@
-from app.nnvis.rests.protected_resource import ProtectedResource
 from app.nnvis.models import Architecture, Model, Image, Dataset
 from app.nnvis.models import Trainingsample as TrainingSample
-
-from app.utils import fileToB64
+from app.nnvis.rests.protected_resource import ProtectedResource
+from app.utils import fileToB64, numpyToB64
 from app.vis_tools import visualize_utils
-
+from app.vis_tools.algorithms.gradcam import GradCAM
 
 def safe_add_is_training(feed_dict, graph, train):
     try:
@@ -14,27 +13,29 @@ def safe_add_is_training(feed_dict, graph, train):
         pass
 
 
-# inference/<int:model_id>/<int:image_id>
+# inference/<int:model_id>/<int:trainsample_id>
 class Inference(ProtectedResource):
-    def get(self, model_id, image_id):
-        image = Image.query.get(image_id)
-        image_path = image.full_path()
+    def get(self, model_id, trainsample_id):
+        ts = TrainingSample.query.get(trainsample_id)
+        images = sorted(ts.images, key=lambda im: im.trainsample_position)
+        image_paths = [image.full_path() for image in images]
 
         model = Model.query.get(model_id)
         weights_path = model.weights_path
         meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
-        graph, sess, x, *_ = \
-            visualize_utils.load_model(meta_file, weights_path)
+        number_of_inputs = Dataset.query.get(model.dataset_id).imgs_per_sample
+        graph, sess, xs, *_ = visualize_utils.load_model(meta_file, weights_path, number_of_inputs)
 
         output_op = graph.get_tensor_by_name('output:0')
+        image_inputs = [
+            visualize_utils.load_image(image_path, xs[0].shape.as_list()[1:], proc=visualize_utils.preprocess)
+            for image_path in image_paths
+        ]
 
-        image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
+        image_inputs = [visualize_utils.exapnd_dim(img) for img in image_inputs]
+        feed_dict = {xs[i]: image_inputs[i] for i in range(number_of_inputs)}
 
-        feed_dict = {
-                x: [image_input]
-                }
         safe_add_is_training(feed_dict, graph, False)
-
         predictions = output_op.eval(feed_dict=feed_dict, session=sess)
         predictions = predictions[0]
 
@@ -49,72 +50,111 @@ class Inference(ProtectedResource):
         return {'class_scores': scores}
 
 
-# visualize/<int:model_id>/<int:alg_id>/<int:image_id>
+# visualize/<int:model_id>/<int:alg_id>/<int:trainsample_id>/<int:postprocessing_id>/<int:on_image>
 class Visualize(ProtectedResource):
-    def get(self, model_id, alg_id, image_id):
+    def get(self, model_id, alg_id, trainsample_id, postprocessing_id, on_image):
         if alg_id not in visualize_utils.algorithms_register:
             return {'errormsg': "Bad algorithm id"}, 400
 
-        image = Image.query.get(image_id)
-        image_path = image.full_path()
-        ts = TrainingSample.query.get(image.trainsample_id)
-        label = int(ts.label)
+        if postprocessing_id not in visualize_utils.postprocessing_register:
+            return {'errormsg': "Bad postprocessing id"}, 400
+
+        ts = TrainingSample.query.get(trainsample_id)
+        images = sorted(ts.images, key=lambda im: im.trainsample_position)
+        image_paths = [image.full_path() for image in images]
 
         model = Model.query.get(model_id)
         weights_path = model.weights_path
         meta_file = Architecture.query.get(model.arch_id).get_meta_file_path()
-        graph, sess, x, y, neuron_selector, _ = visualize_utils.load_model(meta_file, weights_path)
+        number_of_inputs = Dataset.query.get(model.dataset_id).imgs_per_sample
+        graph, sess, xs, y, neuron_selector, *_ = visualize_utils.load_model(meta_file, weights_path, number_of_inputs)
 
-        alg_class = visualize_utils.algorithms_register[alg_id]
-        vis_algorithm = alg_class(graph, sess, y, x)
+        image_inputs = [
+            visualize_utils.load_image(image_path, xs[0].shape.as_list()[1:], proc=visualize_utils.preprocess)
+            for image_path in image_paths
+        ]
 
-        feed_dict = {
-                neuron_selector: label
-                }
+        image_inputs = [visualize_utils.exapnd_dim(img) for img in image_inputs]
+
+        feed_dict = {xs[i]: image_inputs[i] for i in range(number_of_inputs)}
+
         safe_add_is_training(feed_dict, graph, False)
 
-        image_input = visualize_utils.load_image(image_path, x.shape.as_list()[1:], proc=visualize_utils.preprocess)
-        saliency = vis_algorithm.GetMask(image_input, feed_dict=feed_dict)
+        label = int(ts.label)
+        feed_dict[neuron_selector] = label
+
+        alg_class = visualize_utils.algorithms_register[alg_id]
+        if alg_class == GradCAM:
+            vis_algorithm = alg_class(graph, sess, y, xs, [model.last_conv_tensor_name])
+        else:
+            vis_algorithm = alg_class(graph, sess, y, xs)
+
+        image_outputs = vis_algorithm.GetMask(image_inputs, feed_dict=feed_dict)
 
         sess.close()
 
-        img_stream = visualize_utils.save_image(saliency, proc=visualize_utils.normalize_gray_pos)
-        img_b64 = fileToB64(img_stream)
+        original_image_paths = [
+            image_paths[i] if on_image else None
+            for i in range(number_of_inputs)
+        ]
+
+        postproc_class = alg_class.postprocessings[postprocessing_id]
+        saliency_maps = postproc_class.process(image_outputs, original_image_paths)
+        img = visualize_utils.combine(saliency_maps)
+        img = visualize_utils.downsize(img)
+
+        img_b64 = numpyToB64(img)
+
         return {
-                'base64': [{
-                    'name': 'img',
-                    'contentType': 'image/png'
-                    }],
-                'img': img_b64
-                }
+            'base64': [{
+                'name': 'img',
+                'contentType': 'image/png'
+            }],
+            'img': img_b64
+        }
 
 
-# /image/<string:image_id>
+# /image/<string:id>
 class Images(ProtectedResource):
-    def get(self, image_id):
-        image = Image.query.get(image_id)
-        img_path = image.full_path()
-        with open(img_path, 'rb') as img_f:
-            img_b64 = fileToB64(img_f)
+    def get(self, id):
+        ts = TrainingSample.query.get(id)
+
+        images = sorted(ts.images, key=lambda im: im.trainsample_position)
+        img_paths = [image.full_path() for image in images]
+
+        img = visualize_utils.combine(img_paths, from_paths=True)
+        img = visualize_utils.downsize(img)
+
+        img_b64 = numpyToB64(img)
+
         return {
-                'base64': [{
-                    'name': 'img',
-                    'contentType': 'image/png'
-                    }],
-                'img': img_b64
-                }
+            'base64': [{
+                'name': 'img',
+                'contentType': 'image/png'
+            }],
+            'img': img_b64
+        }
 
 
 # /images/<int:model_id>
 class ImageList(ProtectedResource):
     def get(self, model_id):
         model = Model.query.get(model_id)
-        images = Image.query.join(TrainingSample.images).filter(TrainingSample.dataset_id == model.dataset.id).all()
-        return {'images': [image.json() for image in images]}
+        trainingsamples = TrainingSample.query.filter(TrainingSample.dataset_id == model.dataset_id).all()
+        return {'trainingsamples': [trainingsample.json() for trainingsample in trainingsamples]}
 
 
+# /list_algorithms
 class Algorithms(ProtectedResource):
     def get(self):
-        return {
-            'algs': {alg_class.__name__: alg_id for alg_id, alg_class in visualize_utils.algorithms_register.items()}
-        }
+        return {'algorithms': [{'id': a_id, 'name': algo.name()}
+                               for a_id, algo
+                               in visualize_utils.algorithms_register.items()]}
+
+
+# /list_postprocessing/<int:alg_id>'
+class Postprocessing(ProtectedResource):
+    def get(self, alg_id):
+        postprocessings = visualize_utils.algorithms_register[alg_id].postprocessings
+        return {'postprocessing': [{'id': p_id, 'name': postprocessing.name()}
+                                   for p_id, postprocessing in postprocessings.items()]}

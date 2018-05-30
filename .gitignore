@@ -5,6 +5,9 @@ backend/app/datasets/
 backend/app/test_models.db
 backend/app/datasets
 backend/app/nnvis_test_tmp
+backend/app/static
+!backend/app/static/placeholder2.jpg
+
 ./UltiSnips/
 .idea
 

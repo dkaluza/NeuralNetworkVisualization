@@ -1,9 +1,0 @@
-<div fxLayoutAlign="left">
-    <mat-form-field>
-        <mat-select placeholder="Choose algorithm" (change)="onSelectorSelect($event)">
-            <mat-option *ngFor="let algorithm of visualizeService.algorithmsList" [value]="algorithm.algorithmId">
-                {{ algorithm.algorithmName }}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-</div>

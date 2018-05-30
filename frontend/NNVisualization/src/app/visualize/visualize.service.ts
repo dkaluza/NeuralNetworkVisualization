@@ -1,36 +1,46 @@
 import { Injectable, OnInit } from '@angular/core';
 import { Restangular } from 'ngx-restangular';
 import { Algorithm } from './algorithm.model';
+import { Postprocessing } from './postprocessing.model';
 
 @Injectable()
 export class VisualizeService implements OnInit {
     algorithmsList: Algorithm[] = [];
+    postprocessingList: Postprocessing[] = [];
     currentAlgorithm = -1;
+    currentPostprocessing = -1;
+    selectedPostprocessing = undefined;
+    disabledButton = true;
 
     constructor(private restangular: Restangular) {
-        this.restangular.one('list_algorithms').get().subscribe(response => {
-            Object.keys(response['algs']).forEach(key => {
-                this.algorithmsList.push(new Algorithm(response['algs'][key], key));
-            });
-        });
+
     }
 
     getDataset(model_id: number) {
         return this.restangular.one('images/' + model_id.toString()).get();
     }
 
-    getImage(image_id: number) {
-        return this.restangular.one('image/' + image_id.toString()).get();
+    getPostprcessing(alg_id: number) {
+        return this.restangular.one('list_postprocessing/' + alg_id.toString()).get();
     }
 
-    getImageVis(model_id: number, alg_id: number, image_id: number) {
+    getAlgorithms() {
+        return this.restangular.one('list_algorithms').get();
+    }
+
+    getImage(id: number) {
+        return this.restangular.one('image/' + id.toString()).get();
+    }
+
+    getImageVis(model_id: number, trainsample_id: number, onImage: boolean) {
         return this.restangular.one('visualize/' + model_id.toString() + '/'
-            + this.currentAlgorithm.toString() + '/' + image_id.toString()).get();
+            + this.currentAlgorithm.toString() + '/' + trainsample_id.toString() + '/'
+            + this.currentPostprocessing.toString() + '/' + (onImage ? 1 : 0).toString()).get();
     }
 
-    doInference(model_id: number, image_id: number) {
+    doInference(model_id: number, trainsample_id: number) {
         return this.restangular.one('inference/' + model_id.toString() +
-            '/' + image_id.toString()).get();
+            '/' + trainsample_id.toString()).get();
     }
 
     ngOnInit() {

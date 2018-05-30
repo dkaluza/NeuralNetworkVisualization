@@ -1,19 +1,7 @@
 <div fxLayout="row" fxLayoutAlign="center">
-
-    <div fxLayout="column" class="infernece">
-
-        <div fxLayout="column"
-             fxLayoutAlign="center">
-            <button mat-button (click)="onInference()">inference</button>
-        </div>
-
+    <div fxLayout="column" class="inference">
         <div class="container">
             <mat-table #table [dataSource]="dataSource">
-
-                <ng-container matColumnDef="class_number">
-                    <mat-header-cell *matHeaderCellDef>Class Number</mat-header-cell>
-                    <mat-cell *matCellDef="let element"> {{element.class_number}}</mat-cell>
-                </ng-container>
 
                 <ng-container matColumnDef="class_name">
                     <mat-header-cell *matHeaderCellDef>Class Name</mat-header-cell>
@@ -31,7 +19,10 @@
             </mat-table>
         </div>
 
-
+        <div fxLayout="column"
+             fxLayoutAlign="center">
+            <button mat-button (click)="onInference()">inference</button>
+        </div>
     </div>
 
     <div fxLayout="column" class="input-image">
@@ -39,7 +30,7 @@
              fxLayoutAlign="center">
 
             <div *ngIf="currentImage; else placeholder">
-                <img [src]="currentImage.display_path"
+                <img [src]="currentImage.path"
                      class="img-responsive">
             </div>
             <ng-template #placeholder>
@@ -47,8 +38,7 @@
                      class="img-responsive">
             </ng-template>
         </div>
-        <div class="select_group"
-             fxLayout="row"
+        <div fxLayout="row"
              fxLayoutAlign="center">
             <div fxLayoutAlign="left">
                 <button mat-icon-button class="icon-button" (click)="onGetPreviousImage()">
@@ -58,8 +48,8 @@
 
             <ng-select [items]="imagesList"
                        [virtualScroll]="true"
-                       bindLabel="imageName"
-                       bindValue="imageName"
+                       bindLabel="name"
+                       bindValue="name"
                        placeholder="Select image"
                        (add)="onSelectorSelect($event)"
                        [(ngModel)]="currentImageName">
@@ -86,14 +76,55 @@
             </ng-template>
         </div>
 
-        <div fxLayout="row"
-             fxLayoutAlign="center">
+        <div fxLayout="row" fxLayoutAlign="center">
+            <div fxLayout="column" fxLayoutAlign="center">
+                <div fxLayout="row" fxLayoutAlign="center" class="my_form">
+                    <div fxLayout="column" fxLayoutAlign="center">
+                        <div fxLayoutAlign="left">
+                            <mat-form-field>
+                                <mat-select placeholder="Choose algorithm" (change)="onSelectorAlgorithm($event)">
+                                    <mat-option *ngFor="let algorithm of visualizeService.algorithmsList"
+                                                [value]="algorithm.algorithmId">
+                                        {{ algorithm.algorithmName }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+                <div fxLayout="row" fxLayoutAlign="center" class="my_form">
+                    <div fxLayoutAlign="left">
+                        <mat-form-field>
+                            <mat-select placeholder="Choose postprocessing"
+                                        [(ngModel)]="visualizeService.selectedPostprocessing"
+                                        (change)="onSelectPostprocessing($event)">
+                                <mat-option *ngFor="let postprocessing of visualizeService.postprocessingList"
+                                            [value]="postprocessing.postprocessingId">
+                                    {{ postprocessing.postprocessingName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
 
-            <div fxLayout="column"
-                 fxLayoutAlign="center">
-                <button mat-button (click)="onVisualize()">visualize</button>
+                <div fxLayout="row" fxLayoutAlign="center">
+                    <mat-checkbox
+                        class="example-margin"
+                        [(ngModel)]="onImageChecked">
+                        display on image
+                    </mat-checkbox>
+                </div>
+
+                <div fxLayout="row"
+                     fxLayoutAlign="center">
+                    <button mat-button
+                            [disabled]="visualizeService.disabledButton"
+                            (click)="onVisualize()">
+                        visualize
+                    </button>
+                </div>
+
             </div>
-
         </div>
     </div>
 </div>

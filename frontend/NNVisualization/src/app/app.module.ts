@@ -16,10 +16,8 @@ import { ImagesPanelComponent } from './visualize/images-panel/images-panel.comp
 import { SelectedBarComponent } from './selected-bar/selected-bar.component';
 import { SelectedArchitectureService } from './selected-architecture/selected-architecture.service';
 import { VisualizeComponent } from './visualize/visualize.component';
-import { NavAlgorithmsComponent } from './visualize/nav-algorithms/nav-algorithms.component';
 import { UtilsModule } from './utils/utils.module';
 import { BuildComponent, BuildModule } from './build/build.module';
-
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -136,7 +134,6 @@ export function RestangularConfigFactory(RestangularProvider,
         SelectedBarComponent,
         VisualizeComponent,
         ImagesPanelComponent,
-        NavAlgorithmsComponent,
         LogInDialogComponent,
         UnauthorizedComponent,
         TimeoutAlertComponent,

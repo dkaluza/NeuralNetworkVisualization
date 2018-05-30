@@ -17,13 +17,13 @@ from app.nnvis.rests.dataset import (DatasetTask,
                                      UploadNewDataset,
                                      ListAllDatasets)
 
-from app.nnvis.rests.visualize import (Inference, Visualize, Images,
-                                       ImageList, Algorithms)
 from app.nnvis.rests.train import (TrainNewModel, TrainModel,
                                    ListLosses, ListOptimizers,
                                    handle_currently_training_connection,
                                    handle_list_trained_models_connection)
 from app.nnvis.rests.user import AuthenticationTask
+from app.nnvis.rests.visualize import (Inference, Visualize, Images,
+                                       ImageList, Algorithms, Postprocessing)
 
 api = Api(nnvis)
 
@@ -43,12 +43,12 @@ api.add_resource(DatasetTask, 'dataset/<int:dataset_id>')
 api.add_resource(UploadNewDataset, 'upload_dataset')
 api.add_resource(ListAllDatasets, 'list_datasets')
 
-api.add_resource(Inference, 'inference/<int:model_id>/<int:image_id>')
-api.add_resource(
-    Visualize, 'visualize/<int:model_id>/<int:alg_id>/<int:image_id>')
+api.add_resource(Inference, 'inference/<int:model_id>/<int:trainsample_id>')
+api.add_resource(Visualize, 'visualize/<int:model_id>/<int:alg_id>/<int:trainsample_id>/<int:postprocessing_id>/<int:on_image>')
 api.add_resource(ImageList, 'images/<int:model_id>')
-api.add_resource(Images, 'image/<int:image_id>')
+api.add_resource(Images, 'image/<int:id>')
 api.add_resource(Algorithms, 'list_algorithms')
+api.add_resource(Postprocessing, 'list_postprocessing/<int:alg_id>')
 
 api.add_resource(TrainNewModel, 'train_new_model/<int:arch_id>')
 api.add_resource(TrainModel, 'train_model/<int:model_id>')
