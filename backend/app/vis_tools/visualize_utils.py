@@ -154,4 +154,14 @@ def combine(images, shape=None, from_paths=False):
 
 
 def downsize(img, height=800, width=600):
+    """
+    Downsize image with scipy.
+    Scipy functions can handle specific image matrices only
+    (with shape HxW, HxWx3, HxWx4).
+    """
+    if len(img.shape) == 3 and img.shape[-1] == 1:
+        img = scipy.misc.imresize(img[:, :, 0], (height, width))
+        img = np.expand_dims(img, axis=2)
+        return img
+
     return scipy.misc.imresize(img, (height, width, img.shape[-1]))
