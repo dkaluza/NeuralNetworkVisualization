@@ -66,7 +66,7 @@ class DatasetBuilder(object):
         row_no = len(labelsmapdf.index)
         tsdicts = [pd.Series(np.arange(row_no), index=labelsmapdf[col]).to_dict() for col in lcols[:-2]]
         positiondicts = [pd.Series(np.repeat(i, row_no), index=labelsmapdf[col]).to_dict() for i, col in enumerate(lcols[:-2])]
-        tsname_dict = pd.Series(labelsmapdf[lcols[-1]], index=np.arange(row_no))
+        tsname_dict = pd.Series(labelsmapdf[lcols[-1]], index=np.arange(row_no)).to_dict()
 
         labelsdict_sum = reduce(lambda x, y: {**x, **y}, labeldicts)
         tsdict_sum = reduce(lambda x, y: {**x, **y}, tsdicts)
@@ -110,7 +110,7 @@ class DatasetBuilder(object):
         if not existing_ts:
             label = str(self._img_to_label[fname])
             self.training_samples[ts_no] = TrainingSample(
-                name=ts_name,
+                name=str(ts_name),
                 label=label,
                 dataset_id=self._dataset_id
             )
