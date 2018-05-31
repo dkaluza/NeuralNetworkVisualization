@@ -29,7 +29,7 @@ def bad_zipfile():
 
 def good_zipfile_noimgs():
     retfile = BytesIO()
-    labelfilestr = create_csv(['image', 'label'])
+    labelfilestr = create_csv(['image', 'label', 'samplename'])
     classfilestr = create_csv(['class_number', 'class_name'])
 
     with zipfile.ZipFile(
@@ -44,10 +44,10 @@ def good_zipfile_noimgs():
 def good_zipfile_unmapped_classes():
     retfile = BytesIO()
     labelfilestr = create_csv(
-        ['image', 'label'],
-        ['01.jpg', '0'],
-        ['02.jpg', '1'],
-        ['69.jpg', '2']
+        ['image', 'label', 'sample name'],
+        ['01.jpg', '0', 'Training Sample 1'],
+        ['02.jpg', '1', 'Training Sample 2'],
+        ['69.jpg', '2', 'Training Sample 3']
     )
     classfilestr = create_csv(
         ['class_number', 'class_name'],
@@ -70,10 +70,10 @@ def good_zipfile_unmapped_classes():
 def good_zipfile_bad_classes():
     retfile = BytesIO()
     labelfilestr = create_csv(
-        ['image', 'label'],
-        ['01.jpg', '0'],
-        ['02.jpg', '2'],
-        ['69.jpg', '0']
+        ['image', 'label', 'sample name'],
+        ['01.jpg', '0', 'Training Sample 1'],
+        ['02.jpg', '2', 'Training Sample 2'],
+        ['69.jpg', '0', 'Training Sample 3']
     )
     classfilestr = create_csv(
         ['class_number', 'class_name'],
@@ -103,7 +103,7 @@ def good_zipfile_imgs(labels_content, classmap_content):
         thezip.writestr(LABELS_FILENAME, labelfilestr)
         thezip.writestr(CLASSMAP_FILENAME, classfilestr)
         for row in labels_content[1:]:
-            for img in row[:-1]:
+            for img in row[:-2]:
                 thezip.writestr(img, 'raboerijbaoeribriribv')
 
     retfile.seek(0)
@@ -200,7 +200,7 @@ class UploadNewDatasetTest(NNvisTestCase):
 
         self._assertCsvContent(
             os.path.join(dataset_folder, LABELS_FILENAME),
-            [['image', 'label']]
+            [['image', 'label', 'samplename']]
         )
 
         self._assertCsvContent(
@@ -249,7 +249,7 @@ class UploadNewDatasetTest(NNvisTestCase):
         expected_pos = [y for y in list(range(imgs_per_sample)) for _ in range(len(imgs) // imgs_per_sample)]
         self.assertEqual(sorted(image_pos), sorted(expected_pos))
 
-    def _assertTrainingSamplesCreated(self):
+    def _assertTrainingSamplesCreated(self, labels_content):
         tss = TrainingSample.query.all()
         ds_id = Dataset.query.all()[0].id
 
@@ -259,8 +259,8 @@ class UploadNewDatasetTest(NNvisTestCase):
         self.assertEqual(len(tss), 3)
 
         ts_names = list(map(lambda x: x.name, tss))
-        for i in range(3):
-            self.assertIn('Training sample {}'.format(i), ts_names)
+        for tsname in map(lambda l: l[-1], labels_content[1:]):
+            self.assertIn(tsname, ts_names)
 
         ts_labels = list(map(lambda x: str(x.label), tss))
         self.assertIn('10', ts_labels)
@@ -269,10 +269,10 @@ class UploadNewDatasetTest(NNvisTestCase):
 
     def test_zipfile_someimgs(self):
         labels_content = [
-            ['image', 'label'],
-            ['01.jpg', '0'],
-            ['02.jpg', '10'],
-            ['69.jpg', '2']
+            ['image', 'label', 'samplename'],
+            ['01.jpg', '0', 'data point 1'],
+            ['02.jpg', '10', 'data point 2'],
+            ['69.jpg', '2', 'data point 3']
         ]
         classmap_content = [
             ['class_number', 'class_name'],
@@ -315,7 +315,7 @@ class UploadNewDatasetTest(NNvisTestCase):
         self._assertImagesCreated([
             '01.jpg', '02.jpg', '69.jpg'
         ], 1)
-        self._assertTrainingSamplesCreated()
+        self._assertTrainingSamplesCreated(labels_content)
 
         dataset_folder = os.path.join(
                 self.app.config['DATASET_FOLDER'], str(ds_id))
@@ -340,10 +340,10 @@ class UploadNewDatasetTest(NNvisTestCase):
 
     def test_zipfile_multiimg_samples(self):
         labels_content = [
-            ['img1', 'img2', 'img3', 'label'],
-            ['01.jpg', '02.jpg', '03.jpg', '0'],
-            ['04.jpg', '05.jpg', '06.jpg', '10'],
-            ['69.jpg', '70.jpg', '71.jpg', '2']
+            ['img1', 'img2', 'img3', 'label', 'sample name'],
+            ['01.jpg', '02.jpg', '03.jpg', '0', 'sample1'],
+            ['04.jpg', '05.jpg', '06.jpg', '10', 'sample2'],
+            ['69.jpg', '70.jpg', '71.jpg', '2', 'sample3']
         ]
         classmap_content = [
             ['class_number', 'class_name'],
@@ -387,7 +387,7 @@ class UploadNewDatasetTest(NNvisTestCase):
             '01.jpg', '02.jpg', '03.jpg', '04.jpg', '05.jpg',
             '06.jpg', '69.jpg', '70.jpg', '71.jpg'
         ], 3)
-        self._assertTrainingSamplesCreated()
+        self._assertTrainingSamplesCreated(labels_content)
 
         dataset_folder = os.path.join(
                 self.app.config['DATASET_FOLDER'], str(ds_id))

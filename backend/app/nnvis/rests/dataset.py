@@ -34,7 +34,7 @@ class DatasetBuilder(object):
         self._path = path
 
         self._label_list = self._parse_class_mapping(path)
-        self._img_to_label, self._img_to_ts, self._img_to_position, self._imgs_per_sample, ts_no =\
+        self._img_to_label, self._img_to_ts, self._img_to_position, self._imgs_per_sample, self._ts_to_name, ts_no =\
             self._parse_labels_mapping(path, len(self._label_list))
 
         self.imgs = []
@@ -54,22 +54,24 @@ class DatasetBuilder(object):
 
     @staticmethod
     def _parse_labels_mapping(path, class_no):
-        labels_filename = app.config['LABELS_FILENAME']
-        labelsmapdf = pd.read_csv(os.path.join(path, labels_filename))
+        labelsmapdf = pd.read_csv(os.path.join(path, app.config['LABELS_FILENAME']))
         lcols = labelsmapdf.columns
-        labelsmapdf[lcols[-1]] = labelsmapdf[lcols[-1]].astype(np.int32)
-        labelsmap_vals = labelsmapdf[lcols[-1]].values
+        _assert(len(lcols) > 2, "labels file is required to have at least 3 columns")
+
+        labelsmapdf[lcols[-2]] = labelsmapdf[lcols[-2]].astype(np.int32)
+        labelsmap_vals = labelsmapdf[lcols[-2]].values
         DatasetBuilder._assert_labels_in_range(labelsmap_vals, class_no)
 
-        labeldicts = [pd.Series(labelsmap_vals, index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
+        labeldicts = [pd.Series(labelsmap_vals, index=labelsmapdf[col]).to_dict() for col in lcols[:-2]]
         row_no = len(labelsmapdf.index)
-        tsdicts = [pd.Series(np.arange(row_no), index=labelsmapdf[col]).to_dict() for col in lcols[:-1]]
-        positiondicts = [pd.Series(np.repeat(i, row_no), index=labelsmapdf[col]).to_dict() for i, col in enumerate(lcols[:-1])]
+        tsdicts = [pd.Series(np.arange(row_no), index=labelsmapdf[col]).to_dict() for col in lcols[:-2]]
+        positiondicts = [pd.Series(np.repeat(i, row_no), index=labelsmapdf[col]).to_dict() for i, col in enumerate(lcols[:-2])]
+        tsname_dict = pd.Series(labelsmapdf[lcols[-1]], index=np.arange(row_no))
 
         labelsdict_sum = reduce(lambda x, y: {**x, **y}, labeldicts)
         tsdict_sum = reduce(lambda x, y: {**x, **y}, tsdicts)
         positiondict_sum = reduce(lambda x, y: {**x, **y}, positiondicts)
-        return labelsdict_sum, tsdict_sum, positiondict_sum, (len(lcols) - 1), row_no
+        return labelsdict_sum, tsdict_sum, positiondict_sum, (len(lcols) - 2), tsname_dict, row_no
 
     @staticmethod
     def _assert_labels_are_consecutive_numbers(array):
@@ -103,11 +105,12 @@ class DatasetBuilder(object):
     def _create_trainingsample(self, fname):
         ts_no = self._img_to_ts[fname]
         existing_ts = self.training_samples[ts_no]
+        ts_name = self._ts_to_name[ts_no]
 
         if not existing_ts:
             label = str(self._img_to_label[fname])
             self.training_samples[ts_no] = TrainingSample(
-                name='Training sample {}'.format(ts_no),
+                name=ts_name,
                 label=label,
                 dataset_id=self._dataset_id
             )
