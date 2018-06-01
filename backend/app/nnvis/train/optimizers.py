@@ -100,4 +100,9 @@ def optimize(optimizer, loss, params):
     if opt is None:
         raise NnvisException('Unknown optimizer: {}'.format(optimizer))
 
-    return opt(params).minimize(loss)
+    """
+    Necessary for batch norm to work properly
+    """
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
+        return opt(params).minimize(loss)
